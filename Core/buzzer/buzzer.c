@@ -63,9 +63,9 @@ void Buzzer_Init(buzzer* obj,uint16_t* _music,uint16_t _len){
 }
 void Buzzer_Update(buzzer* obj){
     if(obj->finished) return;
-    // __HAL_TIM_SetCompare
+    __HAL_TIM_SetAutoreload(obj->BUZZER_PWM_BASE,obj->music[(int)obj->count]);
     if(obj->music[obj->count] != 0){
-
+        __HAL_TIM_SetCompare(obj->BUZZER_PWM_BASE,obj->BUZZER_PWM_CHANNEL,obj->music[obj->count]);
     }
     else{
 
