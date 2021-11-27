@@ -41,7 +41,7 @@ static uint8_t BMI088_gyro_config[BMI088_WRITE_GYRO_REG_NUM][3] =
 
 };
 
-BMI088_imu imu;
+volatile BMI088_imu imu;
 
 //成员函数
 void BMI088_accel_init(BMI088_imu *obj);

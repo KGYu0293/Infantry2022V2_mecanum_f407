@@ -37,7 +37,7 @@ typedef struct _BMI088_imu
     MadgwickAHRS madgwick_solver;
 } BMI088_imu;
 
-extern BMI088_imu imu;
+extern volatile BMI088_imu imu;
 
 uint8_t BMI088_init(BMI088_imu* obj);
 void BMI088_Update(BMI088_imu* obj);

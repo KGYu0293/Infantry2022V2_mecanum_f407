@@ -30,7 +30,7 @@
                     "text": "file ${workspaceFolderBasename}.elf"
                 },
                 {
-                    "text": "target remote localhost:3333"
+                    "text": "target remote localhost:2331"
                 },
                 {
                     "text": "monitor reset"

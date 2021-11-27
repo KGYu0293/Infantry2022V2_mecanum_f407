@@ -29,6 +29,7 @@
 #include "stdio.h"
 #include "BMI088.h"
 #include "arm_math.h"
+#include "buzzer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,6 +65,13 @@ const osThreadAttr_t ImuTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
+/* Definitions for LogTask */
+osThreadId_t LogTaskHandle;
+const osThreadAttr_t LogTask_attributes = {
+  .name = "LogTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -72,6 +80,7 @@ const osThreadAttr_t ImuTask_attributes = {
 
 void StartDefaultTask(void *argument);
 void StartImuTask(void *argument);
+void StartLogTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -108,6 +117,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of ImuTask */
   ImuTaskHandle = osThreadNew(StartImuTask, NULL, &ImuTask_attributes);
 
+  /* creation of LogTask */
+  LogTaskHandle = osThreadNew(StartLogTask, NULL, &LogTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -129,13 +141,13 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
-  for(;;)
+  // Buzzer_Init(&internal_buzzer,music2,14);
+  for (;;)
   {
     if(imu.bias_init_success){
-      //printf("imu: %.2lf %.2lf %.2lf %.2lf\n", imu.data.euler[0] * RAD2DEG, imu.data.euler[1] * RAD2DEG, imu.data.euler[2] * RAD2DEG, imu.temp);
-      printf("yaw=%.2lf,pitch=%.2lf,roll=%.2lf,temp=%.2lf\r\n",imu.data.euler[0] * RAD2DEG, imu.data.euler[1] * RAD2DEG, imu.data.euler[2] * RAD2DEG, imu.temp);
+      Buzzer_Update(&internal_buzzer);
     }
-    osDelay(10);
+    osDelay(140);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -151,15 +163,39 @@ void StartImuTask(void *argument)
 {
   /* USER CODE BEGIN StartImuTask */
   /* Infinite loop */
-  while (BMI088_init(&imu));
   portTickType currentTime;
-	currentTime = xTaskGetTickCount();
-  for(;;)
+  currentTime = xTaskGetTickCount();
+  for (;;)
   {
     BMI088_Update(&imu);
-    vTaskDelayUntil(&currentTime,2);
+    // printf("yaw=%.2lf\r\n",imu.data.euler[0] * RAD2DEG);
+    vTaskDelayUntil(&currentTime, 2);
   }
   /* USER CODE END StartImuTask */
+}
+
+/* USER CODE BEGIN Header_StartLogTask */
+/**
+* @brief Function implementing the LogTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartLogTask */
+void StartLogTask(void *argument)
+{
+  /* USER CODE BEGIN StartLogTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    if(imu.bias_init_success){
+      //printf("yaw=%.2lf,pitch=%.2lf,roll=%.2lf,temp=%.2lf\r\n", imu.data.euler[0] * RAD2DEG, imu.data.euler[1] * RAD2DEG, imu.data.euler[2] * RAD2DEG, imu.temp);
+      
+      //printf("fuck!");
+    }
+    // printf("fuck!!!\n");
+    osDelay(50);
+  }
+  /* USER CODE END StartLogTask */
 }
 
 /* Private application code --------------------------------------------------*/

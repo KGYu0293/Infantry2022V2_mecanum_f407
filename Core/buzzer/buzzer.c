@@ -22,7 +22,7 @@
 #define H_La 568
 #define H_Xi 506
 
-buzzer internal_buzzer;
+volatile buzzer internal_buzzer;
 
 uint16_t music1[8] = {M_Re, M_Mi, M_So, H_Do, 0, M_La, H_Do, H_Do};
 uint16_t music2[14] = {H_Do, 0, M_So, 0, M_Mi, 0, M_Xi, M_Xi, M_Xi, M_Xi, M_La, 0, M_Xi, H_Do};
@@ -54,21 +54,34 @@ uint16_t music_nxt[40] = {M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do,
                           M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do,
                           H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do};
 
-
-void Buzzer_Init(buzzer* obj,uint16_t* _music,uint16_t _len){
+void Buzzer_Init(buzzer *obj, uint16_t *_music, uint16_t _len)
+{
     obj->finished = 0;
     obj->music = _music;
     obj->len = _len;
     obj->count = 0;
+    obj->BUZZER_PWM_BASE = &htim4;
+    obj->BUZZER_PWM_CHANNEL = TIM_CHANNEL_3;
+    HAL_TIM_PWM_Start(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
 }
-void Buzzer_Update(buzzer* obj){
-    if(obj->finished) return;
-    __HAL_TIM_SetAutoreload(obj->BUZZER_PWM_BASE,obj->music[(int)obj->count]);
-    if(obj->music[obj->count] != 0){
-        __HAL_TIM_SetCompare(obj->BUZZER_PWM_BASE,obj->BUZZER_PWM_CHANNEL,obj->music[obj->count]);
-    }
-    else{
 
+void Buzzer_Update(buzzer *obj)
+{
+    if (obj->finished)
+        return;
+    __HAL_TIM_SetAutoreload(obj->BUZZER_PWM_BASE, obj->music[(int)obj->count]);
+    if (obj->music[obj->count] != 0)
+    {
+        __HAL_TIM_SetCompare(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL, obj->music[obj->count] / 2);
+    }
+    else
+    {
+        __HAL_TIM_SetCompare(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL, obj->music[obj->count]);
     }
     obj->count++;
+    if (obj->count == obj->len)
+    {
+        obj->finished = 1;
+        HAL_TIM_PWM_Stop(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
+    }
 }

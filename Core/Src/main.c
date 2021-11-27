@@ -30,6 +30,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
+#include "BMI088.h"
+#include "buzzer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,8 +107,10 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-
+  while (BMI088_init(&imu));
+  Buzzer_Init(&internal_buzzer,music5,62);
   /* USER CODE END 2 */
 
   /* Init scheduler */
