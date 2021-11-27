@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "编译项目",
+			"type": "shell",
+			"command": "make",
+			"args": [
+				"-j8"
+			]
+		},
+		{
+			"label": "启动调试下载器",
+			"type": "shell",
+			"command": "openocd -f interface/cmsis-dap.cfg -c 'transport select swd' -f target/stm32f4x.cfg"
+		}
+	]
+}

@@ -1,0 +1,28 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "e:\\STM32Prj\\F407BoardC\\build",
+            "binaryPath": "e:\\STM32Prj\\F407BoardC\\build\\F407BoardC.elf",
+            "binaryArgs": []
+        }
+    ],
+    "files.associations": {
+        "cmsis_os.h": "c",
+        "main.h": "c",
+        "stm32f4xx_hal.h": "c",
+        "task.h": "c",
+        "freertos.h": "c",
+        "stm32f4xx_hal_conf.h": "c",
+        "freertosconfig.h": "c",
+        "imu.h": "c",
+        "bmi088reg.h": "c",
+        "bmi088.h": "c",
+        "pid.h": "c",
+        "stdint.h": "c",
+        "math.h": "c",
+        "madgwickahrs.h": "c",
+        "arm_math.h": "c",
+        "stdio.h": "c"
+    }
+}
