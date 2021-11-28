@@ -1,6 +1,7 @@
 #ifndef __BMI088_H
 #define __BMI088_H
-#include "stm32f4xx_hal.h"
+// #include "stm32f4xx_hal.h"
+#include "stdint.h"
 #include "pid.h"
 #include "tim.h"
 #include "common.h"

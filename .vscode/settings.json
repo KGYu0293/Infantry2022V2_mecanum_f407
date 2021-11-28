@@ -24,6 +24,7 @@
         "madgwickahrs.h": "c",
         "arm_math.h": "c",
         "stdio.h": "c",
-        "buzzer.h": "c"
+        "buzzer.h": "c",
+        "usart.h": "c"
     }
 }

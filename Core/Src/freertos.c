@@ -30,6 +30,8 @@
 #include "BMI088.h"
 #include "arm_math.h"
 #include "buzzer.h"
+#include "usart.h"
+#include "datatypes.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -163,12 +165,12 @@ void StartImuTask(void *argument)
 {
   /* USER CODE BEGIN StartImuTask */
   /* Infinite loop */
-  portTickType currentTime;
-  currentTime = xTaskGetTickCount();
+  portTickType currentTimeImu;
+  currentTimeImu = xTaskGetTickCount();
   for (;;)
   {
     BMI088_Update(&imu);
-    vTaskDelayUntil(&currentTime, 2);
+    vTaskDelayUntil(&currentTimeImu, 2);
   }
   /* USER CODE END StartImuTask */
 }
@@ -184,14 +186,21 @@ void StartLogTask(void *argument)
 {
   /* USER CODE BEGIN StartLogTask */
   /* Infinite loop */
+  // printf("%d\n",sizeof(pc_com));
+  portTickType currentTimeLog;
+  currentTimeLog = xTaskGetTickCount();
+  pc_com data;
+  Data_init(&data);
   for(;;)
   {
     if(imu.bias_init_success){
-      //printf("yaw=%.2lf,pitch=%.2lf,roll=%.2lf,temp=%.2lf\r\n", imu.data.euler[0] * RAD2DEG, imu.data.euler[1] * RAD2DEG, imu.data.euler[2] * RAD2DEG, imu.temp);
-      //printf("fuck!");
+      // 
+      data.x = imu.data.euler_deg[0];
+      data.y = imu.data.euler_deg[1];
+      data.z = imu.data.euler_deg[2];
+      HAL_UART_Transmit_DMA(&huart1,(uint8_t*) &data,sizeof(pc_com));
     }
-    // printf("fuck!!!\n");
-    osDelay(50);
+    vTaskDelayUntil(&currentTimeLog, 10);
   }
   /* USER CODE END StartLogTask */
 }

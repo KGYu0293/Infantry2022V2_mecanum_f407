@@ -22,6 +22,7 @@
 #include "cmsis_os.h"
 #include "can.h"
 #include "crc.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -32,6 +33,7 @@
 #include "stdio.h"
 #include "BMI088.h"
 #include "buzzer.h"
+extern DMA_HandleTypeDef hdma_usart1_tx;
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,7 +55,7 @@
 /* USER CODE BEGIN PV */
 int _write(int fd, char *ch, int len)
 {
-  HAL_UART_Transmit(&huart1, (uint8_t *)ch, len, 0xFFFF);
+  HAL_UART_Transmit_DMA(&huart1, (uint8_t *)ch, len);
   return len;
 }
 /* USER CODE END PV */
@@ -107,8 +109,13 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
   MX_USART6_UART_Init();
+  MX_DMA_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  HAL_DMA_DeInit(&hdma_usart1_tx);
+  HAL_DMA_Init(&hdma_usart1_tx);
+  HAL_UART_DMAStop(&huart1);
+
   while (BMI088_init(&imu));
   Buzzer_Init(&internal_buzzer,music2,14);
   /* USER CODE END 2 */
