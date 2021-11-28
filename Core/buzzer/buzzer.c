@@ -22,7 +22,7 @@
 #define H_La 568
 #define H_Xi 506
 
-volatile buzzer internal_buzzer;
+buzzer internal_buzzer;
 
 uint16_t music1[8] = {M_Re, M_Mi, M_So, H_Do, 0, M_La, H_Do, H_Do};
 uint16_t music2[14] = {H_Do, 0, M_So, 0, M_Mi, 0, M_Xi, M_Xi, M_Xi, M_Xi, M_La, 0, M_Xi, H_Do};

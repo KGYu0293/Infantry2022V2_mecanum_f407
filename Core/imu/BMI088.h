@@ -12,6 +12,7 @@ typedef struct _imu_data{
     float accel[3];
     float gyro[3];
     float euler[3];
+    float euler_deg[3];
 } imu_data;
 typedef struct _BMI088_imu
 {
@@ -37,7 +38,7 @@ typedef struct _BMI088_imu
     MadgwickAHRS madgwick_solver;
 } BMI088_imu;
 
-extern volatile BMI088_imu imu;
+extern BMI088_imu imu;
 
 uint8_t BMI088_init(BMI088_imu* obj);
 void BMI088_Update(BMI088_imu* obj);

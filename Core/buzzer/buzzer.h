@@ -11,7 +11,7 @@ typedef struct _buzzer
     uint16_t count;
 }buzzer;
 
-extern volatile buzzer internal_buzzer;
+extern buzzer internal_buzzer;
 //预定义的一些音乐
 extern uint16_t music1[];
 extern uint16_t music2[];

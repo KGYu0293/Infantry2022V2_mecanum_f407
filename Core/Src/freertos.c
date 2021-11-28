@@ -145,7 +145,7 @@ void StartDefaultTask(void *argument)
   for (;;)
   {
     if(imu.bias_init_success){
-      Buzzer_Update(&internal_buzzer);
+      //Buzzer_Update(&internal_buzzer);
     }
     osDelay(140);
   }

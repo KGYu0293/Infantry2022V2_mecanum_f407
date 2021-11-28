@@ -41,7 +41,7 @@ static uint8_t BMI088_gyro_config[BMI088_WRITE_GYRO_REG_NUM][3] =
 
 };
 
-volatile BMI088_imu imu;
+BMI088_imu imu;
 
 //成员函数
 void BMI088_accel_init(BMI088_imu *obj);
@@ -140,6 +140,9 @@ void BMI088_Update(BMI088_imu *obj)
     //Mahony算法姿态解算
     MahonyAHRS_update(&obj->mahony_solver, obj->data.gyro[0], obj->data.gyro[1], obj->data.gyro[2], obj->data.accel[0], obj->data.accel[1], obj->data.accel[2]);
     memcpy(obj->data.euler, obj->mahony_solver.euler, sizeof(float) * 3);
+    obj->data.euler_deg[0] = obj->data.euler[0] * RAD2DEG;
+    obj->data.euler_deg[1] = obj->data.euler[1] * RAD2DEG;
+    obj->data.euler_deg[2] = obj->data.euler[2] * RAD2DEG;
     // MadgwickAHRS_update(&obj->madgwick_solver, obj->data.gyro[0], obj->data.gyro[1], obj->data.gyro[2], obj->data.accel[0], obj->data.accel[1], obj->data.accel[2]);
     // memcpy(obj->data.euler, obj->madgwick_solver.euler, sizeof(float) * 3);
     // printf("imu: %.2lf %.2lf %.2lf %.2lf\n", imu.data.euler[0] * RAD2DEG, imu.data.euler[1] * RAD2DEG, imu.data.euler[2] * RAD2DEG, imu.temp);
