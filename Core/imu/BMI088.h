@@ -39,7 +39,7 @@ typedef struct _BMI088_imu
 } BMI088_imu;
 
 extern BMI088_imu imu;
-
+//Public methods
 uint8_t BMI088_init(BMI088_imu* obj);
 void BMI088_Update(BMI088_imu* obj);
 #endif

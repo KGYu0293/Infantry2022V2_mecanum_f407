@@ -145,7 +145,7 @@ void StartDefaultTask(void *argument)
   for (;;)
   {
     if(imu.bias_init_success){
-      //Buzzer_Update(&internal_buzzer);
+      Buzzer_Update(&internal_buzzer);
     }
     osDelay(140);
   }
@@ -168,7 +168,6 @@ void StartImuTask(void *argument)
   for (;;)
   {
     BMI088_Update(&imu);
-    // printf("yaw=%.2lf\r\n",imu.data.euler[0] * RAD2DEG);
     vTaskDelayUntil(&currentTime, 2);
   }
   /* USER CODE END StartImuTask */
@@ -189,7 +188,6 @@ void StartLogTask(void *argument)
   {
     if(imu.bias_init_success){
       //printf("yaw=%.2lf,pitch=%.2lf,roll=%.2lf,temp=%.2lf\r\n", imu.data.euler[0] * RAD2DEG, imu.data.euler[1] * RAD2DEG, imu.data.euler[2] * RAD2DEG, imu.temp);
-      
       //printf("fuck!");
     }
     // printf("fuck!!!\n");

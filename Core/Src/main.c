@@ -110,7 +110,7 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   while (BMI088_init(&imu));
-  Buzzer_Init(&internal_buzzer,music5,62);
+  Buzzer_Init(&internal_buzzer,music2,14);
   /* USER CODE END 2 */
 
   /* Init scheduler */
