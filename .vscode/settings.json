@@ -26,6 +26,7 @@
         "stdio.h": "c",
         "buzzer.h": "c",
         "usart.h": "c",
-        "crc16.h": "c"
+        "crc16.h": "c",
+        "halrandom.h": "c"
     }
 }

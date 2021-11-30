@@ -1,8 +1,7 @@
 #include "app.h"
-#include "stm32f4xx_hal.h"
 #include "gpio.h"
 #include "spi.h"
-
+#include "halRandom.h"
 BMI088_imu* imu;
 buzzer* internal_buzzer;
 
@@ -23,8 +22,9 @@ void APP_Layer_Init(){
     internal_imu_config.temp_target = 55.0f; //设定温度为55度
 
     //buzzer
-    internal_buzzer_config.music = music2;
-    internal_buzzer_config.len = 14;
+    uint32_t music_id = GetRand_Int() % 7;
+    internal_buzzer_config.music = musics[music_id];
+    internal_buzzer_config.len = music_lens[music_id];
     
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);

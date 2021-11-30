@@ -1,7 +1,6 @@
 #ifndef __COMMON_H
 #define __COMMON_H
-#include "stm32f4xx_hal.h"
-
+#include "stdint.h"
 #define pi 3.1415926f
 #define RAD2DEG 180.0f / pi
 

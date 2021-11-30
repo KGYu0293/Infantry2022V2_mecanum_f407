@@ -60,6 +60,8 @@ uint16_t music_nxt[40] = {M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do,
                           M_Do, M_Do, M_Do, M_Do, H_Do, H_Do, H_Do, H_Do,
                           H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do};
 
+uint16_t* musics[] = {music1,music2,music3,music4,music5,music6};
+uint16_t music_lens[] = {8,14,23,63,62,56};
 buzzer *Buzzer_Create(buzzer_config* config){
     buzzer* obj = (buzzer*) malloc(sizeof(buzzer));
     Buzzer_Init(obj,config);

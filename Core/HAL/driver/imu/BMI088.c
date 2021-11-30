@@ -108,8 +108,7 @@ BMI088_imu *BMI088_Create(BMI088_config *config) {
     obj->HEAT_PWM_BASE = config->HEAT_PWM_BASE;
     obj->HAET_PWM_CHANNEL = config->HAET_PWM_CHANNEL;
     obj->temp_target = config->temp_target;
-    while (!BMI088_init(obj))
-        ;
+    while (BMI088_init(obj));
     cvector_pushback(bmi088_instances, &obj);
     return obj;
 }

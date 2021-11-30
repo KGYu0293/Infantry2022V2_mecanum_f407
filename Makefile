@@ -86,6 +86,7 @@ Core/HAL/lib/crc16.c \
 Core/HAL/lib/MahonyAHRS.c \
 Core/HAL/lib/MadgwickAHRS.c \
 Core/HAL/lib/cvector.c \
+Core/HAL/lib/halRandom.c \
 Core/HAL/hal.c \
 Core/APP/app.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/BasicMathFunctions/BasicMathFunctions.c \

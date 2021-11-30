@@ -22,7 +22,8 @@ extern uint16_t music3[];
 extern uint16_t music4[];
 extern uint16_t music5[];
 extern uint16_t music6[];
-
+extern uint16_t* musics[];
+extern uint16_t music_lens[];
 // buzzer* ()
 buzzer* Buzzer_Create(buzzer_config* config);
 void Buzzer_Init(buzzer* obj, buzzer_config* config);
