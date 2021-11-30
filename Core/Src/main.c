@@ -23,6 +23,7 @@
 #include "can.h"
 #include "crc.h"
 #include "dma.h"
+#include "rng.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -31,8 +32,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
-#include "BMI088.h"
-#include "buzzer.h"
+#include "app.h"
+#include "hal.h"
 extern DMA_HandleTypeDef hdma_usart1_tx;
 /* USER CODE END Includes */
 
@@ -111,13 +112,15 @@ int main(void)
   MX_USART6_UART_Init();
   MX_DMA_Init();
   MX_TIM4_Init();
+  MX_RNG_Init();
   /* USER CODE BEGIN 2 */
   HAL_DMA_DeInit(&hdma_usart1_tx);
   HAL_DMA_Init(&hdma_usart1_tx);
   HAL_UART_DMAStop(&huart1);
+  
+  HAL_Layer_Init();
+  APP_Layer_Init();
 
-  while (BMI088_init(&imu));
-  Buzzer_Init(&internal_buzzer,music2,14);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -161,7 +164,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 6;
   RCC_OscInitStruct.PLL.PLLN = 168;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();

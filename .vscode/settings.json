@@ -25,6 +25,7 @@
         "arm_math.h": "c",
         "stdio.h": "c",
         "buzzer.h": "c",
-        "usart.h": "c"
+        "usart.h": "c",
+        "crc16.h": "c"
     }
 }

@@ -1,0 +1,19 @@
+#include "hal.h"
+#include "BMI088.h"
+#include "crc16.h"
+void HAL_Layer_Init(){
+    CRC16_Init();
+    BMI088_Driver_Init();
+}
+
+void HAL_Default_Loop(){
+
+}
+
+void HAL_Imu_Loop(){
+    BMI088_Update_All();
+}
+
+void HAL_Motor_Calc_Loop(){
+    
+}
