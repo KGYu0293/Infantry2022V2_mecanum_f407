@@ -1,7 +1,7 @@
 #ifndef _BUZZER_H
 #define _BUZZER_H
 #include "tim.h"
-typedef struct _buzzer
+typedef struct buzzer_t
 {
     TIM_HandleTypeDef* BUZZER_PWM_BASE;
     uint16_t BUZZER_PWM_CHANNEL;

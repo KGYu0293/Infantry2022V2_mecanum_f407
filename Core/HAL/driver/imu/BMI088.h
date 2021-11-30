@@ -9,13 +9,13 @@
 #include "MadgwickAHRS.h"
 
 //此处欧拉角定义为 绕固定参考坐标轴旋转Z-Y-X 也就是 yaw pitch roll
-typedef struct _imu_data{
+typedef struct imu_data_t{
     float accel[3];
     float gyro[3];
     float euler[3];
     float euler_deg[3];
 } imu_data;
-typedef struct _BMI088_imu
+typedef struct BMI088_imu_t
 {
     uint8_t init_error;
     uint8_t bias_init_success;
