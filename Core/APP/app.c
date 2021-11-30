@@ -10,7 +10,7 @@ BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
 
 void APP_Layer_Init(){
-    //app层外设设置
+    //app层需要的外设配置设置
     
     //bmi088
     internal_imu_config.ACCEL_NS_BASE = GPIOA;
@@ -26,7 +26,7 @@ void APP_Layer_Init(){
     internal_buzzer_config.music = music2;
     internal_buzzer_config.len = 14;
     
-    //初始化app层外设
+    //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
 }
