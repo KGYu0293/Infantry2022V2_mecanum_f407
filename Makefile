@@ -77,13 +77,13 @@ Middlewares/Third_Party/FreeRTOS/Source/timers.c \
 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
-Core/imu/BMI088.c \
-Core/lib/common.c \
-Core/lib/pid.c \
-Core/buzzer/buzzer.c \
-Core/lib/MahonyAHRS.c \
-Core/lib/MadgwickAHRS.c \
-Core/com/datatypes.c \
+Core/HAL/driver/imu/BMI088.c \
+Core/HAL/driver/buzzer/buzzer.c \
+Core/HAL/driver/com/datatypes.c \
+Core/HAL/lib/common.c \
+Core/HAL/lib/pid.c \
+Core/HAL/lib/MahonyAHRS.c \
+Core/HAL/lib/MadgwickAHRS.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/BasicMathFunctions/BasicMathFunctions.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/QuaternionMathFunctions/QuaternionMathFunctions.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/BayesFunctions/BayesFunctions.c \
@@ -178,10 +178,11 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
 -IDrivers/CMSIS/Include \
--ICore/imu \
--ICore/lib \
--ICore/buzzer \
--ICore/com \
+-ICore/HAL/driver/imu \
+-ICore/HAL/driver/lib \
+-ICore/HAL/driver/buzzer \
+-ICore/HAL/driver/com \
+-ICore/HAL/lib/ \
 -IMiddlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/PrivateInclude/ \
 -IMiddlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include/ \
 -IMiddlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include
