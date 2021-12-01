@@ -34,6 +34,7 @@
 #include "stdio.h"
 #include "app.h"
 #include "hal.h"
+#include "bsp.h"
 extern DMA_HandleTypeDef hdma_usart1_tx;
 /* USER CODE END Includes */
 
@@ -118,6 +119,7 @@ int main(void)
   HAL_DMA_Init(&hdma_usart1_tx);
   HAL_UART_DMAStop(&huart1);
   
+  BSP_Layer_Init();
   HAL_Layer_Init();
   APP_Layer_Init();
 

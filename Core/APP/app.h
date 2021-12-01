@@ -3,6 +3,7 @@
 #include "BMI088.h"
 #include "buzzer.h"
 
+
 //此处预定义所有的外设
 extern BMI088_imu* imu;
 extern buzzer* internal_buzzer;

@@ -1,4 +1,4 @@
-#include "halRandom.h"
+#include "bsp_random.h"
 #include "rng.h"
 
 uint32_t GetRand_Int(){

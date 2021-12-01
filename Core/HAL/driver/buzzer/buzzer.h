@@ -1,20 +1,18 @@
 #ifndef _BUZZER_H
 #define _BUZZER_H
-#include "tim.h"
-typedef struct buzzer_t {
-    TIM_HandleTypeDef* BUZZER_PWM_BASE;
-    uint16_t BUZZER_PWM_CHANNEL;
-    uint16_t finished;
-    uint16_t* music;
-    uint16_t len;
-    uint16_t count;
-} buzzer;
+#include "bsp_pwm.h"
 
 typedef struct buzzer_config_t{
     uint16_t* music;
     uint16_t len;
+    uint8_t bsp_pwm_index;
 } buzzer_config;
 
+typedef struct buzzer_t {
+    uint16_t finished;
+    uint16_t count;
+    buzzer_config config;
+} buzzer;
 //预定义的一些音乐
 extern uint16_t music1[];
 extern uint16_t music2[];

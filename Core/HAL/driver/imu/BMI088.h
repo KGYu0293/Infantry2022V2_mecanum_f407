@@ -6,7 +6,6 @@
 #include "common.h"
 #include "pid.h"
 #include "stdint.h"
-#include "tim.h"
 
 //此处欧拉角定义为 绕固定参考坐标轴旋转Z-Y-X 也就是 yaw pitch roll
 typedef struct imu_data_t {
@@ -17,13 +16,10 @@ typedef struct imu_data_t {
 } imu_data;
 
 typedef struct BMI088_config_t {
-    TIM_HandleTypeDef* HEAT_PWM_BASE;
-    SPI_HandleTypeDef* SPI_PORT;
-    GPIO_TypeDef* ACCEL_NS_BASE;
-    GPIO_TypeDef* GYRO_NS_BASE;
-    uint16_t HAET_PWM_CHANNEL;
-    uint16_t ACCEL_NS_PIN;
-    uint16_t GYRO_NS_PIN;
+    uint8_t bsp_spi_index;
+    uint8_t bsp_pwm_heat_index;
+    uint8_t bsp_gpio_accel_index;
+    uint8_t bsp_gpio_gyro_index;
     float temp_target;
 } BMI088_config;
 
@@ -34,15 +30,8 @@ typedef struct BMI088_imu_t {
     imu_data data;
     float gyrobias[3];
     float temp;
-    float temp_target;
 
-    TIM_HandleTypeDef* HEAT_PWM_BASE;
-    SPI_HandleTypeDef* SPI_PORT;
-    GPIO_TypeDef* ACCEL_NS_BASE;
-    GPIO_TypeDef* GYRO_NS_BASE;
-    uint16_t HAET_PWM_CHANNEL;
-    uint16_t ACCEL_NS_PIN;
-    uint16_t GYRO_NS_PIN;
+    BMI088_config config;
 
     struct PID_t heat_pid;
     MahonyAHRS mahony_solver;

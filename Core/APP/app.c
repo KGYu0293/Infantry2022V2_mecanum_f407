@@ -1,7 +1,8 @@
 #include "app.h"
-#include "gpio.h"
-#include "spi.h"
-#include "halRandom.h"
+#include "bsp.h"
+#include "hal.h"
+#include "bsp_random.h"
+
 BMI088_imu* imu;
 buzzer* internal_buzzer;
 
@@ -12,19 +13,17 @@ void APP_Layer_Init(){
     //app层需要的外设配置设置
     
     //bmi088
-    internal_imu_config.ACCEL_NS_BASE = GPIOA;
-    internal_imu_config.ACCEL_NS_PIN = GPIO_PIN_4;
-    internal_imu_config.GYRO_NS_BASE = GPIOB;
-    internal_imu_config.GYRO_NS_PIN = GPIO_PIN_0;
-    internal_imu_config.SPI_PORT = &hspi1;
-    internal_imu_config.HEAT_PWM_BASE = &htim10;
-    internal_imu_config.HAET_PWM_CHANNEL = TIM_CHANNEL_1;
+    internal_imu_config.bsp_gpio_accel_index = GPIO_BMI088_ACCEL_NS;
+    internal_imu_config.bsp_gpio_gyro_index = GPIO_BMI088_GYRO_NS;
+    internal_imu_config.bsp_pwm_heat_index = PWM_BMI088_HEAT_PORT;
+    internal_imu_config.bsp_spi_index = SPI_BMI088_PORT;
     internal_imu_config.temp_target = 55.0f; //设定温度为55度
 
     //buzzer
     uint32_t music_id = GetRand_Int() % 7;
     internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
+    internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
     
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);

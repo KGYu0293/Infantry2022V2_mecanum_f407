@@ -27,6 +27,11 @@
         "buzzer.h": "c",
         "usart.h": "c",
         "crc16.h": "c",
-        "halrandom.h": "c"
+        "halrandom.h": "c",
+        "bsp.h": "c",
+        "bsp_spi.h": "c",
+        "tim.h": "c",
+        "common.h": "c",
+        "mahonyahrs.h": "c"
     }
 }

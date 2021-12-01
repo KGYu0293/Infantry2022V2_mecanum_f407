@@ -2,12 +2,15 @@
 
 #include "BMI088def.h"
 #include "BMI088reg.h"
+#include "bsp_delay.h"
+#include "bsp_gpio.h"
+#include "bsp_pwm.h"
+#include "bsp_random.h"
+#include "bsp_spi.h"
 #include "common.h"
 #include "cvector.h"
-#include "spi.h"
 #include "stdio.h"
 #include "string.h"
-#include "tim.h"
 
 ////BMI088全局配置
 #define BMI088_ACCEL_SEN BMI088_ACCEL_3G_SEN
@@ -64,10 +67,10 @@ void BMI088_heat_control(BMI088_imu *obj);
 
 void BMI088_read_raw(BMI088_imu *obj);
 
-void BMI088_ACCEL_NS_L(BMI088_imu *obj);
-void BMI088_ACCEL_NS_H(BMI088_imu *obj);
-void BMI088_GYRO_NS_L(BMI088_imu *obj);
-void BMI088_GYRO_NS_H(BMI088_imu *obj);
+// void BMI088_ACCEL_NS_L(BMI088_imu *obj);
+// void BMI088_ACCEL_NS_H(BMI088_imu *obj);
+// void BMI088_GYRO_NS_L(BMI088_imu *obj);
+// void BMI088_GYRO_NS_H(BMI088_imu *obj);
 
 void BMI088_accel_read(BMI088_imu *obj, uint8_t reg, uint8_t *buf, uint8_t len);
 void BMI088_accel_read_single(BMI088_imu *obj, uint8_t reg, uint8_t *buf);
@@ -77,10 +80,9 @@ void BMI088_gyro_read_single(BMI088_imu *obj, uint8_t reg, uint8_t *buf);
 void BMI088_gyro_write(BMI088_imu *obj, uint8_t reg, uint8_t data);
 
 //静态成员函数
-uint8_t spi_read_write_byte(SPI_HandleTypeDef *spi_port, uint8_t txdata);
-void spi_read_multi(SPI_HandleTypeDef *spi_port, uint8_t reg, uint8_t *buf,
-                    uint8_t len);
-void spi_write_byte(SPI_HandleTypeDef *spi_port, uint8_t reg, uint8_t data);
+uint8_t spi_read_write_byte(uint8_t spi_index, uint8_t txdata);
+void spi_read_multi(uint8_t spi_index, uint8_t reg, uint8_t *buf, uint8_t len);
+void spi_write_byte(uint8_t spi_index, uint8_t reg, uint8_t data);
 
 //驱动初始化
 void BMI088_Driver_Init() {
@@ -100,15 +102,9 @@ void BMI088_Update_All() {
 // BMI088构造函数
 BMI088_imu *BMI088_Create(BMI088_config *config) {
     BMI088_imu *obj = (BMI088_imu *)malloc(sizeof(BMI088_imu));
-    obj->ACCEL_NS_BASE = config->ACCEL_NS_BASE;
-    obj->ACCEL_NS_PIN = config->ACCEL_NS_PIN;
-    obj->GYRO_NS_BASE = config->GYRO_NS_BASE;
-    obj->GYRO_NS_PIN = config->GYRO_NS_PIN;
-    obj->SPI_PORT = config->SPI_PORT;
-    obj->HEAT_PWM_BASE = config->HEAT_PWM_BASE;
-    obj->HAET_PWM_CHANNEL = config->HAET_PWM_CHANNEL;
-    obj->temp_target = config->temp_target;
-    while (BMI088_init(obj));
+    obj->config = *config;
+    while (BMI088_init(obj))
+        ;
     cvector_pushback(bmi088_instances, &obj);
     return obj;
 }
@@ -184,19 +180,19 @@ void BMI088_accel_init(BMI088_imu *obj) {
     uint8_t res = 0;
     // dummy read
     BMI088_accel_read_single(obj, BMI088_ACC_CHIP_ID, &res);
-    delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+    bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
     // software reset
     BMI088_accel_write(obj, BMI088_ACC_SOFTRESET, BMI088_ACC_SOFTRESET_VALUE);
-    delay_ms(100);
+    bsp_delay_ms(100);
     // check normal
 
     // dummy read
     BMI088_accel_read_single(obj, BMI088_ACC_CHIP_ID, &res);
-    delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+    bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
     // get chip ID
     BMI088_accel_read_single(obj, BMI088_ACC_CHIP_ID, &res);
-    delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+    bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
     if (res != BMI088_ACC_CHIP_ID_VALUE) {
         obj->init_error |= BMI088_NO_SENSOR;
@@ -205,10 +201,10 @@ void BMI088_accel_init(BMI088_imu *obj) {
     for (int i = 0; i < BMI088_WRITE_ACCEL_REG_NUM; ++i) {
         BMI088_accel_write(obj, BMI088_accel_config[i][0],
                            BMI088_accel_config[i][1]);
-        delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+        bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
         BMI088_accel_read_single(obj, BMI088_accel_config[i][0], &res);
-        delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+        bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
         if (res != BMI088_accel_config[i][1]) {
             obj->init_error |= BMI088_accel_config[i][2];
             return;
@@ -220,13 +216,13 @@ void BMI088_accel_init(BMI088_imu *obj) {
 void BMI088_gyro_init(BMI088_imu *obj) {
     uint8_t res = 0;
     BMI088_gyro_read_single(obj, BMI088_GYRO_CHIP_ID, &res);
-    delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+    bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
     BMI088_gyro_write(obj, BMI088_GYRO_SOFTRESET, BMI088_GYRO_SOFTRESET_VALUE);
-    delay_ms(100);
+    bsp_delay_ms(100);
 
     BMI088_gyro_read_single(obj, BMI088_GYRO_CHIP_ID, &res);
-    delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+    bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
     if (res != BMI088_GYRO_CHIP_ID_VALUE) {
         obj->init_error |= BMI088_NO_SENSOR;
@@ -235,10 +231,10 @@ void BMI088_gyro_init(BMI088_imu *obj) {
     for (int i = 0; i < BMI088_WRITE_GYRO_REG_NUM; ++i) {
         BMI088_gyro_write(obj, BMI088_gyro_config[i][0],
                           BMI088_gyro_config[i][1]);
-        delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+        bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
         BMI088_gyro_read_single(obj, BMI088_gyro_config[i][0], &res);
-        delay_us(BMI088_COM_WAIT_SENSOR_TIME);
+        bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
         if (res != BMI088_gyro_config[i][1]) {
             obj->init_error |= BMI088_gyro_config[i][2];
             return;
@@ -248,7 +244,8 @@ void BMI088_gyro_init(BMI088_imu *obj) {
 }
 // BMI088温控初始化
 void BMI088_heat_init(BMI088_imu *obj) {
-    HAL_TIM_PWM_Start(obj->HEAT_PWM_BASE, obj->HAET_PWM_CHANNEL);
+    // HAL_TIM_PWM_Start(obj->HEAT_PWM_BASE, obj->HAET_PWM_CHANNEL);
+    BSP_PWM_Start(obj->config.bsp_pwm_heat_index);
     memset(&obj->heat_pid, 0, sizeof(struct PID_t));
     obj->heat_pid.KP = HEAT_PID_KP;
     obj->heat_pid.KI = HEAT_PID_KI;
@@ -256,14 +253,16 @@ void BMI088_heat_init(BMI088_imu *obj) {
     obj->heat_pid.error_max = 2048;
     obj->heat_pid.outputMax = HEAT_PID_MAX_OUT;
     obj->heat_pid.error_max = HEAT_PID_MAX_IOUT;
-    obj->heat_pid.ref = obj->temp_target;
+    obj->heat_pid.ref = obj->config.temp_target;
 }
 
 void BMI088_heat_control(BMI088_imu *obj) {
     obj->heat_pid.fdb = obj->temp;
     PID_Calc(&obj->heat_pid);
-    __HAL_TIM_SetCompare(obj->HEAT_PWM_BASE, obj->HAET_PWM_CHANNEL,
-                         (uint16_t)(obj->heat_pid.output));
+    // __HAL_TIM_SetCompare(obj->HEAT_PWM_BASE, obj->HAET_PWM_CHANNEL,
+    //                      (uint16_t)(obj->heat_pid.output));
+    BPS_PWM_SetCCR(obj->config.bsp_pwm_heat_index,
+                   (uint16_t)(obj->heat_pid.output));
 }
 
 // BMI088读取函数
@@ -296,72 +295,83 @@ void BMI088_read_raw(BMI088_imu *obj) {
     obj->temp = tmp * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
 }
 
-//片选信号函数
-void BMI088_ACCEL_NS_L(BMI088_imu *obj) {
-    HAL_GPIO_WritePin(obj->ACCEL_NS_BASE, obj->ACCEL_NS_PIN, GPIO_PIN_RESET);
-}
-void BMI088_ACCEL_NS_H(BMI088_imu *obj) {
-    HAL_GPIO_WritePin(obj->ACCEL_NS_BASE, obj->ACCEL_NS_PIN, GPIO_PIN_SET);
-}
-void BMI088_GYRO_NS_L(BMI088_imu *obj) {
-    HAL_GPIO_WritePin(obj->GYRO_NS_BASE, obj->GYRO_NS_PIN, GPIO_PIN_RESET);
-}
-void BMI088_GYRO_NS_H(BMI088_imu *obj) {
-    HAL_GPIO_WritePin(obj->GYRO_NS_BASE, obj->GYRO_NS_PIN, GPIO_PIN_SET);
-}
+// //片选信号函数
+// void BMI088_ACCEL_NS_L(BMI088_imu *obj) {
+//     HAL_GPIO_WritePin(obj->ACCEL_NS_BASE, obj->ACCEL_NS_PIN, GPIO_PIN_RESET);
+// }
+// void BMI088_ACCEL_NS_H(BMI088_imu *obj) {
+//     HAL_GPIO_WritePin(obj->ACCEL_NS_BASE, obj->ACCEL_NS_PIN, GPIO_PIN_SET);
+// }
+// void BMI088_GYRO_NS_L(BMI088_imu *obj) {
+//     HAL_GPIO_WritePin(obj->GYRO_NS_BASE, obj->GYRO_NS_PIN, GPIO_PIN_RESET);
+// }
+// void BMI088_GYRO_NS_H(BMI088_imu *obj) {
+//     HAL_GPIO_WritePin(obj->GYRO_NS_BASE, obj->GYRO_NS_PIN, GPIO_PIN_SET);
+// }
 
 //辅助读/写函数
 void BMI088_accel_read(BMI088_imu *obj, uint8_t reg, uint8_t *buf,
                        uint8_t len) {
-    BMI088_ACCEL_NS_L(obj);
-    spi_read_write_byte(obj->SPI_PORT, reg | 0x80);
-    spi_read_multi(obj->SPI_PORT, reg, buf, len);
-    BMI088_ACCEL_NS_H(obj);
+    // BMI088_ACCEL_NS_L(obj);
+    BSP_GPIO_Set(obj->config.bsp_gpio_accel_index, 0);
+    spi_read_write_byte(obj->config.bsp_spi_index, reg | 0x80);
+    spi_read_multi(obj->config.bsp_spi_index, reg, buf, len);
+    BSP_GPIO_Set(obj->config.bsp_gpio_accel_index, 1);
+    // BMI088_ACCEL_NS_H(obj);
 }
 void BMI088_accel_read_single(BMI088_imu *obj, uint8_t reg, uint8_t *buf) {
-    BMI088_ACCEL_NS_L(obj);
-    spi_read_write_byte(obj->SPI_PORT, reg | 0x80);
-    spi_read_write_byte(obj->SPI_PORT, 0x55);
-    *buf = spi_read_write_byte(obj->SPI_PORT, 0x55);
-    BMI088_ACCEL_NS_H(obj);
+    // BMI088_ACCEL_NS_L(obj);
+    BSP_GPIO_Set(obj->config.bsp_gpio_accel_index, 0);
+    spi_read_write_byte(obj->config.bsp_spi_index, reg | 0x80);
+    spi_read_write_byte(obj->config.bsp_spi_index, 0x55);
+    *buf = spi_read_write_byte(obj->config.bsp_spi_index, 0x55);
+    BSP_GPIO_Set(obj->config.bsp_gpio_accel_index, 1);
+    // BMI088_ACCEL_NS_H(obj);
 }
 void BMI088_accel_write(BMI088_imu *obj, uint8_t reg, uint8_t data) {
-    BMI088_ACCEL_NS_L(obj);
-    spi_write_byte(obj->SPI_PORT, reg, data);
-    BMI088_ACCEL_NS_H(obj);
+    // BMI088_ACCEL_NS_L(obj);
+    BSP_GPIO_Set(obj->config.bsp_gpio_accel_index, 0);
+    spi_write_byte(obj->config.bsp_spi_index, reg, data);
+    BSP_GPIO_Set(obj->config.bsp_gpio_accel_index, 1);
+    // BMI088_ACCEL_NS_H(obj);
 }
 void BMI088_gyro_read(BMI088_imu *obj, uint8_t reg, uint8_t *buf, uint8_t len) {
-    BMI088_GYRO_NS_L(obj);
-    spi_read_multi(obj->SPI_PORT, reg, buf, len);
-    BMI088_GYRO_NS_H(obj);
+    // BMI088_GYRO_NS_L(obj);
+    BSP_GPIO_Set(obj->config.bsp_gpio_gyro_index, 0);
+    spi_read_multi(obj->config.bsp_spi_index, reg, buf, len);
+    BSP_GPIO_Set(obj->config.bsp_gpio_gyro_index, 1);
+    // BMI088_GYRO_NS_H(obj);
 }
 void BMI088_gyro_read_single(BMI088_imu *obj, uint8_t reg, uint8_t *buf) {
-    BMI088_GYRO_NS_L(obj);
-    spi_read_write_byte(obj->SPI_PORT, reg | 0x80);
-    *buf = spi_read_write_byte(obj->SPI_PORT, 0x55);
-    BMI088_GYRO_NS_H(obj);
+    // BMI088_GYRO_NS_L(obj);
+    BSP_GPIO_Set(obj->config.bsp_gpio_gyro_index, 0);
+    spi_read_write_byte(obj->config.bsp_spi_index, reg | 0x80);
+    *buf = spi_read_write_byte(obj->config.bsp_spi_index, 0x55);
+    BSP_GPIO_Set(obj->config.bsp_gpio_gyro_index, 1);
+    // BMI088_GYRO_NS_H(obj);
 }
 void BMI088_gyro_write(BMI088_imu *obj, uint8_t reg, uint8_t data) {
-    BMI088_GYRO_NS_L(obj);
-    spi_write_byte(obj->SPI_PORT, reg, data);
-    BMI088_GYRO_NS_H(obj);
+    // BMI088_GYRO_NS_L(obj);
+    BSP_GPIO_Set(obj->config.bsp_gpio_gyro_index, 0);
+    spi_write_byte(obj->config.bsp_spi_index, reg, data);
+    BSP_GPIO_Set(obj->config.bsp_gpio_gyro_index, 1);
+    // BMI088_GYRO_NS_H(obj);
 }
 
-uint8_t spi_read_write_byte(SPI_HandleTypeDef *spi_port, uint8_t txdata) {
+uint8_t spi_read_write_byte(uint8_t spi_index, uint8_t txdata) {
     uint8_t rx_data;
-    HAL_SPI_TransmitReceive(spi_port, &txdata, &rx_data, 1, 1000);
+    BSP_SPI_TransmitReceive(spi_index, &txdata, &rx_data, 1, 1000);
     return rx_data;
 }
-void spi_read_multi(SPI_HandleTypeDef *spi_port, uint8_t reg, uint8_t *buf,
-                    uint8_t len) {
-    spi_read_write_byte(spi_port, reg | 0x80);
+void spi_read_multi(uint8_t spi_index, uint8_t reg, uint8_t *buf, uint8_t len) {
+    spi_read_write_byte(spi_index, reg | 0x80);
     while (len != 0) {
-        *buf = spi_read_write_byte(spi_port, 0x55);
+        *buf = spi_read_write_byte(spi_index, 0x55);
         ++buf;
         --len;
     }
 }
-void spi_write_byte(SPI_HandleTypeDef *spi_port, uint8_t reg, uint8_t data) {
-    spi_read_write_byte(spi_port, reg);
-    spi_read_write_byte(spi_port, data);
+void spi_write_byte(uint8_t spi_index, uint8_t reg, uint8_t data) {
+    spi_read_write_byte(spi_index, reg);
+    spi_read_write_byte(spi_index, data);
 }
