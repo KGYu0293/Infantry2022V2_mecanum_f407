@@ -6,9 +6,9 @@
 typedef struct BSP_GPIO_Typedef_t {
     GPIO_TypeDef *base;
     uint16_t pin;
-} BSP_SPI_Typedef;
+} BSP_GPIO_Typedef;
 
-BSP_SPI_Typedef gpio_ports[DEVICE_GPIO_CNT];
+BSP_GPIO_Typedef gpio_ports[DEVICE_GPIO_CNT];
 
 void BSP_GPIO_Init(){
     gpio_ports[0].base = GPIOA;
