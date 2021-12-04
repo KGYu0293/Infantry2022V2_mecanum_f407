@@ -32,6 +32,8 @@
         "bsp_spi.h": "c",
         "tim.h": "c",
         "common.h": "c",
-        "mahonyahrs.h": "c"
+        "mahonyahrs.h": "c",
+        "bsp_can.h": "c",
+        "can.h": "c"
     }
 }
