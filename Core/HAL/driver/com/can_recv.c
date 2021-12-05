@@ -54,6 +54,7 @@ void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,
                         BufferToData(now->rxbuf + 1, &now->data_rx);
                         now->recv_status = 0;
                         now->recv_len = 0;
+                        now->config.notify_func();
                     }
                 }
             }

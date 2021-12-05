@@ -12,6 +12,11 @@ BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
 can_recv_config test_recv_config;
 
+uint32_t recv_cnt;
+void test_notify_callback(){
+    recv_cnt += 1;
+}
+
 void APP_Layer_Init() {
     // app层需要的外设配置设置
 
@@ -34,6 +39,7 @@ void APP_Layer_Init() {
     test_recv_config.data_id = 1;
     test_recv_config.data_len = 10;
     test_recv_config.data_type = 1;
+    test_recv_config.notify_func = test_notify_callback;
 
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);

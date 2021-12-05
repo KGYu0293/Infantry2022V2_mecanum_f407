@@ -3,12 +3,15 @@
 #include "stdint.h"
 #include "datatypes.h"
 
+typedef void (*can_recv_notifiy)(void);
+
 typedef struct can_recv_config_t{
     uint8_t bsp_can_index;
     uint8_t data_len;
     uint8_t data_id;
     uint8_t data_type;
     uint16_t can_identifier;
+    can_recv_notifiy notify_func;
 } can_recv_config;
 
 typedef struct can_recv_t{
