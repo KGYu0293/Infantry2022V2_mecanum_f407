@@ -3,7 +3,8 @@
 #include "stdint.h"
 #define FILTER_MAX_CNT (4 * 14)
 
-typedef void (*can_rx_callback)(uint32_t id, uint8_t* data, uint32_t len);
+typedef void (*can_rx_callback)(uint8_t can_id, uint32_t identifier, uint8_t* data,
+                                uint32_t len);
 
 void BSP_CAN_Init();
 void BSP_CAN_AddFilter(uint8_t can_id, uint16_t filter);

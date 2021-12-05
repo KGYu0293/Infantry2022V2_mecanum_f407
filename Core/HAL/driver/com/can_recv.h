@@ -14,8 +14,12 @@ typedef struct can_recv_config_t{
 typedef struct can_recv_t{
     can_recv_config config;
     general_data data_rx;
+    uint8_t buf_len;
+    uint8_t recv_len;
+    uint8_t recv_status;
+    uint8_t* rxbuf;
 } can_recv;
 
 void CanRecv_Driver_Init();
-
+can_recv* CanRecv_Create(can_recv_config* config);
 #endif

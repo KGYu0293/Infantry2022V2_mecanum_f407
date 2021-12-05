@@ -38,6 +38,7 @@
         "datatypes.h": "c",
         "cvector.h": "c",
         "can_send.h": "c",
-        "crc.h": "c"
+        "crc.h": "c",
+        "hal.h": "c"
     }
 }

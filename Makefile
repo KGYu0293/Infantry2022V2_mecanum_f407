@@ -79,7 +79,7 @@ Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
 Core/HAL/driver/imu/BMI088.c \
 Core/HAL/driver/buzzer/buzzer.c \
-Core/HAL/driver/com/minipc.c \
+Core/HAL/driver/com/can_pc.c \
 Core/HAL/driver/com/can_send.c \
 Core/HAL/driver/com/can_recv.c \
 Core/HAL/lib/common.c \

@@ -6,9 +6,11 @@
 
 BMI088_imu* imu;
 buzzer* internal_buzzer;
+can_send* test_send;
 
 BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
+can_send_config test_send_config;
 
 void APP_Layer_Init() {
     // app层需要的外设配置设置
@@ -26,19 +28,28 @@ void APP_Layer_Init() {
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
 
+    // test send
+    test_send_config.bsp_can_index = 1;
+    test_send_config.can_identifier = 0x300;
+    test_send_config.data_id = 233;
+    test_send_config.data_len = 10;
+    test_send_config.data_type = 1;
+
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
+    test_send = CanSend_Create(&test_send_config);
 }
 void APP_Layer_default_loop() {
     if (imu->bias_init_success) {
-        //Buzzer_Update(internal_buzzer);
+        // Buzzer_Update(internal_buzzer);
     }
 }
 
 void APP_Log_Loop() {
     if (imu->bias_init_success) {
-        // uint8_t buf[8] = "12345678";
+        uint8_t buf[10] = "1234567812";
+        CanSend_Send(test_send, buf);
         // BSP_CAN_Send(1, 0x200, buf, 8);
     }
 }
