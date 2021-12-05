@@ -5,7 +5,7 @@
 
 #define DEVICE_CAN_CNT 2
 #define ID_MAX 0x07FF
-#define ID_NOTSET 0xFFF
+#define ID_NOTSET 0x800
 
 typedef struct BSP_CanTypeDef_t {
     CAN_HandleTypeDef *device;
@@ -17,16 +17,16 @@ typedef struct BSP_CanTypeDef_t {
 } BSP_CanTypeDef;
 
 BSP_CanTypeDef can_devices[DEVICE_CAN_CNT];
-
+HAL_StatusTypeDef config_state;
 void BSP_CAN_Init() {
     can_devices[0].device = &hcan1;
-    can_devices[0].fifo = CAN_FILTER_FIFO0;
+    can_devices[0].fifo = CAN_RX_FIFO0;
     // can_devices[0].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX0;
     can_devices[0].bank_prefix = 0;
     can_devices[0].call_backs = cvector_create(sizeof(can_rx_callback));
 
     can_devices[1].device = &hcan2;
-    can_devices[1].fifo = CAN_FILTER_FIFO1;
+    can_devices[1].fifo = CAN_RX_FIFO1;
     // can_devices[1].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX1;
     can_devices[1].bank_prefix = 14;
     can_devices[1].call_backs = cvector_create(sizeof(can_rx_callback));
@@ -36,8 +36,12 @@ void BSP_CAN_Init() {
             can_devices[d].filters[i] = ID_NOTSET;
         }
     }
+
     HAL_CAN_Start(can_devices[0].device);
     HAL_CAN_Start(can_devices[1].device);
+    HAL_CAN_ActivateNotification(can_devices[0].device, CAN_IT_RX_FIFO0_MSG_PENDING);
+    HAL_CAN_ActivateNotification(can_devices[1].device, CAN_IT_RX_FIFO1_MSG_PENDING);
+
 }
 
 void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
@@ -51,18 +55,19 @@ void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
                          &can_devices[can_id].tx_mailbox);
 }
 
+CAN_FilterTypeDef tmp;
+
 void update_filter(uint8_t can_id, uint32_t filter_index) {
-    CAN_FilterTypeDef tmp;
     tmp.FilterMode = CAN_FILTERMODE_IDLIST;
     tmp.FilterScale = CAN_FILTERSCALE_16BIT;
     tmp.FilterFIFOAssignment = can_devices[can_id].fifo;
     tmp.SlaveStartFilterBank = 14;
     uint32_t group_index = filter_index / 4;
     uint16_t *filter_data = can_devices[can_id].filters;
-    tmp.FilterIdLow = filter_data[group_index * 4];
-    tmp.FilterIdHigh = filter_data[group_index * 4 + 1];
-    tmp.FilterMaskIdLow = filter_data[group_index * 4 + 2];
-    tmp.FilterMaskIdHigh = filter_data[group_index * 4 + 3];
+    tmp.FilterIdLow = filter_data[group_index * 4] << 5;
+    tmp.FilterIdHigh = filter_data[group_index * 4 + 1] << 5;
+    tmp.FilterMaskIdLow = filter_data[group_index * 4 + 2] << 5;
+    tmp.FilterMaskIdHigh = filter_data[group_index * 4 + 3] << 5;
     tmp.FilterBank = group_index + can_devices[can_id].bank_prefix;
     uint8_t id_all_notset = 1;
     for (size_t i = 0; i < 4; ++i) {
@@ -72,7 +77,7 @@ void update_filter(uint8_t can_id, uint32_t filter_index) {
         tmp.FilterActivation = CAN_FILTER_DISABLE;
     else
         tmp.FilterActivation = CAN_FILTER_ENABLE;
-    HAL_CAN_ConfigFilter(can_devices[can_id].device, &tmp);
+    config_state = HAL_CAN_ConfigFilter(can_devices[can_id].device, &tmp);
 }
 
 void BSP_CAN_AddFilter(uint8_t can_id, uint16_t filter) {
@@ -102,28 +107,31 @@ void BSP_CAN_RegisterRxCallback(uint8_t can_id, can_rx_callback func) {
     cvector_pushback(can_devices[can_id].call_backs, &func);
 }
 
+uint8_t bsp_can_rxbuf0[8];
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     if (hcan == can_devices[0].device) {
         CAN_RxHeaderTypeDef rxconf;
-        uint8_t rxbuf[8];
-        HAL_CAN_GetRxMessage(hcan, can_devices[0].fifo, &rxconf, rxbuf);
+
+        HAL_CAN_GetRxMessage(hcan, can_devices[0].fifo, &rxconf,
+                             bsp_can_rxbuf0);
         for (size_t i = 0; i < can_devices[0].call_backs->cv_len; ++i) {
             can_rx_callback funcnow = *(can_rx_callback *)cvector_val_at(
                 can_devices[0].call_backs, i);
-            funcnow(0, rxconf.StdId, rxbuf, rxconf.DLC);
+            funcnow(0, rxconf.StdId, bsp_can_rxbuf0, rxconf.DLC);
         }
     }
 }
 
+uint8_t bsp_can_rxbuf1[8];
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     if (hcan == can_devices[1].device) {
         CAN_RxHeaderTypeDef rxconf;
-        uint8_t rxbuf[8];
-        HAL_CAN_GetRxMessage(hcan, can_devices[1].fifo, &rxconf, rxbuf);
+        HAL_CAN_GetRxMessage(hcan, can_devices[1].fifo, &rxconf,
+                             bsp_can_rxbuf1);
         for (size_t i = 0; i < can_devices[1].call_backs->cv_len; ++i) {
             can_rx_callback funcnow = *(can_rx_callback *)cvector_val_at(
                 can_devices[1].call_backs, i);
-            funcnow(1, rxconf.StdId, rxbuf, rxconf.DLC);
+            funcnow(1, rxconf.StdId, bsp_can_rxbuf1, rxconf.DLC);
         }
     }
 }

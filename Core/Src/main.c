@@ -55,11 +55,11 @@ extern DMA_HandleTypeDef hdma_usart1_tx;
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-int _write(int fd, char *ch, int len)
-{
-  HAL_UART_Transmit_DMA(&huart1, (uint8_t *)ch, len);
-  return len;
-}
+// int _write(int fd, char *ch, int len)
+// {
+//   HAL_UART_Transmit_DMA(&huart1, (uint8_t *)ch, len);
+//   return len;
+// }
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

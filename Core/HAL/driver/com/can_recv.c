@@ -3,6 +3,7 @@
 #include "bsp_can.h"
 #include "crc16.h"
 #include "cvector.h"
+#include "stdio.h"
 
 cvector* can_recv_instances;
 void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,
@@ -25,6 +26,9 @@ can_recv* CanRecv_Create(can_recv_config* config) {
     obj->rxbuf = (uint8_t*)malloc(obj->buf_len);
     obj->recv_len = 0;
     obj->recv_status = 0;
+    cvector_pushback(can_recv_instances,&obj);
+    BSP_CAN_AddFilter(obj->config.bsp_can_index,obj->config.can_identifier);
+    return obj;
 }
 
 void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,

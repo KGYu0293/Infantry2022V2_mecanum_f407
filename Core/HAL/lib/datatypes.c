@@ -14,7 +14,7 @@ void DataToBuffer(general_data* data, uint8_t* buffer) {
     buffer[1] = data->type;
     buffer[2] = data->len;
     memcpy(buffer + 3, data->data, data->len);
-    memcpy(buffer + 3 + data->len, data->crc16, 2);
+    memcpy(buffer + 3 + data->len, &data->crc16, 2);
 }
 
 void BufferToData(uint8_t* buffer, general_data* data) {
