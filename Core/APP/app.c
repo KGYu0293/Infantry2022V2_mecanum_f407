@@ -48,8 +48,8 @@ void APP_Layer_default_loop() {
 
 void APP_Log_Loop() {
     if (imu->bias_init_success) {
-        uint8_t buf[10] = "1234567812";
-        CanSend_Send(test_send, buf);
+        // uint8_t buf[10] = "1234567812";
+        // CanSend_Send(test_send, buf);
         // BSP_CAN_Send(1, 0x200, buf, 8);
     }
 }
