@@ -20,13 +20,15 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "task.h"
-#include "main.h"
+
 #include "cmsis_os.h"
+#include "main.h"
+#include "task.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
+#include "bsp.h"
 #include "hal.h"
 #include "stdio.h"
 /* USER CODE END Includes */
@@ -53,23 +55,23 @@
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "defaultTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 /* Definitions for ImuTask */
 osThreadId_t ImuTaskHandle;
 const osThreadAttr_t ImuTask_attributes = {
-  .name = "ImuTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+    .name = "ImuTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityHigh,
 };
 /* Definitions for LogTask */
 osThreadId_t LogTaskHandle;
 const osThreadAttr_t LogTask_attributes = {
-  .name = "LogTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "LogTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,49 +86,49 @@ void StartLogTask(void *argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
 void MX_FREERTOS_Init(void) {
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* USER CODE BEGIN RTOS_MUTEX */
+    /* USER CODE BEGIN RTOS_MUTEX */
     /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+    /* USER CODE END RTOS_MUTEX */
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+    /* USER CODE END RTOS_SEMAPHORES */
 
-  /* USER CODE BEGIN RTOS_TIMERS */
+    /* USER CODE BEGIN RTOS_TIMERS */
     /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
+    /* USER CODE END RTOS_TIMERS */
 
-  /* USER CODE BEGIN RTOS_QUEUES */
+    /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
+    /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+    /* Create the thread(s) */
+    /* creation of defaultTask */
+    defaultTaskHandle =
+        osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of ImuTask */
-  ImuTaskHandle = osThreadNew(StartImuTask, NULL, &ImuTask_attributes);
+    /* creation of ImuTask */
+    ImuTaskHandle = osThreadNew(StartImuTask, NULL, &ImuTask_attributes);
 
-  /* creation of LogTask */
-  LogTaskHandle = osThreadNew(StartLogTask, NULL, &LogTask_attributes);
+    /* creation of LogTask */
+    LogTaskHandle = osThreadNew(StartLogTask, NULL, &LogTask_attributes);
 
-  /* USER CODE BEGIN RTOS_THREADS */
+    /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
+    /* USER CODE END RTOS_THREADS */
 
-  /* USER CODE BEGIN RTOS_EVENTS */
+    /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
+    /* USER CODE END RTOS_EVENTS */
 }
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -136,16 +138,15 @@ void MX_FREERTOS_Init(void) {
  * @retval None
  */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN StartDefaultTask */
+void StartDefaultTask(void *argument) {
+    /* USER CODE BEGIN StartDefaultTask */
     /* Infinite loop */
     // Buzzer_Init(&internal_buzzer,music2,14);
     for (;;) {
         APP_Layer_default_loop();
         osDelay(140);
     }
-  /* USER CODE END StartDefaultTask */
+    /* USER CODE END StartDefaultTask */
 }
 
 /* USER CODE BEGIN Header_StartImuTask */
@@ -155,9 +156,8 @@ void StartDefaultTask(void *argument)
  * @retval None
  */
 /* USER CODE END Header_StartImuTask */
-void StartImuTask(void *argument)
-{
-  /* USER CODE BEGIN StartImuTask */
+void StartImuTask(void *argument) {
+    /* USER CODE BEGIN StartImuTask */
     /* Infinite loop */
     portTickType currentTimeImu;
     currentTimeImu = xTaskGetTickCount();
@@ -165,7 +165,7 @@ void StartImuTask(void *argument)
         HAL_Imu_Loop();
         vTaskDelayUntil(&currentTimeImu, 2);
     }
-  /* USER CODE END StartImuTask */
+    /* USER CODE END StartImuTask */
 }
 
 /* USER CODE BEGIN Header_StartLogTask */
@@ -175,26 +175,15 @@ void StartImuTask(void *argument)
  * @retval None
  */
 /* USER CODE END Header_StartLogTask */
-void StartLogTask(void *argument)
-{
-  /* USER CODE BEGIN StartLogTask */
-    /* Infinite loop */
-    // printf("%d\n",sizeof(pc_com));
+void StartLogTask(void *argument) {
+    /* USER CODE BEGIN StartLogTask */
     portTickType currentTimeLog;
     currentTimeLog = xTaskGetTickCount();
-    // pc_com data;
-    // Data_init(&data);
     for (;;) {
-        //   if(imu.bias_init_success){
-        //     //
-        //     data.x = imu.data.euler_deg[0];
-        //     data.y = imu.data.euler_deg[1];
-        //     data.z = imu.data.euler_deg[2];
-        //     HAL_UART_Transmit_DMA(&huart1,(uint8_t*) &data,sizeof(pc_com));
+        APP_Log_Loop();
+        vTaskDelayUntil(&currentTimeLog, 10);
     }
-    //   vTaskDelayUntil(&currentTimeLog, 10);
-    // }
-  /* USER CODE END StartLogTask */
+    /* USER CODE END StartLogTask */
 }
 
 /* Private application code --------------------------------------------------*/

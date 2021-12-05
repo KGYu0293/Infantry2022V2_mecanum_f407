@@ -3,15 +3,9 @@
 
 #include <stdint.h>
 
-enum PID_Mode_e
-{
-    PID_POSITION = 0,
-    PID_DELTA,
-    PID_COMP_POSITION
-};
+enum PID_Mode_e { PID_POSITION = 0, PID_DELTA, PID_COMP_POSITION };
 
-struct PID_t
-{
+struct PID_t {
     float KP;
     float KI;
     float KD;
@@ -31,9 +25,10 @@ struct PID_t
     float error_preload;
 };
 
-#define DEFAULT_PID                                                                            \
-    {                                                                                          \
-        0.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f}, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, PID_POSITION \
+#define DEFAULT_PID                                                         \
+    {                                                                       \
+        0.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f}, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, \
+            0.0f, PID_POSITION                                              \
     }
 
 void PID_Calc(struct PID_t *pid);

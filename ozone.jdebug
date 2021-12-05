@@ -33,6 +33,7 @@ void OnProjectLoad (void) {
   //
   // User settings
   //
+  Project.SetOSPlugin ("FreeRTOSPlugin");
   File.Open ("$(ProjectDir)/build/STM32F407_2022_framework.elf");
 }
 

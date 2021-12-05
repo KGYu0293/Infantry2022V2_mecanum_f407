@@ -9,7 +9,7 @@
 
 typedef struct BSP_CanTypeDef_t {
     CAN_HandleTypeDef *device;
-    uint32_t *tx_mailbox;
+    uint32_t tx_mailbox;
     cvector *call_backs;
     uint32_t fifo;
     uint32_t bank_prefix;
@@ -21,13 +21,13 @@ BSP_CanTypeDef can_devices[DEVICE_CAN_CNT];
 void BSP_CAN_Init() {
     can_devices[0].device = &hcan1;
     can_devices[0].fifo = CAN_FILTER_FIFO0;
-    can_devices[0].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX0;
+    // can_devices[0].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX0;
     can_devices[0].bank_prefix = 0;
     can_devices[0].call_backs = cvector_create(sizeof(can_rx_callback));
 
     can_devices[1].device = &hcan2;
     can_devices[1].fifo = CAN_FILTER_FIFO1;
-    can_devices[1].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX1;
+    // can_devices[1].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX1;
     can_devices[1].bank_prefix = 14;
     can_devices[1].call_backs = cvector_create(sizeof(can_rx_callback));
 
@@ -36,6 +36,8 @@ void BSP_CAN_Init() {
             can_devices[d].filters[i] = ID_NOTSET;
         }
     }
+    HAL_CAN_Start(can_devices[0].device);
+    HAL_CAN_Start(can_devices[1].device);
 }
 
 void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
@@ -46,7 +48,7 @@ void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
     txconf.RTR = CAN_RTR_DATA;
     txconf.DLC = len;
     HAL_CAN_AddTxMessage(can_devices[can_id].device, &txconf, data,
-                         can_devices[can_id].tx_mailbox);
+                         &can_devices[can_id].tx_mailbox);
 }
 
 void update_filter(uint8_t can_id, uint32_t filter_index) {
@@ -94,6 +96,10 @@ void BSP_CAN_RemoveFilter(uint8_t can_id, uint16_t filter) {
             update_filter(can_id, filter_index);
         }
     }
+}
+
+void BSP_CAN_RegisterRxCallback(uint8_t can_id, can_rx_callback func) {
+    cvector_pushback(can_devices[can_id].call_backs, &func);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {

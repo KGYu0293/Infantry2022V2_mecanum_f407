@@ -79,13 +79,16 @@ Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
 Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
 Core/HAL/driver/imu/BMI088.c \
 Core/HAL/driver/buzzer/buzzer.c \
-Core/HAL/driver/com/datatypes.c \
+Core/HAL/driver/com/minipc.c \
+Core/HAL/driver/com/can_send.c \
+Core/HAL/driver/com/can_recv.c \
 Core/HAL/lib/common.c \
 Core/HAL/lib/pid.c \
 Core/HAL/lib/crc16.c \
 Core/HAL/lib/MahonyAHRS.c \
 Core/HAL/lib/MadgwickAHRS.c \
 Core/HAL/lib/cvector.c \
+Core/HAL/lib/datatypes.c \
 Core/HAL/hal.c \
 Core/APP/app.c \
 Core/BSP/bsp.c \

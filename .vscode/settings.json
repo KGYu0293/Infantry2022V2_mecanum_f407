@@ -34,6 +34,10 @@
         "common.h": "c",
         "mahonyahrs.h": "c",
         "bsp_can.h": "c",
-        "can.h": "c"
+        "can.h": "c",
+        "datatypes.h": "c",
+        "cvector.h": "c",
+        "can_send.h": "c",
+        "crc.h": "c"
     }
 }
