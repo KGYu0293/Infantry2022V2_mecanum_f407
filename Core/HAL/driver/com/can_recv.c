@@ -18,16 +18,15 @@ void CanRecv_Driver_Init() {
 can_recv* CanRecv_Create(can_recv_config* config) {
     can_recv* obj = (can_recv*)malloc(sizeof(can_recv));
     obj->config = *config;
-    obj->data_rx.identifier = obj->config.data_id;
-    obj->data_rx.type = obj->config.data_type;
     obj->data_rx.len = obj->config.data_len;
     obj->data_rx.data = (uint8_t*)malloc(obj->config.data_len);
-    obj->buf_len = obj->config.data_len + 7;
+    obj->buf_len = obj->config.data_len + 5;
     obj->rxbuf = (uint8_t*)malloc(obj->buf_len);
     obj->recv_len = 0;
     obj->recv_status = 0;
-    cvector_pushback(can_recv_instances,&obj);
-    BSP_CAN_AddFilter(obj->config.bsp_can_index,obj->config.can_identifier);
+    obj->data_updated = 0;
+    cvector_pushback(can_recv_instances, &obj);
+    BSP_CAN_AddFilter(obj->config.bsp_can_index, obj->config.can_identifier);
     return obj;
 }
 
@@ -54,7 +53,10 @@ void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,
                         BufferToData(now->rxbuf + 1, &now->data_rx);
                         now->recv_status = 0;
                         now->recv_len = 0;
-                        now->config.notify_func();
+                        now->data_updated = 1;
+                        if (now->config.notify_func != NULL) {
+                            now->config.notify_func(now);
+                        }
                     }
                 }
             }

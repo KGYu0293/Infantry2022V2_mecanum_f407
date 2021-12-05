@@ -2,6 +2,7 @@
 #include "BMI088.h"
 #include "crc16.h"
 #include "can_recv.h"
+#include "can_pc.h"
 #include "bsp_delay.h"
 
 void HAL_Layer_Init(){

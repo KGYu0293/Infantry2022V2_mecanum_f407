@@ -6,16 +6,11 @@
 
 BMI088_imu* imu;
 buzzer* internal_buzzer;
-can_recv* test_recv;
+canpc* pc;
 
 BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
-can_recv_config test_recv_config;
-
-uint32_t recv_cnt;
-void test_notify_callback(){
-    recv_cnt += 1;
-}
+canpc_config pc_config;
 
 void APP_Layer_Init() {
     // app层需要的外设配置设置
@@ -29,23 +24,21 @@ void APP_Layer_Init() {
 
     // buzzer
     uint32_t music_id = GetRand_Int() % 7;
-    internal_buzzer_config.music = musics[music_id];
+    internal_buzzer_config.music = musics[music_id]; 
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
 
-    // test recv
-    test_recv_config.bsp_can_index = 1;
-    test_recv_config.can_identifier = 0x201;
-    test_recv_config.data_id = 1;
-    test_recv_config.data_len = 10;
-    test_recv_config.data_type = 1;
-    test_recv_config.notify_func = test_notify_callback;
+    //PC
+    pc_config.bsp_can_index = 1;
+    pc_config.recv_identifer = 0x201;
+    pc_config.send_identifer = 0x202;
 
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
-    test_recv = CanRecv_Create(&test_recv_config);
+    pc = CanPC_Create(&pc_config);
 }
+
 void APP_Layer_default_loop() {
     if (imu->bias_init_success) {
         // Buzzer_Update(internal_buzzer);

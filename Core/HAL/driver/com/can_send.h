@@ -5,8 +5,6 @@
 typedef struct can_send_config_t{
     uint8_t bsp_can_index;
     uint8_t data_len;
-    uint8_t data_id;
-    uint8_t data_type;
     uint16_t can_identifier;
 } can_send_config;
 

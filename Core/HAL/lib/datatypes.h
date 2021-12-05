@@ -7,8 +7,6 @@ extern "C" {
 #include "stdint.h"
 #pragma pack(1)
 typedef struct _general_data {
-    uint8_t identifier;
-    uint8_t type;
     uint8_t len;
     uint8_t* data;
     uint16_t crc16;
