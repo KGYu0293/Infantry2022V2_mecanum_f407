@@ -11,6 +11,7 @@
 #include "cvector.h"
 #include "stdio.h"
 #include "string.h"
+#include "bsp_log.h"
 
 ////BMI088全局配置
 #define BMI088_ACCEL_SEN BMI088_ACCEL_3G_SEN
@@ -210,7 +211,7 @@ void BMI088_accel_init(BMI088_imu *obj) {
             return;
         }
     }
-    printf("BMI088 accel init success!\n");
+    printf_log("BMI088 accel init success!\n");
 }
 // BMI088陀螺仪初始化
 void BMI088_gyro_init(BMI088_imu *obj) {
@@ -240,7 +241,7 @@ void BMI088_gyro_init(BMI088_imu *obj) {
             return;
         }
     }
-    printf("BMI088 gyro init success!\n");
+    printf_log("BMI088 gyro init success!\n");
 }
 // BMI088温控初始化
 void BMI088_heat_init(BMI088_imu *obj) {

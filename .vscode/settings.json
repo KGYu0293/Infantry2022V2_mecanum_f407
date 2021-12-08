@@ -40,6 +40,7 @@
         "can_send.h": "c",
         "crc.h": "c",
         "hal.h": "c",
-        "app.h": "c"
+        "app.h": "c",
+        "bsp_log.h": "c"
     }
 }

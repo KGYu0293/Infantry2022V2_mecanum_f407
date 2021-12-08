@@ -98,6 +98,7 @@ Core/BSP/interface/bsp_can.c \
 Core/BSP/interface/bsp_pwm.c \
 Core/BSP/lib/bsp_random.c \
 Core/BSP/lib/bsp_delay.c \
+Core/BSP/lib/bsp_log.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/BasicMathFunctions/BasicMathFunctions.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/QuaternionMathFunctions/QuaternionMathFunctions.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/BayesFunctions/BayesFunctions.c \
@@ -126,13 +127,16 @@ Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/FastMathFunctions/FastMathFun
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/DistanceFunctions/DistanceFunctionsF16.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/BayesFunctions/BayesFunctionsF16.c \
 Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Source/SVMFunctions/SVMFunctionsF16.c \
+Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c \
+Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c \
 Core/Src/dma.c \
 Core/Src/rng.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rng.c
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32f407xx.s
+startup_stm32f407xx.s \
+Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_ASM_ARMv7M.s
 
 
 #######################################
@@ -182,7 +186,7 @@ C_DEFS =  \
 
 # AS includes
 AS_INCLUDES =  \
--ICore\Inc
+-ICore\Inc 
 
 # C includes
 C_INCLUDES =  \
@@ -206,7 +210,8 @@ C_INCLUDES =  \
 -ICore/BSP/interface \
 -IMiddlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/PrivateInclude/ \
 -IMiddlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include/ \
--IMiddlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include
+-IMiddlewares/Third_Party/SEGGER/RTT/ \
+-IMiddlewares/Third_Party/SEGGER/Config
 
 
 # compile gcc flags
@@ -232,7 +237,7 @@ LDSCRIPT = STM32F407IGHx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections,-u_printf_float
+LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin

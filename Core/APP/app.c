@@ -3,6 +3,7 @@
 #include "bsp.h"
 #include "bsp_random.h"
 #include "hal.h"
+#include "stdio.h"
 
 BMI088_imu* imu;
 buzzer* internal_buzzer;
@@ -24,11 +25,11 @@ void APP_Layer_Init() {
 
     // buzzer
     uint32_t music_id = GetRand_Int() % 7;
-    internal_buzzer_config.music = musics[music_id]; 
+    internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
 
-    //PC
+    // PC
     pc_config.bsp_can_index = 1;
     pc_config.recv_identifer = 0x201;
     pc_config.send_identifer = 0x202;
@@ -50,5 +51,13 @@ void APP_Log_Loop() {
         // uint8_t buf[10] = "1234567812";
         // CanSend_Send(test_send, buf);
         // BSP_CAN_Send(1, 0x200, buf, 8);
+        
+        // static char fbufs[3][10];
+        // Float2Str(fbufs[0], imu->data.euler_deg[0]);
+        // Float2Str(fbufs[1], imu->data.euler_deg[1]);
+        // Float2Str(fbufs[2], imu->data.euler_deg[2]);
+        // printf_log("%s %s %s\n", fbufs[0], fbufs[1], fbufs[2]);
+        
+        // printf_log("test_log\n");
     }
 }
