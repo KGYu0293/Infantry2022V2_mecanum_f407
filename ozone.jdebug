@@ -25,7 +25,7 @@ void OnProjectLoad (void) {
   Project.SetDevice ("STM32F407IG");
   Project.SetHostIF ("USB", "");
   Project.SetTargetIF ("SWD");
-  Project.SetTIFSpeed ("12 MHz");
+  Project.SetTIFSpeed ("Automatic");
   Project.AddPathSubstitute ("E:/STM32Prj/STM32F407_2022_framework", "$(ProjectDir)");
   Project.AddPathSubstitute ("e:/stm32prj/stm32f407_2022_framework", "$(ProjectDir)");
   Project.SetTraceSource ("SWO");
