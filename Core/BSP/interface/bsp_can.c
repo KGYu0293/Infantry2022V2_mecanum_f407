@@ -23,16 +23,15 @@
 #define ID_NOTSET 0x800     //未使用过滤器时的填充值
 
 typedef struct BSP_CanTypeDef_t {
-    CAN_HandleTypeDef *device;
+    CAN_HandleTypeDef *device;  //自定义总线编号
     uint32_t tx_mailbox;
     cvector *call_backs;
     uint32_t fifo;
-    uint32_t bank_prefix;   //不同can对应的过滤器相关参数值
+    uint32_t bank_prefix;       //不同can对应的过滤器相关参数值
     uint16_t filters[FILTER_MAX_CNT];  //按标准帧ID定义
 } BSP_CanTypeDef;
 
 BSP_CanTypeDef can_devices[DEVICE_CAN_CNT]; //定义对应数量的can外设，即代码中定义can总线
-HAL_StatusTypeDef config_state;     //定义一个HAL库状态表示量，用来表示
 
 void BSP_CAN_Init() {
     can_devices[0].device = &hcan1;
@@ -74,7 +73,7 @@ void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
 
 
 void update_filter(uint8_t can_id, uint32_t filter_index) {
-    CAN_FilterTypeDef tmp;  //传参用临时变量
+    CAN_FilterTypeDef tmp;
     tmp.FilterMode = CAN_FILTERMODE_IDLIST;
     tmp.FilterScale = CAN_FILTERSCALE_16BIT;
     tmp.FilterFIFOAssignment = can_devices[can_id].fifo;
@@ -94,7 +93,7 @@ void update_filter(uint8_t can_id, uint32_t filter_index) {
         tmp.FilterActivation = CAN_FILTER_DISABLE;
     else
         tmp.FilterActivation = CAN_FILTER_ENABLE;
-    config_state = HAL_CAN_ConfigFilter(can_devices[can_id].device, &tmp);
+    HAL_CAN_ConfigFilter(can_devices[can_id].device, &tmp);
 }
 
 void BSP_CAN_AddFilter(uint8_t can_id, uint16_t filter) {
