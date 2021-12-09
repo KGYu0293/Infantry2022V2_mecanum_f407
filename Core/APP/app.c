@@ -2,6 +2,7 @@
 
 #include "bsp.h"
 #include "bsp_random.h"
+#include "arm_math.h"
 #include "hal.h"
 #include "stdio.h"
 
