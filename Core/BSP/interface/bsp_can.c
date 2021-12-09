@@ -32,7 +32,6 @@ typedef struct BSP_CanTypeDef_t {
 } BSP_CanTypeDef;
 
 BSP_CanTypeDef can_devices[DEVICE_CAN_CNT]; //定义对应数量的can外设，即代码中定义can总线
-HAL_StatusTypeDef config_state;     //定义一个HAL库状态表示量，用来表示
 
 void BSP_CAN_Init() {
     can_devices[0].device = &hcan1;
@@ -94,7 +93,7 @@ void update_filter(uint8_t can_id, uint32_t filter_index) {
         tmp.FilterActivation = CAN_FILTER_DISABLE;
     else
         tmp.FilterActivation = CAN_FILTER_ENABLE;
-    config_state = HAL_CAN_ConfigFilter(can_devices[can_id].device, &tmp);
+    HAL_CAN_ConfigFilter(can_devices[can_id].device, &tmp);
 }
 
 void BSP_CAN_AddFilter(uint8_t can_id, uint16_t filter) {

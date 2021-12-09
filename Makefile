@@ -95,6 +95,7 @@ Core/BSP/bsp.c \
 Core/BSP/interface/bsp_spi.c \
 Core/BSP/interface/bsp_gpio.c \
 Core/BSP/interface/bsp_can.c \
+Core/BSP/interface/bsp_uart.c \
 Core/BSP/interface/bsp_pwm.c \
 Core/BSP/lib/bsp_random.c \
 Core/BSP/lib/bsp_delay.c \
