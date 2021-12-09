@@ -190,6 +190,7 @@ C_INCLUDES += \
 -ICore/BSP/interface \
 -IMiddlewares/Third_Party/SEGGER/RTT/ \
 -IMiddlewares/Third_Party/SEGGER/Config
+
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
