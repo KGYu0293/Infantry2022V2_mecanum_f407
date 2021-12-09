@@ -23,11 +23,11 @@
 #define ID_NOTSET 0x800     //未使用过滤器时的填充值
 
 typedef struct BSP_CanTypeDef_t {
-    CAN_HandleTypeDef *device;
+    CAN_HandleTypeDef *device;  //自定义总线编号
     uint32_t tx_mailbox;
     cvector *call_backs;
     uint32_t fifo;
-    uint32_t bank_prefix;   //不同can对应的过滤器相关参数值
+    uint32_t bank_prefix;       //不同can对应的过滤器相关参数值
     uint16_t filters[FILTER_MAX_CNT];  //按标准帧ID定义
 } BSP_CanTypeDef;
 
@@ -74,7 +74,7 @@ void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
 
 
 void update_filter(uint8_t can_id, uint32_t filter_index) {
-    CAN_FilterTypeDef tmp;  //传参用临时变量
+    CAN_FilterTypeDef tmp;
     tmp.FilterMode = CAN_FILTERMODE_IDLIST;
     tmp.FilterScale = CAN_FILTERSCALE_16BIT;
     tmp.FilterFIFOAssignment = can_devices[can_id].fifo;
