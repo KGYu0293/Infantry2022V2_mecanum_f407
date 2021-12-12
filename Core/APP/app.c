@@ -1,21 +1,22 @@
 #include "app.h"
 
+#include "arm_math.h"
 #include "bsp.h"
 #include "bsp_random.h"
-#include "arm_math.h"
 #include "hal.h"
 #include "stdio.h"
 
 BMI088_imu* imu;
 buzzer* internal_buzzer;
 canpc* pc;
+can_motor* can1_motor_1;
 // #TODO to add other motors
 
 BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
 canpc_config pc_config;
+can_motor_config can1_motor_1_config;
 // #TODO to add other motors
-
 
 void APP_Layer_Init() {
     // app层需要的外设配置设置
@@ -38,10 +39,22 @@ void APP_Layer_Init() {
     pc_config.recv_identifer = 0x201;
     pc_config.send_identifer = 0x202;
 
+    // motors
+    // example :index：can1填充0,can2填充1
+    //          motor_set_id直接填充电调上通过闪灯次数确定的id
+    //          model填写MODEL_3508/MODEL_2006/MODEL_6020
+    can1_motor_1_config.bsp_can_index = 0;
+    can1_motor_1_config.motor_set_id = 1;
+    can1_motor_1_config.motor_model = MODEL_3508;
+    // pid参数初始化
+    memcpy(&can1_motor_1_config.config_speed,Can_Motor_ConfigInit(1, 0, 0, 0, 16384),sizeof(struct PID_config_t));
+    memcpy(&can1_motor_1_config.config_position,Can_Motor_ConfigInit(0, 0, 0, 0, 0), sizeof(struct PID_config_t));
+
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
     pc = CanPC_Create(&pc_config);
+    can1_motor_1 = Can_Motor_Create(&can1_motor_1_config);
 }
 
 void APP_Layer_default_loop() {
@@ -55,13 +68,13 @@ void APP_Log_Loop() {
         // uint8_t buf[10] = "1234567812";
         // CanSend_Send(test_send, buf);
         // BSP_CAN_Send(1, 0x200, buf, 8);
-        
+
         // static char fbufs[3][10];
         // Float2Str(fbufs[0], imu->data.euler_deg[0]);
         // Float2Str(fbufs[1], imu->data.euler_deg[1]);
         // Float2Str(fbufs[2], imu->data.euler_deg[2]);
         // printf_log("%s %s %s\n", fbufs[0], fbufs[1], fbufs[2]);
-        
+
         // printf_log("test_log\n");
     }
 }
