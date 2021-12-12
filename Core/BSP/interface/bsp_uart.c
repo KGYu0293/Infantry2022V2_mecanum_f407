@@ -5,14 +5,16 @@
 
 #define DEVICE_UART_CNT 2
 
-typedef struct BSP_UART_Typedef_t {
-    UART_HandleTypeDef* port;  //自定义uart编号
-    cvector* call_backs;
+typedef struct BSP_UART_Typedef_t
+{
+    UART_HandleTypeDef *port; //自定义uart编号
+    cvector *call_backs;
 } BSP_UART_Typedef;
 
 BSP_UART_Typedef uart_ports[DEVICE_UART_CNT];
 
-void BSP_UART_Init() {
+void BSP_UART_Init()
+{
     uart_ports[0].port = &huart3;
     uart_ports[0].call_backs = cvector_create(sizeof(uart_rx_callback));
 
@@ -21,18 +23,22 @@ void BSP_UART_Init() {
 }
 
 // 注册回调函数
-void BSP_UART_RegisterRxCallback(uint8_t uart_index, uart_rx_callback func) {
+void BSP_UART_RegisterRxCallback(uint8_t uart_index, uart_rx_callback func)
+{
     cvector_pushback(uart_ports[uart_index].call_backs, &func);
 }
 
 //三种模式的发送函数
-void BSP_UART_Send_blocking(uint8_t uart_index, uint8_t* data, uint16_t len) {
+void BSP_UART_Send_blocking(uint8_t uart_index, uint8_t *data, uint16_t len)
+{
     HAL_UART_Transmit(uart_ports[uart_index].port, data, len, 20);
 }
-void BSP_UART_Send_IT(uint8_t uart_index, uint8_t* data, uint16_t len) {
+void BSP_UART_Send_IT(uint8_t uart_index, uint8_t *data, uint16_t len)
+{
     HAL_UART_Transmit_IT(uart_ports[uart_index].port, data, len);
 }
-void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t* data, uint16_t len) {
+void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len)
+{
     HAL_UART_Transmit_DMA(uart_ports[uart_index].port, data, len);
 }
 
