@@ -6,7 +6,7 @@
 			"type": "shell",
 			"command": "make",
 			"args": [
-				"-j8"
+				"-j16"
 			],
 			"problemMatcher": []
 		},

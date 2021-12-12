@@ -41,6 +41,9 @@
         "crc.h": "c",
         "hal.h": "c",
         "app.h": "c",
-        "bsp_log.h": "c"
+        "bsp_log.h": "c",
+        "can_recv.h": "c",
+        "can_motor.h": "c",
+        "motor.h": "c"
     }
 }

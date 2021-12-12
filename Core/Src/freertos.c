@@ -72,6 +72,13 @@ const osThreadAttr_t LogTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for MotorTask */
+osThreadId_t MotorTaskHandle;
+const osThreadAttr_t MotorTask_attributes = {
+  .name = "MotorTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -81,6 +88,7 @@ const osThreadAttr_t LogTask_attributes = {
 void StartDefaultTask(void *argument);
 void StartImuTask(void *argument);
 void StartLogTask(void *argument);
+void StartMotorTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -119,6 +127,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of LogTask */
   LogTaskHandle = osThreadNew(StartLogTask, NULL, &LogTask_attributes);
+
+  /* creation of MotorTask */
+  MotorTaskHandle = osThreadNew(StartMotorTask, NULL, &MotorTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -186,6 +197,26 @@ void StartLogTask(void *argument)
         vTaskDelayUntil(&currentTimeLog, 10);
     }
   /* USER CODE END StartLogTask */
+}
+
+/* USER CODE BEGIN Header_StartMotorTask */
+/**
+* @brief Function implementing the MotorTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartMotorTask */
+void StartMotorTask(void *argument)
+{
+  /* USER CODE BEGIN StartMotorTask */
+  portTickType currentTimeMotor;
+  currentTimeMotor = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;){
+    HAL_Motor_Calc_Loop();
+    vTaskDelayUntil(&currentTimeMotor, 1);
+  }
+  /* USER CODE END StartMotorTask */
 }
 
 /* Private application code --------------------------------------------------*/

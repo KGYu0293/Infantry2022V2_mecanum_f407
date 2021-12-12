@@ -4,33 +4,31 @@
 #include <stdint.h>
 
 enum PID_Mode_e { PID_POSITION = 0, PID_DELTA, PID_COMP_POSITION };
-
-struct PID_t {
+struct PID_config_t{
     float KP;
     float KI;
     float KD;
-    float error[3];
-    float error_sum;
-    float error_max;
-    float fdb;
-    float ref;
-    float output;
-    float outputMax;
-    enum PID_Mode_e PID_Mode;
     float KP_fine;
     float range_rough;
     float range_fine;
+    float error_max;
+    float outputMax;
     float compensation;
+    enum PID_Mode_e PID_Mode;
+};
+
+struct PID_t {
+    struct PID_config_t config;
+    float error[3];
+    float error_sum;
+    float fdb;
+    float ref;
+    float output;
     float error_delta;
     float error_preload;
 };
 
-#define DEFAULT_PID                                                         \
-    {                                                                       \
-        0.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f}, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, \
-            0.0f, PID_POSITION                                              \
-    }
-
+void PID_Init(struct PID_t *pid, struct PID_config_t* config);
 void PID_Calc(struct PID_t *pid);
 
 #endif
