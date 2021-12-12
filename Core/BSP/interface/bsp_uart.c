@@ -51,9 +51,12 @@ void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len)
  * 具体位置：系统调用的HAL_UART_IRQHandler函数下面，"USER CODE BEGIN USART1_IRQn
  * 1"和"USER CODE END USART1_IRQn 1"两行注释之间
  */
-// void BSP_UART_IDLE_RxCallback(UART_HandleTypeDef* huart) {
-//     if (huart == uart_ports[0].port) {
-//         if (RESET != __HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE)) {
+// void BSP_UART_IDLE_RxCallback(UART_HandleTypeDef *huart)
+// {
+//     if (huart == uart_ports[0].port)
+//     {
+//         if (RESET != __HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE))
+//         {
 //             __HAL_UART_CLEAR_IDLEFLAG(huart);
 //             HAL_UART_DMAStop(&huart);
 //             uint8_t data_length = RX_LEN - __HAL_DMA_GET_COUNTER(huart.hdmarx);
