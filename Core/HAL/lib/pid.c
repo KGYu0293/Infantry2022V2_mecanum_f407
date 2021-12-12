@@ -70,7 +70,7 @@ void PID_Calc(struct PID_t* pid) {
     else if (pid->config.PID_Mode ==
              PID_COMP_POSITION)  // PI分离模式 用于摩擦轮和拨弹
     {
-        pid->error_delta = pid->error[1] - pid->error[0];
+        pid->error_delta = pid->error[0] - pid->error[1];
         if (pid->error[0] > pid->config.range_rough)  // bangbang
         {
             pid->output = pid->config.outputMax;
@@ -86,16 +86,16 @@ void PID_Calc(struct PID_t* pid) {
                 pid->error_sum = pid->config.error_max;
             if (pid->error_sum < -pid->config.error_max)
                 pid->error_sum = -pid->config.error_max;
-            pid->output = pid->config.KP_fine * pid->error[1] +
+            pid->output = pid->config.KP_fine * pid->error[0] +
                           pid->config.KI * pid->error_sum +
                           pid->config.KD * pid->error_delta;
         } else  //粗调
         {
             pid->output = pid->config.KP *
-                              (pid->error[1] +
-                               fsgn(pid->error[1]) * pid->config.compensation) +
+                              (pid->error[0] +
+                               fsgn(pid->error[0]) * pid->config.compensation) +
                           pid->config.KD * pid->error_delta;
-            pid->error_sum = fsgn(pid->error[1]) * pid->error_preload;
+            pid->error_sum = fsgn(pid->error[0]) * pid->error_preload;
         }
     }
 
