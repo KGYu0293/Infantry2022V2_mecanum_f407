@@ -95,7 +95,7 @@ void PID_Calc(struct PID_t* pid) {
                               (pid->error[0] +
                                fsgn(pid->error[0]) * pid->config.compensation) +
                           pid->config.KD * pid->error_delta;
-            pid->error_sum = fsgn(pid->error[0]) * pid->error_preload;
+            pid->error_sum = fsgn(pid->error[0]) * pid->config.error_preload;
         }
     }
 

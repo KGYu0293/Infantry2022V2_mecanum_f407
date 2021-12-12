@@ -14,6 +14,7 @@ struct PID_config_t{
     float error_max;
     float outputMax;
     float compensation;
+    float error_preload;
     enum PID_Mode_e PID_Mode;
 };
 
@@ -25,7 +26,7 @@ struct PID_t {
     float ref;
     float output;
     float error_delta;
-    float error_preload;
+    
 };
 
 void PID_Init(struct PID_t *pid, struct PID_config_t* config);
