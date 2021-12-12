@@ -7,6 +7,7 @@
 #define GPIO_BMI088_GYRO_NS 1
 
 void BSP_GPIO_Init();
+void BSP_GPIO_Read(uint8_t gpio_index,uint8_t* data);
 void BSP_GPIO_Set(uint8_t gpio_index,uint8_t status);
 
 #endif
