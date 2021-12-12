@@ -4,13 +4,13 @@
   * 创建时间        : 2021.12.07
   * 作者            : 陈迅  
   ******************************************************************************
-  * 1.本代码包含大量中文注释，请以UTF-8编码格式打开
-  * 2.本代码最终解释权归哈尔滨工业大学（深圳）南工骁鹰战队Critical HIT所有
-  * 3.Copyright (c) 哈尔滨工业大学（深圳）南工骁鹰战队Critical HIT 版权所有
+  * 1.本代码基于STM32F407IGH6TR开发，编译环境为vscode，基于FreeRTOS进行开发
+  * 2.本代码包含大量中文注释，请以UTF-8编码格式打开
+  * 3.本代码最终解释权归哈尔滨工业大学（深圳）南工骁鹰战队Critical HIT所有
+  * 
+  * Copyright (c) 哈尔滨工业大学（深圳）南工骁鹰战队Critical HIT 版权所有
   ******************************************************************************
   * 说明：
-  * 
-  * 
   ******************************************************************************
   */
 #include "bsp_can.h"
@@ -119,6 +119,7 @@ void BSP_CAN_RemoveFilter(uint8_t can_id, uint16_t filter) {
     }
 }
 
+// 注册回调函数
 void BSP_CAN_RegisterRxCallback(uint8_t can_id, can_rx_callback func) {
     cvector_pushback(can_devices[can_id].call_backs, &func);
 }
