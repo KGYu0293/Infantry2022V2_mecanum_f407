@@ -4,7 +4,7 @@
 #include "stdlib.h"
 #include "string.h"
 
-can_motor* instances[2][3][4];  // instances用于存放canmotor*类型的指向电机实体的指针，在每个电机初始化时被填充
+can_motor* instances[2][3][4];  // instances用于存放can_motor*类型的指向电机实体的指针，在每个电机初始化时被填充
 uint8_t motors_id[2][3][8];  // motors_id 被填充为1表示此处有电机被注册，为0表示此处没有电机被注册
 const uint32_t identifiers[3] = {0x200, 0x1FF, 0x2FF};
 
