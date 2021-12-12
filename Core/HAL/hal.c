@@ -3,15 +3,18 @@
 #include "crc16.h"
 #include "can_recv.h"
 #include "can_pc.h"
+#include "can_motor.h"
 #include "bsp_delay.h"
+//#include "motor.h"
 
 void HAL_Layer_Init(){
     CRC16_Init();
     BMI088_Driver_Init();
     CanRecv_Driver_Init();
+    Can_Motor_Driver_Init();
 }
 
-void HAL_Default_Loop(){
+void HAL_Layer_Default_Loop(){
 
 }
 
@@ -20,5 +23,5 @@ void HAL_Imu_Loop(){
 }
 
 void HAL_Motor_Calc_Loop(){
-    
+    Can_Motor_Calc();
 }

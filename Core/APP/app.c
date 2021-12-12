@@ -9,10 +9,13 @@
 BMI088_imu* imu;
 buzzer* internal_buzzer;
 canpc* pc;
+// #TODO to add other motors
 
 BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
 canpc_config pc_config;
+// #TODO to add other motors
+
 
 void APP_Layer_Init() {
     // app层需要的外设配置设置

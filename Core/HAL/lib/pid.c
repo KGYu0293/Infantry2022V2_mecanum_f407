@@ -36,59 +36,72 @@ float_t fsgn(float input) {
  * @param PID结构体
  * @retval None
  */
+
+void PID_Init(struct PID_t *pid, struct PID_config_t* config) {
+    pid->config = *config;
+}
+
 void PID_Calc(struct PID_t *pid) {
     pid->error[2] = pid->error[1];        //上上次误差
     pid->error[1] = pid->error[0];        //上次误差
     pid->error[0] = pid->ref - pid->fdb;  //本次误差
 
-    if (pid->PID_Mode == PID_POSITION)  //位置式PID
+    if (pid->config.PID_Mode == PID_POSITION)  //位置式PID
     {
         pid->error_sum += pid->error[0];  //积分上限判断
-        if (pid->error_sum > pid->error_max) pid->error_sum = pid->error_max;
-        if (pid->error_sum < -pid->error_max) pid->error_sum = -pid->error_max;
+        if (pid->error_sum > pid->config.error_max)
+            pid->error_sum = pid->config.error_max;
+        if (pid->error_sum < -pid->config.error_max)
+            pid->error_sum = -pid->config.error_max;
 
-        pid->output = pid->KP * pid->error[0] + pid->KI * pid->error_sum +
-                      pid->KD * (pid->error[0] - pid->error[1]);
+        pid->output = pid->config.KP * pid->error[0] +
+                      pid->config.KI * pid->error_sum +
+                      pid->config.KD * (pid->error[0] - pid->error[1]);
     }
 
-    else if (pid->PID_Mode == PID_DELTA)  //增量式PID
+    else if (pid->config.PID_Mode == PID_DELTA)  //增量式PID
     {
-        pid->output +=
-            pid->KP * (pid->error[0] - pid->error[1]) +
-            pid->KI * (pid->error[0] - 2.0f * pid->error[1] + pid->error[2]) +
-            pid->KI * pid->error[0];
+        pid->output += pid->config.KP * (pid->error[0] - pid->error[1]) +
+                       pid->config.KI * (pid->error[0] - 2.0f * pid->error[1] +
+                                         pid->error[2]) +
+                       pid->config.KI * pid->error[0];
     }
 
-    else if (pid->PID_Mode == PID_COMP_POSITION)  // PI分离模式 用于摩擦轮和拨弹
+    else if (pid->config.PID_Mode ==
+             PID_COMP_POSITION)  // PI分离模式 用于摩擦轮和拨弹
     {
         pid->error_delta = pid->error[1] - pid->error[0];
-        if (pid->error[0] > pid->range_rough)  // bangbang
+        if (pid->error[0] > pid->config.range_rough)  // bangbang
         {
-            pid->output = pid->outputMax;
+            pid->output = pid->config.outputMax;
             pid->error_sum = 0;
-        } else if (pid->error[0] < -pid->range_rough)  // bangbang
+        } else if (pid->error[0] < -pid->config.range_rough)  // bangbang
         {
-            pid->output = -pid->outputMax;
+            pid->output = -pid->config.outputMax;
             pid->error_sum = 0;
-        } else if (fabsf(pid->error[0]) < pid->range_fine)  //细调
+        } else if (fabsf(pid->error[0]) < pid->config.range_fine)  //细调
         {
             pid->error_sum += pid->error[0];  //积分上限判断
-            if (pid->error_sum > pid->error_max)
-                pid->error_sum = pid->error_max;
-            if (pid->error_sum < -pid->error_max)
-                pid->error_sum = -pid->error_max;
-            pid->output = pid->KP_fine * pid->error[1] +
-                          pid->KI * pid->error_sum + pid->KD * pid->error_delta;
+            if (pid->error_sum > pid->config.error_max)
+                pid->error_sum = pid->config.error_max;
+            if (pid->error_sum < -pid->config.error_max)
+                pid->error_sum = -pid->config.error_max;
+            pid->output = pid->config.KP_fine * pid->error[1] +
+                          pid->config.KI * pid->error_sum +
+                          pid->config.KD * pid->error_delta;
         } else  //粗调
         {
-            pid->output = pid->KP * (pid->error[1] +
-                                     fsgn(pid->error[1]) * pid->compensation) +
-                          pid->KD * pid->error_delta;
+            pid->output = pid->config.KP *
+                              (pid->error[1] +
+                               fsgn(pid->error[1]) * pid->config.compensation) +
+                          pid->config.KD * pid->error_delta;
             pid->error_sum = fsgn(pid->error[1]) * pid->error_preload;
         }
     }
 
     /* 输出上限 */
-    if (pid->output > pid->outputMax) pid->output = pid->outputMax;
-    if (pid->output < -pid->outputMax) pid->output = -pid->outputMax;
+    if (pid->output > pid->config.outputMax)
+        pid->output = pid->config.outputMax;
+    if (pid->output < -pid->config.outputMax)
+        pid->output = -pid->config.outputMax;
 }

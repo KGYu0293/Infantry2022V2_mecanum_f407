@@ -248,12 +248,14 @@ void BMI088_heat_init(BMI088_imu *obj) {
     // HAL_TIM_PWM_Start(obj->HEAT_PWM_BASE, obj->HAET_PWM_CHANNEL);
     BSP_PWM_Start(obj->config.bsp_pwm_heat_index);
     memset(&obj->heat_pid, 0, sizeof(struct PID_t));
-    obj->heat_pid.KP = HEAT_PID_KP;
-    obj->heat_pid.KI = HEAT_PID_KI;
-    obj->heat_pid.KD = HEAT_PID_KD;
-    obj->heat_pid.error_max = 2048;
-    obj->heat_pid.outputMax = HEAT_PID_MAX_OUT;
-    obj->heat_pid.error_max = HEAT_PID_MAX_IOUT;
+    struct PID_config_t bmi088_config;
+    bmi088_config.KP = HEAT_PID_KP;
+    bmi088_config.KI = HEAT_PID_KI;
+    bmi088_config.KD = HEAT_PID_KD;
+    bmi088_config.error_max = 2048;
+    bmi088_config.outputMax = HEAT_PID_MAX_OUT;
+    bmi088_config.error_max = HEAT_PID_MAX_IOUT;
+    PID_Init(&obj->heat_pid,&bmi088_config);
     obj->heat_pid.ref = obj->config.temp_target;
 }
 
