@@ -21,3 +21,7 @@ void BSP_GPIO_Init(){
 void BSP_GPIO_Set(uint8_t gpio_index,uint8_t status){
     HAL_GPIO_WritePin(gpio_ports[gpio_index].base,gpio_ports[gpio_index].pin,status);
 }
+
+void BSP_GPIO_Read(uint8_t gpio_index,uint8_t* data){
+    (*data) = HAL_GPIO_ReadPin(gpio_ports[gpio_index].base,gpio_ports[gpio_index].pin);
+}
