@@ -37,11 +37,11 @@ float_t fsgn(float input) {
  * @retval None
  */
 
-void PID_Init(struct PID_t *pid, struct PID_config_t* config) {
+void PID_Init(struct PID_t* pid, struct PID_config_t* config) {
     pid->config = *config;
 }
 
-void PID_Calc(struct PID_t *pid) {
+void PID_Calc(struct PID_t* pid) {
     pid->error[2] = pid->error[1];        //上上次误差
     pid->error[1] = pid->error[0];        //上次误差
     pid->error[0] = pid->ref - pid->fdb;  //本次误差
@@ -104,4 +104,13 @@ void PID_Calc(struct PID_t *pid) {
         pid->output = pid->config.outputMax;
     if (pid->output < -pid->config.outputMax)
         pid->output = -pid->config.outputMax;
+}
+
+void PID_SetConfig(struct PID_config_t* obj, float kp, float ki, float kd,
+                   float errormax, float outputmax) {
+    obj->KP = kp;
+    obj->KI = ki;
+    obj->KD = kd;
+    obj->error_max = errormax;
+    obj->outputMax = outputmax;
 }

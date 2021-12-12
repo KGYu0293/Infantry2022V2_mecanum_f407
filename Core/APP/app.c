@@ -47,8 +47,8 @@ void APP_Layer_Init() {
     can1_motor_1_config.motor_set_id = 1;
     can1_motor_1_config.motor_model = MODEL_3508;
     // pid参数初始化
-    memcpy(&can1_motor_1_config.config_speed,Can_Motor_ConfigInit(1, 0, 0, 0, 16384),sizeof(struct PID_config_t));
-    memcpy(&can1_motor_1_config.config_position,Can_Motor_ConfigInit(0, 0, 0, 0, 0), sizeof(struct PID_config_t));
+    PID_SetConfig(&can1_motor_1_config.config_speed, 1, 0, 0, 0, 16384);
+    PID_SetConfig(&can1_motor_1_config.config_position, 0, 0, 0, 0, 0);
 
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);

@@ -11,6 +11,8 @@ const uint32_t identifiers[3] = {0x200, 0x1FF, 0x2FF};
 void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,
                          uint32_t len);
 
+void Can_Motor_FeedbackData_Update(can_motor* obj, uint8_t* data);
+
 void Can_Motor_Driver_Init() {
     memset(&instances, 0, sizeof(instances));
     memset(&motors_id, 0, sizeof(motors_id));
@@ -56,23 +58,15 @@ void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,uint
     uint32_t model_3508_2006_id = identifier - 0x200;
     uint32_t model_6020_id = identifier - 0x204;
     if (motors_id[can_id][MODEL_2006][model_3508_2006_id]) {
-        Can_Motor_FeedbackData_Update(&instances[can_id][model_3508_2006_id > 4 ? 1 : 0][model_3508_2006_id > 4 ? model_3508_2006_id - 4: model_3508_2006_id],data);
+        Can_Motor_FeedbackData_Update(instances[can_id][model_3508_2006_id > 4 ? 1 : 0][model_3508_2006_id > 4 ? model_3508_2006_id - 4: model_3508_2006_id],data);
     } else if (motors_id[can_id][MODEL_3508][model_3508_2006_id]) {
-        Can_Motor_FeedbackData_Update(&instances[can_id][model_3508_2006_id > 4 ? 1 : 0][model_3508_2006_id > 4 ? model_3508_2006_id - 4: model_3508_2006_id],data);
+        Can_Motor_FeedbackData_Update(instances[can_id][model_3508_2006_id > 4 ? 1 : 0][model_3508_2006_id > 4 ? model_3508_2006_id - 4: model_3508_2006_id],data);
     } else if (motors_id[can_id][MODEL_6020][model_6020_id]) {
-        Can_Motor_FeedbackData_Update(&instances[can_id][model_6020_id > 4 ? 1 : 0][model_6020_id > 4 ? model_6020_id - 4 : model_6020_id],data);
+        Can_Motor_FeedbackData_Update(instances[can_id][model_6020_id > 4 ? 1 : 0][model_6020_id > 4 ? model_6020_id - 4 : model_6020_id],data);
     }
 }
 
-struct PID_config_t* Can_Motor_ConfigInit(float kp, float ki, float kd,float errormax, float outputmax) {
-    struct PID_config_t* obj;
-    obj->KP = kp;
-    obj->KI = ki;
-    obj->KD = kd;
-    obj->error_max = errormax;
-    obj->outputMax = outputmax;
-    return obj;
-}
+
 
 void Can_Motor_FeedbackData_Update(can_motor* obj, uint8_t* data) {
     obj->fdbPosition = data[0] << 8 | data[1];

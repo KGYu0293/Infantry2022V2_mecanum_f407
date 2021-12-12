@@ -30,5 +30,5 @@ struct PID_t {
 
 void PID_Init(struct PID_t *pid, struct PID_config_t* config);
 void PID_Calc(struct PID_t *pid);
-
+void PID_SetConfig(struct PID_config_t* obj,float kp, float ki, float kd, float errormax, float outputmax);
 #endif

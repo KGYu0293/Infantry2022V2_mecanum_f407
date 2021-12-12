@@ -23,9 +23,9 @@ void OnProjectLoad (void) {
   // Dialog-generated settings
   //
   Project.SetDevice ("STM32F407IG");
-  Project.SetHostIF ("USB", "");
+  Project.SetHostIF ("IP", "192.168.2.141");
   Project.SetTargetIF ("SWD");
-  Project.SetTIFSpeed ("Automatic");
+  Project.SetTIFSpeed ("12 MHz");
   Project.AddPathSubstitute ("E:/STM32Prj/STM32F407_2022_framework", "$(ProjectDir)");
   Project.AddPathSubstitute ("e:/stm32prj/stm32f407_2022_framework", "$(ProjectDir)");
   Project.SetTraceSource ("SWO");

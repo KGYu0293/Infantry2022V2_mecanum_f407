@@ -42,8 +42,5 @@ typedef struct can_motor_t {
 
 void Can_Motor_Driver_Init();
 can_motor *Can_Motor_Create(can_motor_config *config);
-struct PID_config_t * Can_Motor_ConfigInit(float kp, float ki, float kd, float errormax, float outputmax);
-void Can_Motor_FeedbackData_Update(can_motor*obj,uint8_t* data); //电机反馈数据更新
-
 void Can_Motor_Calc();
 #endif
