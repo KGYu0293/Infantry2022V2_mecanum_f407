@@ -10,7 +10,6 @@
 enum Motor_Model_e { MODEL_3508 = 0, MODEL_2006, MODEL_6020};
 
 
-
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
 	uint8_t motor_set_id;

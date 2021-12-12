@@ -8,11 +8,7 @@
 typedef struct BSP_UART_Typedef_t {
     UART_HandleTypeDef* port;  //自定义uart编号
     cvector* call_backs;
-    enum {
-        blocking,
-        IT,
-        DMA
-    } send_mode;  //发送模式，堵塞/中断/DMA，其中堵占式不推荐
+    enum BSP_UART_SendMode_e send_mode;
 } BSP_UART_Typedef;
 
 BSP_UART_Typedef uart_ports[DEVICE_UART_CNT];
