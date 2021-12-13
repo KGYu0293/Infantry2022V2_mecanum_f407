@@ -12,7 +12,7 @@ const uint32_t identifiers[3] = {0x200, 0x1FF, 0x2FF};
 void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len);
 
 void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data);
-void Can_Motor_Send(uint8_t can_id, uint16_t identifier, uint16_t motor_data_id1, uint16_t motor_data_id2, uint16_t motor_data_id3, uint16_t motor_data_id4);
+void Can_Motor_Send(uint8_t can_id, uint16_t identifier, short motor_data_id1, short motor_data_id2, short motor_data_id3, short motor_data_id4);
 
 void Can_Motor_Driver_Init() {
     memset(&instances, 0, sizeof(instances));
@@ -50,6 +50,12 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
         default:
             break;
     }
+    if (obj->config.speed_fdb_model == MOTOR_FDB) {
+        obj->config.speed_pid_fdb = &obj->fdbSpeed;
+    }
+    if (obj->config.position_pid_fdb == MOTOR_FDB) {
+        obj->config.position_pid_fdb = &obj->real_position;
+    }
     return obj;
     // cvector_pushback(motor_instances, &obj);
 }
@@ -67,6 +73,7 @@ void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uin
 }
 
 void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
+    obj->last_fdbPosition = obj->fdbPosition;
     obj->fdbPosition = ((short)data[0]) << 8 | data[1];
     obj->fdbSpeed = ((short)data[2]) << 8 | data[3];
     obj->electric_current = ((short)data[4]) << 8 | data[5];
@@ -75,46 +82,53 @@ void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
     } else {
         obj->temperature = data[6];
     }
+    if (obj->fdbPosition - obj->last_fdbPosition > 4096)
+        obj->round--;
+    else if (obj->fdbPosition - obj->last_fdbPosition < -4096)
+        obj->round++;
+    obj->last_real_position = obj->real_position;
+    obj->real_position = obj->fdbPosition + obj->round * 8192;
 }
 
 void Can_Motor_Calc_Send() {
-    for (int index = 0; index < 2; index++) {
+    for (int can_index = 0; can_index < 2; can_index++) {
         for (int identifier = 0; identifier < 3; identifier++) {
-            for (int id = 0; id < 8; id++) {
-                if (motors_id[index][identifier][id]) {
-                    if (instances[index][identifier][id]->config.motor_pid_model == POSITION_LOOP) {
-                        instances[index][identifier][id]->position_pid.fdb = instances[index][identifier][id]->fdbSpeed;
-                        PID_Calc(&instances[index][identifier][id]->position_pid);
-                        instances[index][identifier][id]->speed_pid.ref = instances[index][identifier][id]->position_pid.output;
-                    }
-                    //速度环pid解算
-                    instances[index][identifier][id]->speed_pid.fdb = instances[index][identifier][id]->fdbSpeed;
-                    PID_Calc(&instances[index][identifier][id]->speed_pid);
+            uint8_t identifier_send = 0;
+            short buf[4] = {0};
+            for (int id = 0; id < 4; id++) {
+                can_motor *obj = instances[can_index][identifier][id];
+                if (obj == NULL) continue;
+                identifier_send = 1;
+                if (obj->config.motor_pid_model == POSITION_LOOP) {
+                    obj->position_pid.fdb = *obj->config.position_pid_fdb;
+                    PID_Calc(&obj->position_pid);
+                    obj->speed_pid.ref = obj->position_pid.output;
                 }
+                if (obj->config.motor_pid_model >= SPEED_LOOP) {
+                    PID_Calc(&obj->speed_pid);
+                    obj->speed_pid.fdb = *obj->config.speed_pid_fdb;
+                    obj->current_output = obj->speed_pid.output;
+                }
+                buf[id] = obj->current_output;
             }
-            //如果此标识符(identifier)对应的四个电机里至少有一个被注册，就发送这个标识符的报文，如果全部没有被注册，则这个标识符无需发送
-            if (motors_id[index][identifier][0] | motors_id[index][identifier][1] | motors_id[index][identifier][2] | motors_id[index][identifier][3]) {
-                Can_Motor_Send(index, identifiers[identifier],
-                               //如果电机被注册，则传递speed_pid.output,如果电机没有被注册，则用0填充无电机的位置
-                               (motors_id[index][identifier][0] ? ((uint16_t)instances[index][identifier][0]->speed_pid.output) : 0),
-                               (motors_id[index][identifier][1] ? ((uint16_t)instances[index][identifier][1]->speed_pid.output) : 0),
-                               (motors_id[index][identifier][2] ? ((uint16_t)instances[index][identifier][2]->speed_pid.output) : 0),
-                               (motors_id[index][identifier][3] ? ((uint16_t)instances[index][identifier][3]->speed_pid.output) : 0));
+            // 如果此标识符(identifier)对应的四个电机里至少有一个被注册，就发送这个标识符的报文，如果全部没有被注册，则这个标识符无需发送
+            if (identifier_send) {
+                Can_Motor_Send(can_index, identifiers[identifier], buf[0], buf[1], buf[2], buf[3]);
             }
         }
     }
 }
 
-void Can_Motor_Send(uint8_t can_id, uint16_t identifier, uint16_t motor_data_id1, uint16_t motor_data_id2, uint16_t motor_data_id3, uint16_t motor_data_id4) {
-    uint8_t data[8] = {};
-    data[0] = (uint8_t)((motor_data_id1 & 0xFF00) >> 8);
+void Can_Motor_Send(uint8_t can_id, uint16_t identifier, short motor_data_id1, short motor_data_id2, short motor_data_id3, short motor_data_id4) {
+    static uint8_t data[8];
+    data[0] = (uint8_t)(motor_data_id1 >> 8);
     data[1] = (uint8_t)(motor_data_id1 & 0x00FF);
-    data[2] = (uint8_t)((motor_data_id2 & 0xFF00) >> 8);
+    data[2] = (uint8_t)(motor_data_id2 >> 8);
     data[3] = (uint8_t)(motor_data_id2 & 0x00FF);
-    data[4] = (uint8_t)((motor_data_id3 & 0xFF00) >> 8);
+    data[4] = (uint8_t)(motor_data_id3 >> 8);
     data[5] = (uint8_t)(motor_data_id3 & 0x00FF);
-    if (identifier == 0x200 || identifier == 0x1FF)  //对于标识符为0x2FF的情况，则data[6]和data[7]为NULL
-    {
+    //对于标识符为0x2FF的情况，则data[6]和data[7]为NULL
+    if (identifier == 0x200 || identifier == 0x1FF) {
         data[6] = (uint8_t)((motor_data_id4 & 0xFF00) >> 8);
         data[7] = (uint8_t)(motor_data_id4 & 0x00FF);
     }

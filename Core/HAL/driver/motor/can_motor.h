@@ -9,16 +9,22 @@
 
 enum Motor_Model_e { MODEL_3508 = 0, MODEL_2006, MODEL_6020};
 
-enum Motor_PID_Model_e {SPEED_LOOP,POSITION_LOOP,CURRENT_LOOP}; //速度环/位置环/电流环
+enum Motor_PID_Model_e {CURRENT_LOOP = 0, SPEED_LOOP, POSITION_LOOP}; //速度环/位置环/电流环
+
+enum Motor_FDB_Model_e {MOTOR_FDB = 0, OTHER_FDB};
 
 
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
 	uint8_t motor_set_id;  //电调上通过闪灯次数确定的id
 	enum Motor_Model_e motor_model;
+    enum Motor_PID_Model_e motor_pid_model;
+    enum Motor_FDB_Model_e position_fdb_model;
+    enum Motor_FDB_Model_e speed_fdb_model;
     struct PID_config_t config_speed;
     struct PID_config_t config_position;
-    enum Motor_PID_Model_e motor_pid_model;
+    short* speed_pid_fdb;
+    short* position_pid_fdb;
 } can_motor_config;
 
 typedef struct can_motor_t {
@@ -35,6 +41,7 @@ typedef struct can_motor_t {
     int32_t last_real_position;  //上次真实转过的角度
     struct PID_t speed_pid;      //速度环pid
     struct PID_t position_pid;   //位置环pid
+    short current_output;
 
     float line_speed;      //线速度（m/s，根据角速度算出）
     int position_buf[24];  //计算角速度的数组
