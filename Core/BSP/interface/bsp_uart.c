@@ -76,4 +76,19 @@ void BSP_UART_IRQHandler(UART_HandleTypeDef *huart)
             HAL_UART_Receive_DMA(huart, uart_ports[0].rx_buff, BSP_UART_DMA_BUFF_SIZE); //重启开始DMA传输 每次255字节数据
         }
     }
+    if (huart == uart_ports[1].port)
+    {
+        if (RESET != __HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE))
+        {
+            __HAL_UART_CLEAR_IDLEFLAG(huart);
+            HAL_UART_DMAStop(huart);
+            uint8_t data_length = BSP_UART_DMA_BUFF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx);
+            for (size_t i = 0; i < uart_ports[1].call_backs->cv_len; i++)
+            {
+                uart_rx_callback funcnow = *(uart_rx_callback *)cvector_val_at(uart_ports[0].call_backs, i);
+                funcnow(1,uart_ports[1].rx_buff,data_length);
+            }
+            HAL_UART_Receive_DMA(huart, uart_ports[1].rx_buff, BSP_UART_DMA_BUFF_SIZE);
+        }
+    }
 }
