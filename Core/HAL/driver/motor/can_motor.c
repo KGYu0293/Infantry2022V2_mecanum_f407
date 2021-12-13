@@ -100,7 +100,6 @@ void Can_Motor_Calc_Send() {
             for (int id = 0; id < 4; id++) {
                 can_motor *obj = motor_instances[can_index][identifier][id];
                 if (obj == NULL) continue;
-                printf_log("%d %d %d\n",can_index,identifier,id);
                 identifier_send = 1;
                 if (obj->config.motor_pid_model == POSITION_LOOP) {
                     obj->position_pid.fdb = *obj->config.position_pid_fdb;
