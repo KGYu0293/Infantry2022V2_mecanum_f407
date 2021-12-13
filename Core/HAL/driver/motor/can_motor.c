@@ -24,7 +24,7 @@ void Can_Motor_Driver_Init() {
 can_motor *Can_Motor_Create(can_motor_config *config) {
     can_motor *obj = (can_motor *)malloc(sizeof(can_motor));
     motors_id[obj->config.bsp_can_index][obj->config.motor_model][obj->config.motor_set_id - 1] = 1;
-
+    memset(obj,0,sizeof(can_motor));
     switch (config->motor_model) {
         case MODEL_2006:
             if (config->motor_set_id < 5) {
@@ -53,7 +53,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     if (obj->config.speed_fdb_model == MOTOR_FDB) {
         obj->config.speed_pid_fdb = &obj->fdbSpeed;
     }
-    if (obj->config.position_pid_fdb == MOTOR_FDB) {
+    if (obj->config.position_fdb_model == MOTOR_FDB) {
         obj->config.position_pid_fdb = &obj->real_position;
     }
     return obj;
