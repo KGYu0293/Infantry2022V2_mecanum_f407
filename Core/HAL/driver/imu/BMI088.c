@@ -265,7 +265,7 @@ void BMI088_heat_control(BMI088_imu *obj) {
     PID_Calc(&obj->heat_pid);
     // __HAL_TIM_SetCompare(obj->HEAT_PWM_BASE, obj->HAET_PWM_CHANNEL,
     //                      (uint16_t)(obj->heat_pid.output));
-    BPS_PWM_SetCCR(obj->config.bsp_pwm_heat_index,
+    BSP_PWM_SetCCR(obj->config.bsp_pwm_heat_index,
                    (uint16_t)(obj->heat_pid.output));
 }
 

@@ -124,6 +124,7 @@ Core/HAL/lib/MahonyAHRS.c \
 Core/HAL/lib/MadgwickAHRS.c \
 Core/HAL/lib/cvector.c \
 Core/HAL/lib/datatypes.c \
+Core/HAL/lib/circular_queue.c \
 Core/HAL/hal.c \
 Core/APP/app.c \
 Core/BSP/bsp.c \

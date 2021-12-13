@@ -46,8 +46,8 @@ void APP_Layer_Init() {
     //          motor_set_id 直接填充电调上通过闪灯次数确定的id，如闪烁次数是1，则id是1，motor_set_id填1
     //          motor_model 填写MODEL_3508/MODEL_2006/MODEL_6020
     //          motor_pid_model 填写SPEED_LOOP/POSITION_LOOP/CURRENT_LOOP: 速度环/位置环/电流环
-    //          speed_fdb_model 填写MOTOR_FDB/OTHER_FDB，如果使用OTHER_FDB，需要填写speed_pid_fdb指针指向你的反馈数据，数据单位为RPM
-    //          position_fdb_model 填写MOTOR_FDB/OTHER_FDB，如果使用OTHER_FDB，需要填写position_pid_fdb指针指向你的反馈数据，数据范围为0-8192，代表0-360度
+    //          speed_fdb_model 填写MOTOR_FDB/OTHER_FDB，表示使用电机自身的反馈或者使用其它的反馈模式，如果使用OTHER_FDB，需要填写speed_pid_fdb指针指向你的反馈数据，数据单位为度每秒，数据类型为float
+    //          position_fdb_model 填写MOTOR_FDB/OTHER_FDB，表示使用电机自身的反馈或者使用其它的反馈模式，如果使用OTHER_FDB，需要填写position_pid_fdb指针指向你的反馈数据，数据单位为0.0439453(360/8192)度，数据类型为float
     motor_chaiss_1_config.bsp_can_index = 0;
     motor_chaiss_1_config.motor_set_id = 3;
     motor_chaiss_1_config.motor_model = MODEL_6020;
@@ -55,8 +55,8 @@ void APP_Layer_Init() {
     motor_chaiss_1_config.speed_fdb_model = MOTOR_FDB;
     motor_chaiss_1_config.position_fdb_model = MOTOR_FDB;
     // pid参数初始化
-    PID_SetConfig(&motor_chaiss_1_config.config_speed, 1, 0, 0, 0, 16384);
-    PID_SetConfig(&motor_chaiss_1_config.config_position, 0, 0, 0, 0, 0);
+    PID_SetConfig(&motor_chaiss_1_config.config_speed, 100, 0, 0, 0, 25000);
+    PID_SetConfig(&motor_chaiss_1_config.config_position, 1, 0, 0, 0, 100);
 
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);
@@ -67,7 +67,7 @@ void APP_Layer_Init() {
 
 void APP_Layer_default_loop() {
     if (imu->bias_init_success) {
-        //Buzzer_Update(internal_buzzer);
+        // Buzzer_Update(internal_buzzer);
     }
 }
 

@@ -9,6 +9,6 @@
 void BSP_PWM_Init();
 void BSP_PWM_Start(uint8_t pwm_index);
 void BSP_PWM_Stop(uint8_t pwm_index);
-void BPS_PWM_SetCCR(uint8_t pwm_index,uint32_t ccr_value);
-void BPS_PWM_SetARR(uint8_t pwm_index,uint32_t arr_value);
+void BSP_PWM_SetCCR(uint8_t pwm_index,uint32_t ccr_value);
+void BSP_PWM_SetARR(uint8_t pwm_index,uint32_t arr_value);
 #endif

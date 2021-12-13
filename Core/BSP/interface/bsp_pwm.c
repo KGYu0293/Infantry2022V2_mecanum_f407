@@ -26,10 +26,10 @@ void BSP_PWM_Stop(uint8_t pwm_index){
     HAL_TIM_PWM_Stop(pwm_ports[pwm_index].base,pwm_ports[pwm_index].channel);
 }
 
-void BPS_PWM_SetCCR(uint8_t pwm_index,uint32_t ccr_value){
+void BSP_PWM_SetCCR(uint8_t pwm_index,uint32_t ccr_value){
     __HAL_TIM_SetCompare(pwm_ports[pwm_index].base,pwm_ports[pwm_index].channel,ccr_value);
 }
 
-void BPS_PWM_SetARR(uint8_t pwm_index,uint32_t arr_value){
+void BSP_PWM_SetARR(uint8_t pwm_index,uint32_t arr_value){
     __HAL_TIM_SetAutoreload(pwm_ports[pwm_index].base,arr_value);
 }

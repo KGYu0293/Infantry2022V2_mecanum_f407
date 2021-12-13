@@ -5,6 +5,8 @@
 #include "stdlib.h"
 #include "string.h"
 
+#define VELOCITY_WINDOW 5
+
 can_motor *motor_instances[2][3][4];  // motor_instances用于存放can_motor*类型的指向电机实体的指针，在每个电机初始化时被填充
 uint8_t motors_id[2][3][8];     // motors_id
                                 // 被填充为1表示此处有电机被注册，为0表示此处没有电机被注册
@@ -25,7 +27,9 @@ void Can_Motor_Driver_Init() {
 can_motor *Can_Motor_Create(can_motor_config *config) {
     can_motor *obj = (can_motor *)malloc(sizeof(can_motor));
     memset(obj,0,sizeof(can_motor));
+    obj->position_queue = create_circular_queue(sizeof(float),VELOCITY_WINDOW);
     obj->config = *config;
+    obj->position_sum = 0;
     motors_id[obj->config.bsp_can_index][obj->config.motor_model][obj->config.motor_set_id - 1] = 1;
     switch (config->motor_model) {
         case MODEL_2006:
@@ -56,7 +60,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
             break;
     }
     if (obj->config.speed_fdb_model == MOTOR_FDB) {
-        obj->config.speed_pid_fdb = &obj->fdbSpeed;
+        obj->config.speed_pid_fdb = &obj->velocity;
     }
     if (obj->config.position_fdb_model == MOTOR_FDB) {
         obj->config.position_pid_fdb = &obj->real_position;
@@ -95,6 +99,16 @@ void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
         obj->round++;
     obj->last_real_position = obj->real_position;
     obj->real_position = obj->fdbPosition + obj->round * 8192;
+
+    float position_delta = obj->real_position - obj->last_real_position;
+    if(obj->position_queue->cq_len == VELOCITY_WINDOW){
+        float* now = circular_queue_pop(obj->position_queue);
+        obj->position_sum -= *now;
+    }
+    circular_queue_push(obj->position_queue,&position_delta);
+    obj->position_sum += position_delta;
+    float vnow = obj->position_sum * 43.9453125 / obj->position_queue->cq_len;
+    obj->velocity = 0.2f * obj->velocity + 0.8f * vnow;
 }
 
 void Can_Motor_Calc_Send() {

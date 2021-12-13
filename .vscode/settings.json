@@ -47,6 +47,7 @@
         "motor.h": "c",
         "limits": "c",
         "typeinfo": "c",
-        "stm32f4xx_hal_uart.h": "c"
+        "stm32f4xx_hal_uart.h": "c",
+        "circular_queue.h": "c"
     }
 }
