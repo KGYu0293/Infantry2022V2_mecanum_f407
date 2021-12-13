@@ -49,9 +49,9 @@ void APP_Layer_Init() {
     //          speed_fdb_model 填写MOTOR_FDB/OTHER_FDB，如果使用OTHER_FDB，需要填写speed_pid_fdb指针指向你的反馈数据，数据单位为RPM
     //          position_fdb_model 填写MOTOR_FDB/OTHER_FDB，如果使用OTHER_FDB，需要填写position_pid_fdb指针指向你的反馈数据，数据范围为0-8192，代表0-360度
     motor_chaiss_1_config.bsp_can_index = 0;
-    motor_chaiss_1_config.motor_set_id = 1;
-    motor_chaiss_1_config.motor_model = MODEL_3508;
-    motor_chaiss_1_config.motor_pid_model = SPEED_LOOP;
+    motor_chaiss_1_config.motor_set_id = 3;
+    motor_chaiss_1_config.motor_model = MODEL_6020;
+    motor_chaiss_1_config.motor_pid_model = POSITION_LOOP;
     motor_chaiss_1_config.speed_fdb_model = MOTOR_FDB;
     motor_chaiss_1_config.position_fdb_model = MOTOR_FDB;
     // pid参数初始化

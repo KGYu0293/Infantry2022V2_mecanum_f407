@@ -34,6 +34,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
             } else {
                 motor_instances[config->bsp_can_index][1][config->motor_set_id - 5] = obj;
             }
+            BSP_CAN_AddFilter(obj->config.bsp_can_index,0x200 + config->motor_set_id);
             break;
         case MODEL_3508:
             if (config->motor_set_id < 5) {
@@ -41,6 +42,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
             } else {
                 motor_instances[config->bsp_can_index][1][config->motor_set_id - 5] = obj;
             }
+            BSP_CAN_AddFilter(obj->config.bsp_can_index,0x200 + config->motor_set_id);
             break;
         case MODEL_6020:
             if (config->motor_set_id < 5) {
@@ -48,6 +50,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
             } else {
                 motor_instances[config->bsp_can_index][2][config->motor_set_id - 5] = obj;
             }
+            BSP_CAN_AddFilter(obj->config.bsp_can_index,0x204 + config->motor_set_id);
             break;
         default:
             break;
@@ -58,6 +61,8 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     if (obj->config.position_fdb_model == MOTOR_FDB) {
         obj->config.position_pid_fdb = &obj->real_position;
     }
+    PID_Init(&obj->speed_pid,&obj->config.config_speed);
+    PID_Init(&obj->position_pid,&obj->config.config_position);
     return obj;
     // cvector_pushback(motor_instances, &obj);
 }
