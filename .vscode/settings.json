@@ -46,6 +46,7 @@
         "can_motor.h": "c",
         "motor.h": "c",
         "limits": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "stm32f4xx_hal_uart.h": "c"
     }
 }
