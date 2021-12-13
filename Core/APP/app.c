@@ -9,14 +9,15 @@
 BMI088_imu* imu;
 buzzer* internal_buzzer;
 canpc* pc;
-can_motor* can1_motor_1;
+// 电机创建命名规范：motor_位置_编号或用途，例如motor_chaiss_1 或 motor_chaiss_4 或 motor_gimbal_pitch
+can_motor* motor_chaiss_1;
 // #TODO to add other motors
 
 //此处定义外设的配置文件，也可分开文件配置
 BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
 canpc_config pc_config;
-can_motor_config can1_motor_1_config;
+can_motor_config motor_chaiss_1_config;
 // #TODO to add other motors
 
 void APP_Layer_Init() {
@@ -42,20 +43,22 @@ void APP_Layer_Init() {
 
     // motors
     // example :bsp_can_index：can1填充0,can2填充1
-    //          motor_set_id直接填充电调上通过闪灯次数确定的id，如闪烁次数是1，则id是1，motor_set_id填1
-    //          model填写MODEL_3508/MODEL_2006/MODEL_6020
-    can1_motor_1_config.bsp_can_index = 0;
-    can1_motor_1_config.motor_set_id = 1;
-    can1_motor_1_config.motor_model = MODEL_3508;
+    //          motor_set_id 直接填充电调上通过闪灯次数确定的id，如闪烁次数是1，则id是1，motor_set_id填1
+    //          motor_model 填写MODEL_3508/MODEL_2006/MODEL_6020
+    //          motor_pid_model 填写SPEED_LOOP/POSITION_LOOP/CURRENT_LOOP: 速度环/位置环/电流环
+    motor_chaiss_1_config.bsp_can_index = 0;
+    motor_chaiss_1_config.motor_set_id = 1;
+    motor_chaiss_1_config.motor_model = MODEL_3508;
+    motor_chaiss_1_config.motor_pid_model = SPEED_LOOP;
     // pid参数初始化
-    PID_SetConfig(&can1_motor_1_config.config_speed, 1, 0, 0, 0, 16384);
-    PID_SetConfig(&can1_motor_1_config.config_position, 0, 0, 0, 0, 0);
+    PID_SetConfig(&motor_chaiss_1_config.config_speed, 1, 0, 0, 0, 16384);
+    PID_SetConfig(&motor_chaiss_1_config.config_position, 0, 0, 0, 0, 0);
 
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
     pc = CanPC_Create(&pc_config);
-    can1_motor_1 = Can_Motor_Create(&can1_motor_1_config);
+    motor_chaiss_1 = Can_Motor_Create(&motor_chaiss_1_config);
 }
 
 void APP_Layer_default_loop() {

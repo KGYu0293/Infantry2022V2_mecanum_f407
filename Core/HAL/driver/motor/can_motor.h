@@ -9,6 +9,8 @@
 
 enum Motor_Model_e { MODEL_3508 = 0, MODEL_2006, MODEL_6020};
 
+enum Motor_PID_Model_e {SPEED_LOOP,POSITION_LOOP,CURRENT_LOOP}; //速度环/位置环/电流环
+
 
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
@@ -16,6 +18,7 @@ typedef struct can_motor_config_t {
 	enum Motor_Model_e motor_model;
     struct PID_config_t config_speed;
     struct PID_config_t config_position;
+    enum Motor_PID_Model_e motor_pid_model;
 } can_motor_config;
 
 typedef struct can_motor_t {
@@ -37,10 +40,9 @@ typedef struct can_motor_t {
     int position_buf[24];  //计算角速度的数组
     int index;             //数组编号标志
     int velocity;  //用电机编码器计算出来的角速度（单位：度每秒）
-
 } can_motor;
 
 void Can_Motor_Driver_Init();
 can_motor *Can_Motor_Create(can_motor_config *config);
-void Can_Motor_Calc();
+void Can_Motor_Calc_Send();
 #endif

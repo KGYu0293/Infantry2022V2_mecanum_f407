@@ -23,5 +23,5 @@ void HAL_Imu_Loop(){
 }
 
 void HAL_Motor_Calc_Loop(){
-    Can_Motor_Calc();
+    Can_Motor_Calc_Send();
 }
