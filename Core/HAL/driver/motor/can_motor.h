@@ -24,7 +24,7 @@ typedef struct can_motor_config_t {
     struct PID_config_t config_speed;
     struct PID_config_t config_position;
     short* speed_pid_fdb;
-    short* position_pid_fdb;
+    int32_t* position_pid_fdb;
 } can_motor_config;
 
 typedef struct can_motor_t {
