@@ -14,11 +14,6 @@ extern canpc* pc;
 
 // #TODO to add other motors
 
-//定义外设变量的配置文件
-extern BMI088_config internal_imu_config;
-extern buzzer_config internal_buzzer_config;
-extern canpc_config pc_config;
-
 void APP_Layer_Init();
 void APP_Layer_default_loop();
 void APP_Log_Loop();

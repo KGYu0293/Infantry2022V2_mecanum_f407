@@ -12,6 +12,7 @@ canpc* pc;
 can_motor* can1_motor_1;
 // #TODO to add other motors
 
+//此处定义外设的配置文件，也可分开文件配置
 BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
 canpc_config pc_config;
@@ -40,8 +41,8 @@ void APP_Layer_Init() {
     pc_config.send_identifer = 0x202;
 
     // motors
-    // example :index：can1填充0,can2填充1
-    //          motor_set_id直接填充电调上通过闪灯次数确定的id
+    // example :bsp_can_index：can1填充0,can2填充1
+    //          motor_set_id直接填充电调上通过闪灯次数确定的id，如闪烁次数是1，则id是1，motor_set_id填1
     //          model填写MODEL_3508/MODEL_2006/MODEL_6020
     can1_motor_1_config.bsp_can_index = 0;
     can1_motor_1_config.motor_set_id = 1;
