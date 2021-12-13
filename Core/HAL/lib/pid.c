@@ -108,6 +108,7 @@ void PID_Calc(struct PID_t* pid) {
 
 void PID_SetConfig(struct PID_config_t* obj, float kp, float ki, float kd,
                    float errormax, float outputmax) {
+    obj->PID_Mode = PID_POSITION;
     obj->KP = kp;
     obj->KI = ki;
     obj->KD = kd;

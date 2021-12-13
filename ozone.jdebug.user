@@ -1,26 +1,18 @@
 
-GraphedExpression="imu->data.euler_deg[0]", Color=#a00909
-GraphedExpression="imu->data.euler_deg[1]", Color=#09a01b
-GraphedExpression="imu->data.euler_deg[2]", Color=#aa00ff
+
 OpenDocument="main.c", FilePath="E:/STM32Prj/STM32F407_2022_framework/Core/Src/main.c", Line=73
 OpenDocument="startup_stm32f407xx.s", FilePath="E:/STM32Prj/STM32F407_2022_framework/startup_stm32f407xx.s", Line=45
 OpenDocument="stm32f4xx_it.c", FilePath="E:/STM32Prj/STM32F407_2022_framework/Core/Src/stm32f4xx_it.c", Line=82
 OpenDocument="bsp_can.c", FilePath="E:/STM32Prj/STM32F407_2022_framework/Core/BSP/interface/bsp_can.c", Line=0
 OpenDocument="stm32f4xx_hal_spi.c", FilePath="E:/STM32Prj/STM32F407_2022_framework/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c", Line=1267
 OpenToolbar="Debug", Floating=0, x=0, y=0
-OpenWindow="Source Files", DockArea=LEFT, x=0, y=1, w=283, h=415, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Break & Tracepoints", DockArea=LEFT, x=0, y=0, w=283, h=539, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VectorCatchIndexMask=254
-OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=765, h=955, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Data Sampling", DockArea=BOTTOM, x=1, y=0, w=1560, h=351, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
-OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=999, h=351, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-TableHeader="Vector Catches", SortCol="None", SortOrder="ASCENDING", VisibleCols=["";"Vector Catch";"Description"], ColWidths=[50;300;500]
-TableHeader="Break & Tracepoints", SortCol="None", SortOrder="DESCENDING", VisibleCols=["";"Type";"Location";"Extras"], ColWidths=[100;100;100;100]
-TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[204;100;100;100;674]
-TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" imu->data.euler_deg[0]";" imu->data.euler_deg[1]";" imu->data.euler_deg[2]"], ColWidths=[100;100;100;100;1143]
-TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[146;100;100;100;100;100;100;100;714]
+OpenWindow="Functions", DockArea=LEFT, x=0, y=0, w=283, h=723, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Data Sampling", DockArea=BOTTOM, x=0, y=0, w=1429, h=174, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
+TableHeader="Functions", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Address";"Size";"#Insts";"Source"], ColWidths=[828;100;100;100;218]
+TableHeader="Data Sampling Table", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time"], ColWidths=[100;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[146;100;100;100;100;100;100;100;583]
 TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
 TableHeader="Task List", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Run Count";"Priority";"Status";"Timeout";"Stack Info (Free / Size)";"ID";"Mutex Count";"Notified Value";"Notify State"], ColWidths=[110;110;110;110;110;110;110;110;110;110]
-TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[200;211;100;254]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
 TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;359]
 WatchedExpression="hcan2", Window=Watched Data 1

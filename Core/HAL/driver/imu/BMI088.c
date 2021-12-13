@@ -249,6 +249,7 @@ void BMI088_heat_init(BMI088_imu *obj) {
     BSP_PWM_Start(obj->config.bsp_pwm_heat_index);
     memset(&obj->heat_pid, 0, sizeof(struct PID_t));
     struct PID_config_t bmi088_config;
+    bmi088_config.PID_Mode = PID_POSITION;
     bmi088_config.KP = HEAT_PID_KP;
     bmi088_config.KI = HEAT_PID_KI;
     bmi088_config.KD = HEAT_PID_KD;
