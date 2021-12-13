@@ -66,7 +66,7 @@ void BSP_UART_IRQHandler(UART_HandleTypeDef *huart)
             __HAL_UART_CLEAR_IDLEFLAG(huart); //清除空闲中断标志（否则会一直不断进入中断）
             // 下面进行空闲中断相关处理
             // USAR_UART_IDLECallback(huart); //调用中断处理函数
-            HAL_UART_DMAStop(huart);                                                                         //暂时停止本次DMA传输，进行数据处理
+            HAL_UART_DMAStop(huart);    //暂时停止本次DMA传输，进行数据处理
             uint8_t data_length = BSP_UART_DMA_BUFF_SIZE - __HAL_DMA_GET_COUNTER(huart->hdmarx); //计算接收到的数据长度
             for (size_t i = 0; i < uart_ports[0].call_backs->cv_len; i++)   //调用回调函数对数据进行处理
             {
