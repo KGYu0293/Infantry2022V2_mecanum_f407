@@ -51,12 +51,12 @@ void APP_Layer_Init() {
     motor_chaiss_1_config.bsp_can_index = 0;
     motor_chaiss_1_config.motor_set_id = 3;
     motor_chaiss_1_config.motor_model = MODEL_6020;
-    motor_chaiss_1_config.motor_pid_model = POSITION_LOOP;
+    motor_chaiss_1_config.motor_pid_model = SPEED_LOOP;
     motor_chaiss_1_config.speed_fdb_model = MOTOR_FDB;
     motor_chaiss_1_config.position_fdb_model = MOTOR_FDB;
     // pid参数初始化
-    PID_SetConfig(&motor_chaiss_1_config.config_speed, 100, 0, 0, 0, 25000);
-    PID_SetConfig(&motor_chaiss_1_config.config_position, 1, 0, 0, 0, 100);
+    PID_SetConfig(&motor_chaiss_1_config.config_speed, 1, 0.4, 0, 2000, 5000);
+    PID_SetConfig(&motor_chaiss_1_config.config_position, 1, 0, 0, 0, 0);
 
     //初始化app层需要的外设
     imu = BMI088_Create(&internal_imu_config);
