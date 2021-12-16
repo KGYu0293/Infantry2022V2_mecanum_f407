@@ -8,8 +8,8 @@
 #define VELOCITY_WINDOW 5
 
 can_motor *motor_instances[2][3][4];  // motor_instances用于存放can_motor*类型的指向电机实体的指针，在每个电机初始化时被填充
-uint8_t motors_id[2][3][8];     // motors_id
-                                // 被填充为1表示此处有电机被注册，为0表示此处没有电机被注册
+uint8_t motors_id[2][3][8];           // motors_id
+                                      // 被填充为1表示此处有电机被注册，为0表示此处没有电机被注册
 const uint32_t identifiers[3] = {0x200, 0x1FF, 0x2FF};
 
 void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len);
@@ -26,8 +26,8 @@ void Can_Motor_Driver_Init() {
 
 can_motor *Can_Motor_Create(can_motor_config *config) {
     can_motor *obj = (can_motor *)malloc(sizeof(can_motor));
-    memset(obj,0,sizeof(can_motor));
-    obj->position_queue = create_circular_queue(sizeof(float),VELOCITY_WINDOW);
+    memset(obj, 0, sizeof(can_motor));
+    obj->position_queue = create_circular_queue(sizeof(float), VELOCITY_WINDOW);
     obj->config = *config;
     obj->position_sum = 0;
     motors_id[obj->config.bsp_can_index][obj->config.motor_model][obj->config.motor_set_id - 1] = 1;
@@ -38,7 +38,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
             } else {
                 motor_instances[config->bsp_can_index][1][config->motor_set_id - 5] = obj;
             }
-            BSP_CAN_AddFilter(obj->config.bsp_can_index,0x200 + config->motor_set_id);
+            BSP_CAN_AddFilter(obj->config.bsp_can_index, 0x200 + config->motor_set_id);
             break;
         case MODEL_3508:
             if (config->motor_set_id < 5) {
@@ -46,7 +46,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
             } else {
                 motor_instances[config->bsp_can_index][1][config->motor_set_id - 5] = obj;
             }
-            BSP_CAN_AddFilter(obj->config.bsp_can_index,0x200 + config->motor_set_id);
+            BSP_CAN_AddFilter(obj->config.bsp_can_index, 0x200 + config->motor_set_id);
             break;
         case MODEL_6020:
             if (config->motor_set_id < 5) {
@@ -54,7 +54,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
             } else {
                 motor_instances[config->bsp_can_index][2][config->motor_set_id - 5] = obj;
             }
-            BSP_CAN_AddFilter(obj->config.bsp_can_index,0x204 + config->motor_set_id);
+            BSP_CAN_AddFilter(obj->config.bsp_can_index, 0x204 + config->motor_set_id);
             break;
         default:
             break;
@@ -65,8 +65,8 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     if (obj->config.position_fdb_model == MOTOR_FDB) {
         obj->config.position_pid_fdb = &obj->real_position;
     }
-    PID_Init(&obj->speed_pid,&obj->config.config_speed);
-    PID_Init(&obj->position_pid,&obj->config.config_position);
+    PID_Init(&obj->speed_pid, &obj->config.config_speed);
+    PID_Init(&obj->position_pid, &obj->config.config_position);
     return obj;
     // cvector_pushback(motor_instances, &obj);
 }
@@ -101,11 +101,11 @@ void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
     obj->real_position = obj->fdbPosition + obj->round * 8192;
 
     float position_delta = obj->real_position - obj->last_real_position;
-    if(obj->position_queue->cq_len == VELOCITY_WINDOW){
-        float* now = circular_queue_pop(obj->position_queue);
+    if (obj->position_queue->cq_len == VELOCITY_WINDOW) {
+        float *now = circular_queue_pop(obj->position_queue);
         obj->position_sum -= *now;
     }
-    circular_queue_push(obj->position_queue,&position_delta);
+    circular_queue_push(obj->position_queue, &position_delta);
     obj->position_sum += position_delta;
     float vnow = obj->position_sum * 43.9453125 / obj->position_queue->cq_len;
     obj->velocity = 0.2f * obj->velocity + 0.8f * vnow;

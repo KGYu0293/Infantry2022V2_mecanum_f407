@@ -214,7 +214,6 @@ C_INCLUDES =  \
 # User C includes
 C_INCLUDES += \
 -ICore/HAL/driver/imu \
--ICore/HAL/driver/lib \
 -ICore/HAL/driver/buzzer \
 -ICore/HAL/driver/com \
 -ICore/HAL/driver/motor \
