@@ -117,6 +117,8 @@ Core/HAL/driver/com/can_pc.c \
 Core/HAL/driver/com/can_send.c \
 Core/HAL/driver/com/can_recv.c \
 Core/HAL/driver/motor/can_motor.c \
+Core/HAL/driver/remote/DT7_DR16.c \
+Core/HAL/driver/referee/referee.c \
 Core/HAL/lib/common.c \
 Core/HAL/lib/pid.c \
 Core/HAL/lib/crc16.c \
@@ -216,6 +218,8 @@ C_INCLUDES += \
 -ICore/HAL/driver/buzzer \
 -ICore/HAL/driver/com \
 -ICore/HAL/driver/motor \
+-ICore/HAL/driver/remote \
+-ICore/HAL/driver/referee \
 -ICore/HAL/lib \
 -ICore/HAL \
 -ICore/APP \
