@@ -6,6 +6,7 @@
 #include "hal.h"
 #include "stdio.h"
 
+dt7Remote* remote;
 BMI088_imu* imu;
 buzzer* internal_buzzer;
 canpc* pc;

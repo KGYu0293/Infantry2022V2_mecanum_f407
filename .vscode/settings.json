@@ -5,6 +5,11 @@
             "cwd": "e:\\STM32Prj\\F407BoardC\\build",
             "binaryPath": "e:\\STM32Prj\\F407BoardC\\build\\F407BoardC.elf",
             "binaryArgs": []
+        },
+        {
+            "cwd": "d:\\RM\\Framework\\git_workspace\\STM32F407_2022_framework\\build",
+            "binaryPath": "d:\\RM\\Framework\\git_workspace\\STM32F407_2022_framework\\build\\STM32F407_2022_framework.elf",
+            "binaryArgs": []
         }
     ],
     "files.associations": {

@@ -6,6 +6,7 @@
 #include "can_recv.h"
 #include "can_pc.h"
 #include "can_motor.h"
+#include "DT7_DR16.h"
 
 //此处预定义所有的外设
 extern BMI088_imu* imu;
