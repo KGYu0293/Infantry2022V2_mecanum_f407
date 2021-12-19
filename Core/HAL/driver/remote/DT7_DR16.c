@@ -22,12 +22,15 @@
 #define Key_V 0x4000
 #define Key_B 0x8000
 
-void dt7_data_solve(dt7Remote *obj);
+
 cvector *dt7_instances;
+
+void dt7_data_solve(dt7Remote *obj);
+void dt7_Rx_Callback(uint8_t uart_index, uint8_t *data, uint32_t len);
 
 void dt7_driver_init(void) {
     dt7_instances = cvector_create(sizeof(dt7Remote *));
-    BSP_UART_RegisterRxCallback(UART_REMOTE_PORT, dt7_IDLE_Callback);
+    BSP_UART_RegisterRxCallback(UART_REMOTE_PORT, dt7_Rx_Callback);
 }
 
 // 构造函数
@@ -38,11 +41,11 @@ dt7Remote *dt7_Create(dt7_config *config) {
     return obj;
 }
 
-void dt7_IDLE_Callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
+void dt7_Rx_Callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
     if (len == DT7_RX_SIZE) {
         for (size_t i = 0; i < dt7_instances->cv_len; i++) {
             dt7Remote *now = *(dt7Remote **)cvector_val_at(dt7_instances, i);
-            if (uart_index == now->config.bsp_uart_index) {
+            if (uart_index == now->config.bsp_uart_index && len == DT7_RX_SIZE) {
                 memcpy(now->primary_data, data, DT7_RX_SIZE);
                 dt7_data_solve(now);
             }
@@ -70,20 +73,20 @@ void dt7_data_solve(dt7Remote *obj) {
     obj->data.mouse.press_r = obj->primary_data[13];
     // 键盘按键解算
     uint16_t keyboard = (int16_t)obj->primary_data[14] | ((int16_t)obj->primary_data[15] << 8);
-    obj->data.key_down.w = keyboard & Key_W;
-    obj->data.key_down.s = keyboard & Key_S;
-    obj->data.key_down.d = keyboard & Key_D;
-    obj->data.key_down.a = keyboard & Key_A;
-    obj->data.key_down.shift = keyboard & Key_Shift;
-    obj->data.key_down.ctrl = keyboard & Key_ECtrl;
-    obj->data.key_down.q = keyboard & Key_Q;
-    obj->data.key_down.e = keyboard & Key_E;
-    obj->data.key_down.r = keyboard & Key_R;
-    obj->data.key_down.f = keyboard & Key_F;
-    obj->data.key_down.g = keyboard & Key_G;
-    obj->data.key_down.z = keyboard & Key_Z;
-    obj->data.key_down.x = keyboard & Key_X;
-    obj->data.key_down.c = keyboard & Key_C;
-    obj->data.key_down.v = keyboard & Key_V;
-    obj->data.key_down.b = keyboard & Key_B;
+    obj->data.key_down.w = (keyboard & Key_W) > 0;
+    obj->data.key_down.s = (keyboard & Key_S) > 0;
+    obj->data.key_down.d = (keyboard & Key_D) > 0;
+    obj->data.key_down.a = (keyboard & Key_A) > 0;
+    obj->data.key_down.shift = (keyboard & Key_Shift) > 0;
+    obj->data.key_down.ctrl = (keyboard & Key_ECtrl) > 0;
+    obj->data.key_down.q = (keyboard & Key_Q) > 0;
+    obj->data.key_down.e = (keyboard & Key_E) > 0;
+    obj->data.key_down.r = (keyboard & Key_R) > 0;
+    obj->data.key_down.f = (keyboard & Key_F) > 0;
+    obj->data.key_down.g = (keyboard & Key_G) > 0;
+    obj->data.key_down.z = (keyboard & Key_Z) > 0;
+    obj->data.key_down.x = (keyboard & Key_X) > 0;
+    obj->data.key_down.c = (keyboard & Key_C) > 0;
+    obj->data.key_down.v = (keyboard & Key_V) > 0;
+    obj->data.key_down.b = (keyboard & Key_B) > 0;
 }

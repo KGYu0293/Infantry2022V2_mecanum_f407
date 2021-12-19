@@ -101,16 +101,10 @@
 
 #define DT7_RX_SIZE 18
 
-// #define USART_Remote USART3
-// #define huart_Remote huart3
-// #define DMA_FLAG_TCIF_Remote DMA_FLAG_TCIF1_5
 
-typedef struct dt7_config_t
-{
+typedef struct dt7_config_t {
     uint8_t bsp_uart_index;
-}dt7_config;
-
-
+} dt7_config;
 
 typedef struct dt7_rx_data_rc_t {
     int16_t ch0;
@@ -156,15 +150,15 @@ typedef struct dt7_rx_data_t {
 } dt7_rx_data;
 
 typedef struct dt7Remote_t {
-    uint8_t primary_data[18];// 未解算的原始数据
-    dt7_rx_data data;// 最近一次收到的数据
-    dt7_rx_data last_data;// 上一次收到的数据
+    uint8_t primary_data[18];  // 未解算的原始数据
+    dt7_rx_data data;          // 最近一次收到的数据
+    dt7_rx_data last_data;     // 上一次收到的数据
 
     dt7_config config;
 } dt7Remote;
 
 void dt7_driver_init(void);
 
-dt7Remote* dt7_Create(dt7_config *config);
+dt7Remote* dt7_Create(dt7_config* config);
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef _BSP_UART_H
 #define _BSP_UART_H
 #include "stdint.h"
+#include "usart.h"
 
 #define UART_REMOTE_PORT 0
 #define UART_REFEREE_PORT 1
