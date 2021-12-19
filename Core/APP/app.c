@@ -6,6 +6,7 @@
 #include "hal.h"
 #include "stdio.h"
 
+// 定义所需外设
 dt7Remote* remote;
 BMI088_imu* imu;
 buzzer* internal_buzzer;
@@ -15,6 +16,7 @@ can_motor* motor_chaiss_1;
 // #TODO to add other motors
 
 //此处定义外设的配置文件，也可分开文件配置
+dt7_config remote_dt7_config;
 BMI088_config internal_imu_config;
 buzzer_config internal_buzzer_config;
 canpc_config pc_config;
@@ -23,6 +25,8 @@ can_motor_config motor_chaiss_1_config;
 
 void APP_Layer_Init() {
     // app层需要的外设配置设置
+    // remote
+    remote_dt7_config.bsp_uart_index = UART_REMOTE_PORT;
 
     // bmi088
     internal_imu_config.bsp_gpio_accel_index = GPIO_BMI088_ACCEL_NS;
@@ -60,6 +64,7 @@ void APP_Layer_Init() {
     PID_SetConfig(&motor_chaiss_1_config.config_position, 1, 0, 0, 0, 0);
 
     //初始化app层需要的外设
+    remote = dt7_Create(&remote_dt7_config);
     imu = BMI088_Create(&internal_imu_config);
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
     pc = CanPC_Create(&pc_config);

@@ -9,6 +9,7 @@
 #include "DT7_DR16.h"
 
 //此处预定义所有的外设
+extern dt7Remote* remote;
 extern BMI088_imu* imu;
 extern buzzer* internal_buzzer;
 extern canpc* pc;
