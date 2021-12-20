@@ -17,16 +17,22 @@ BSP_UART_Typedef uart_ports[DEVICE_UART_CNT];
 
 void BSP_UART_Init() {
     uart_ports[0].port = &huart3;
-    uart_ports[0].call_backs = cvector_create(sizeof(uart_rx_callback));
-    __HAL_UART_ENABLE_IT(uart_ports[0].port, UART_IT_IDLE);  //使能串口空闲中断
-    HAL_UART_Receive_DMA(uart_ports[0].port, uart_ports->rx_buff, BSP_UART_DMA_BUFF_SIZE);
-
     uart_ports[1].port = &huart6;
-    uart_ports[1].call_backs = cvector_create(sizeof(uart_rx_callback));
-    __HAL_UART_ENABLE_IT(uart_ports[1].port, UART_IT_IDLE);  //使能串口空闲中断
-    HAL_UART_Receive_DMA(uart_ports[1].port, uart_ports->rx_buff, BSP_UART_DMA_BUFF_SIZE);
+    
+    for (size_t i = 0; i < DEVICE_UART_CNT; ++i) {
+        uart_ports[i].call_backs = cvector_create(sizeof(uart_rx_callback));
+        // HAL库的BUG处理，对于DMA需要先DeInit再Init，不然GG
+        HAL_DMA_DeInit(uart_ports[i].port->hdmatx);
+        HAL_DMA_DeInit(uart_ports[i].port->hdmarx);
+        HAL_DMA_Init(uart_ports[i].port->hdmatx);
+        HAL_DMA_Init(uart_ports[i].port->hdmarx);
+        HAL_UART_DMAStop(uart_ports[i].port);
+        //使能串口空闲中断
+        __HAL_UART_ENABLE_IT(uart_ports[i].port, UART_IT_IDLE);  //使能串口空闲中断
+        //开启DMA接受
+        HAL_UART_Receive_DMA(uart_ports[i].port, uart_ports->rx_buff, BSP_UART_DMA_BUFF_SIZE);
+    }
 }
-
 
 // 注册回调函数
 void BSP_UART_RegisterRxCallback(uint8_t uart_index, uart_rx_callback func) { cvector_pushback(uart_ports[uart_index].call_backs, &func); }
@@ -35,8 +41,6 @@ void BSP_UART_RegisterRxCallback(uint8_t uart_index, uart_rx_callback func) { cv
 void BSP_UART_Send_blocking(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit(uart_ports[uart_index].port, data, len, 20); }
 void BSP_UART_Send_IT(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_IT(uart_ports[uart_index].port, data, len); }
 void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_DMA(uart_ports[uart_index].port, data, len); }
-
-
 
 void BSP_UART_IDLECallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
     //判断是否是空闲中断

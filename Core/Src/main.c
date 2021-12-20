@@ -36,6 +36,7 @@
 #include "hal.h"
 #include "bsp.h"
 extern DMA_HandleTypeDef hdma_usart1_tx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -115,10 +116,6 @@ int main(void)
   MX_TIM4_Init();
   MX_RNG_Init();
   /* USER CODE BEGIN 2 */
-  HAL_DMA_DeInit(&hdma_usart1_tx);
-  HAL_DMA_Init(&hdma_usart1_tx);
-  HAL_UART_DMAStop(&huart1);
-  
   BSP_Layer_Init();
   HAL_Layer_Init();
   APP_Layer_Init();
