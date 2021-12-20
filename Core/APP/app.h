@@ -7,16 +7,13 @@
 #include "can_pc.h"
 #include "can_motor.h"
 #include "DT7_DR16.h"
+#include "fanlight.h"
 
-//此处预定义所有的外设
-extern dt7Remote* remote;
-extern BMI088_imu* imu;
-extern buzzer* internal_buzzer;
-extern canpc* pc;
 
 // #TODO to add other motors
 
 void APP_Layer_Init();
 void APP_Layer_default_loop();
 void APP_Log_Loop();
+void APP_FanLight_Loop();
 #endif

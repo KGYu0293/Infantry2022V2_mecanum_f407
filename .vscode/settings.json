@@ -55,6 +55,7 @@
         "stm32f4xx_hal_uart.h": "c",
         "circular_queue.h": "c",
         "monitor.h": "c",
-        "dt7_dr16.h": "c"
+        "dt7_dr16.h": "c",
+        "stdlib.h": "c"
     }
 }

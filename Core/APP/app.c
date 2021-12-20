@@ -7,14 +7,16 @@
 #include "stdio.h"
 #include "ws2812b.h"
 
-// 定义所需外设
+// 定义APP
+fanlight* fan;
+
+// 定义共享外设
 dt7Remote* remote;
 BMI088_imu* imu;
 buzzer* internal_buzzer;
 canpc* pc;
 // 电机创建命名规范：motor_位置_编号或用途，例如motor_chaiss_1 或 motor_chaiss_4 或 motor_gimbal_pitch
 can_motor* motor_chaiss_1;
-ws2812* fanlight;
 // #TODO to add other motors
 
 //此处定义外设的配置文件，也可分开文件配置
@@ -49,9 +51,6 @@ void APP_Layer_Init() {
     pc_config.recv_identifer = 0x201;
     pc_config.send_identifer = 0x202;
 
-    //LED
-    fanlight_config.max_len = 210;
-    fanlight_config.pwm_id = 2;
 
     // motors
     // example :bsp_can_index：can1填充0,can2填充1
@@ -76,14 +75,15 @@ void APP_Layer_Init() {
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
     pc = CanPC_Create(&pc_config);
     motor_chaiss_1 = Can_Motor_Create(&motor_chaiss_1_config);
-    fanlight = ws2812_create(&fanlight_config);
+
+    fan = Fanlight_APP_Init();
 }
 
 void APP_Layer_default_loop() {
     if (imu->bias_init_success) {
         // Buzzer_Update(internal_buzzer);
     }
-    ws2812_set_all(fanlight,red);
+    FanLight_Update(fan);
 }
 
 void APP_Log_Loop() {
