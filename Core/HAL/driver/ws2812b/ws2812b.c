@@ -59,4 +59,5 @@ void ws2812_close_all(ws2812* obj) {
 
 void ws2812_set_array(ws2812* obj,color_rgb* color_buffer,uint32_t len){
     array_2_raw(obj->frame_start,color_buffer,len);
+    ws2812_send_frame(obj);
 }

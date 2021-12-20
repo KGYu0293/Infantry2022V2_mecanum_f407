@@ -1,6 +1,7 @@
 #ifndef _H_FANLIGHT_H
 #define H_FANLIGHT_H
 #include "ws2812b.h"
+#include "stdint.h"
 #define COLOR_SIZE 210
 
 typedef struct fanlight_t {
