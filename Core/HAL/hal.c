@@ -5,6 +5,7 @@
 #include "can_pc.h"
 #include "can_motor.h"
 #include "bsp_delay.h"
+#include "DT7_DR16.h"
 #include "monitor.h"
 //#include "motor.h"
 
@@ -13,6 +14,7 @@ void HAL_Layer_Init(){
     BMI088_Driver_Init();
     CanRecv_Driver_Init();
     Can_Motor_Driver_Init();
+    dt7_driver_init();
     Monitor_Init();
 }
 

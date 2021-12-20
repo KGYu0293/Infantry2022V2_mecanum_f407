@@ -3,6 +3,8 @@
 #include "bsp_uart.h"
 #include "cvector.h"
 
+#include "bsp_log.h"
+
 #define CHx_BIAS 1024  //通道中间值为1024
 
 #define Key_W 0x0001  //键盘对应的通信协议数据
@@ -42,6 +44,7 @@ dt7Remote *dt7_Create(dt7_config *config) {
 }
 
 void dt7_Rx_Callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
+    printf_log("dt7_len %d\n",len);
     if (len == DT7_RX_SIZE) {
         for (size_t i = 0; i < dt7_instances->cv_len; i++) {
             dt7Remote *now = *(dt7Remote **)cvector_val_at(dt7_instances, i);
