@@ -1,1 +1,1 @@
-{ BasedOnStyle: Google, IndentWidth: 4, TabWidth: 4, ColumnLimit: 200 }
+{ BasedOnStyle: Google, IndentWidth: 4, TabWidth: 4, ColumnLimit: 0 }
