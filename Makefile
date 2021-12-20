@@ -127,6 +127,7 @@ Core/HAL/lib/MadgwickAHRS.c \
 Core/HAL/lib/cvector.c \
 Core/HAL/lib/datatypes.c \
 Core/HAL/lib/circular_queue.c \
+Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/APP/app.c \
 Core/BSP/bsp.c \
@@ -220,6 +221,7 @@ C_INCLUDES += \
 -ICore/HAL/driver/remote \
 -ICore/HAL/driver/referee \
 -ICore/HAL/lib \
+-ICore/HAL/monitor \
 -ICore/HAL \
 -ICore/APP \
 -ICore/BSP \
