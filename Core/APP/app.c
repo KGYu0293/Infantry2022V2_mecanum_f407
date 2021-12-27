@@ -76,14 +76,14 @@ void APP_Layer_Init() {
     pc = CanPC_Create(&pc_config);
     motor_chaiss_1 = Can_Motor_Create(&motor_chaiss_1_config);
 
-    fan = Fanlight_APP_Init();
+    // fan = Fanlight_APP_Init();
 }
 
 void APP_Layer_default_loop() {
     if (imu->bias_init_success) {
         // Buzzer_Update(internal_buzzer);
     }
-    FanLight_Update(fan);
+    // FanLight_Update(fan);
 }
 
 void APP_Log_Loop() {
