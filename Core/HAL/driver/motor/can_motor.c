@@ -74,6 +74,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
 void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len) {
     uint32_t model_3508_2006_id = identifier - 0x200;
     uint32_t model_6020_id = identifier - 0x204;
+    if(model_3508_2006_id > 8) return;
     if (motors_id[can_id][MODEL_2006][model_3508_2006_id - 1]) {
         Can_Motor_FeedbackData_Update(motor_instances[can_id][model_3508_2006_id < 5 ? 0 : 1][model_3508_2006_id < 5 ? model_3508_2006_id - 1 : model_3508_2006_id - 5], data);
     } else if (motors_id[can_id][MODEL_3508][model_3508_2006_id - 1]) {
