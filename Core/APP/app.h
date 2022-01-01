@@ -7,7 +7,6 @@
 #include "can_pc.h"
 #include "can_motor.h"
 #include "DT7_DR16.h"
-#include "fanlight.h"
 
 
 // #TODO to add other motors

@@ -153,9 +153,11 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN StartDefaultTask */
     /* Infinite loop */
     // Buzzer_Init(&internal_buzzer,music2,14);
+    portTickType currentTimeDefault;
+    currentTimeDefault = xTaskGetTickCount();
     for (;;) {
         APP_Layer_default_loop();
-        osDelay(140);
+        vTaskDelayUntil(&currentTimeDefault, 100);
     }
   /* USER CODE END StartDefaultTask */
 }
