@@ -155,7 +155,7 @@ void StartDefaultTask(void *argument)
     // Buzzer_Init(&internal_buzzer,music2,14);
     for (;;) {
         APP_Layer_default_loop();
-        osDelay(140);
+        osDelay(100);
     }
   /* USER CODE END StartDefaultTask */
 }

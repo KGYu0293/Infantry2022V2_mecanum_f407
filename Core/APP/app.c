@@ -41,7 +41,7 @@ void APP_Layer_Init() {
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
 
     // buzzer
-    uint32_t music_id = GetRand_Int() % 7;
+    uint32_t music_id = 1;
     internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
@@ -81,7 +81,7 @@ void APP_Layer_Init() {
 
 void APP_Layer_default_loop() {
     if (imu->bias_init_success) {
-        // Buzzer_Update(internal_buzzer);
+        Buzzer_Update(internal_buzzer);
     }
     // FanLight_Update(fan);
 }

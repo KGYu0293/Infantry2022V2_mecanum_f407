@@ -77,7 +77,13 @@ void Buzzer_Init(buzzer *obj, buzzer_config* config) {
 }
 
 void Buzzer_Update(buzzer *obj) {
-    if (obj->finished) return;
+    if (obj->finished) {
+        if(obj->finished == 1){
+            BSP_PWM_Stop(obj->config.bsp_pwm_index);
+            obj->finished++;
+        }
+        return;
+    }
     //__HAL_TIM_SetAutoreload(obj->BUZZER_PWM_BASE, obj->music[(int)obj->count]);
     BSP_PWM_SetARR(obj->config.bsp_pwm_index,obj->config.music[(int)obj->count]);
     if (obj->config.music[obj->count] != 0) {
@@ -92,7 +98,7 @@ void Buzzer_Update(buzzer *obj) {
     obj->count++;
     if (obj->count == obj->config.len) {
         obj->finished = 1;
-        //HAL_TIM_PWM_Stop(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
-        BSP_PWM_Stop(obj->config.bsp_pwm_index);
+        // HAL_TIM_PWM_Stop(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
+        // BSP_PWM_Stop(obj->config.bsp_pwm_index);
     }
 }
