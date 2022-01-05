@@ -7,8 +7,6 @@
 #include "stdio.h"
 #include "ws2812b.h"
 
-// 定义APP
-fanlight* fan;
 
 // 定义共享外设
 dt7Remote* remote;

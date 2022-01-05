@@ -131,7 +131,6 @@ Core/HAL/lib/circular_queue.c \
 Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/APP/app.c \
-Core/APP/fanlight/fanlight.c \
 Core/BSP/bsp.c \
 Core/BSP/interface/bsp_spi.c \
 Core/BSP/interface/bsp_gpio.c \
@@ -227,7 +226,6 @@ C_INCLUDES += \
 -ICore/HAL/monitor \
 -ICore/HAL \
 -ICore/APP \
--ICore/APP/fanlight \
 -ICore/BSP \
 -ICore/BSP/lib \
 -ICore/BSP/interface \
