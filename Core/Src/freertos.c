@@ -157,11 +157,7 @@ void StartDefaultTask(void *argument)
     currentTimeDefault = xTaskGetTickCount();
     for (;;) {
         APP_Layer_default_loop();
-<<<<<<< HEAD
-        osDelay(100);
-=======
         vTaskDelayUntil(&currentTimeDefault, 100);
->>>>>>> e84390e759ee96fe17692848ce0e0fde233de337
     }
   /* USER CODE END StartDefaultTask */
 }
