@@ -4,6 +4,7 @@
 #include "BMI088reg.h"
 #include "bsp_delay.h"
 #include "bsp_gpio.h"
+#include "bsp_log.h"
 #include "bsp_pwm.h"
 #include "bsp_random.h"
 #include "bsp_spi.h"
@@ -11,7 +12,6 @@
 #include "cvector.h"
 #include "stdio.h"
 #include "string.h"
-#include "bsp_log.h"
 
 ////BMI088全局配置
 #define BMI088_ACCEL_SEN BMI088_ACCEL_3G_SEN
@@ -104,8 +104,8 @@ void BMI088_Update_All() {
 BMI088_imu *BMI088_Create(BMI088_config *config) {
     BMI088_imu *obj = (BMI088_imu *)malloc(sizeof(BMI088_imu));
     obj->config = *config;
-    while (BMI088_init(obj))
-        ;
+    while (BMI088_init(obj));
+    obj->monitor = Monitor_Register(imu_lost,5,obj);
     cvector_pushback(bmi088_instances, &obj);
     return obj;
 }
@@ -128,6 +128,7 @@ uint8_t BMI088_init(BMI088_imu *obj) {
 void BMI088_Update(BMI088_imu *obj) {
     BMI088_read_raw(obj);
     BMI088_heat_control(obj);
+    obj->monitor->reset(obj->monitor);
     if (obj->temp < 52) {
         obj->bias_init_success = 0;
         return;
@@ -256,7 +257,7 @@ void BMI088_heat_init(BMI088_imu *obj) {
     bmi088_config.error_max = 2048;
     bmi088_config.outputMax = HEAT_PID_MAX_OUT;
     bmi088_config.error_max = HEAT_PID_MAX_IOUT;
-    PID_Init(&obj->heat_pid,&bmi088_config);
+    PID_Init(&obj->heat_pid, &bmi088_config);
     obj->heat_pid.ref = obj->config.temp_target;
 }
 

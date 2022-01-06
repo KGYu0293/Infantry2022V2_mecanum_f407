@@ -2,6 +2,7 @@
 
 #include "bsp_can.h"
 #include "bsp_log.h"
+#include "exceptions.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -67,6 +68,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     }
     PID_Init(&obj->speed_pid, &obj->config.config_speed);
     PID_Init(&obj->position_pid, &obj->config.config_position);
+    obj->monitor = Monitor_Register(motor_lost, 5, obj);
     return obj;
     // cvector_pushback(motor_instances, &obj);
 }
@@ -74,7 +76,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
 void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len) {
     uint32_t model_3508_2006_id = identifier - 0x200;
     uint32_t model_6020_id = identifier - 0x204;
-    if(model_3508_2006_id > 8) return;
+    if (model_3508_2006_id > 8) return;
     if (motors_id[can_id][MODEL_2006][model_3508_2006_id - 1]) {
         Can_Motor_FeedbackData_Update(motor_instances[can_id][model_3508_2006_id < 5 ? 0 : 1][model_3508_2006_id < 5 ? model_3508_2006_id - 1 : model_3508_2006_id - 5], data);
     } else if (motors_id[can_id][MODEL_3508][model_3508_2006_id - 1]) {
@@ -110,6 +112,7 @@ void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
     obj->position_sum += position_delta;
     float vnow = obj->position_sum * 43.9453125 / obj->position_queue->cq_len;
     obj->velocity = 0.2f * obj->velocity + 0.8f * vnow;
+    obj->monitor->reset(obj->monitor);
 }
 
 void Can_Motor_Calc_Send() {

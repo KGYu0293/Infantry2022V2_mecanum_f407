@@ -4,6 +4,8 @@
 #include "MadgwickAHRS.h"
 #include "MahonyAHRS.h"
 #include "common.h"
+#include "monitor.h"
+#include "exceptions.h"
 #include "pid.h"
 #include "stdint.h"
 
@@ -36,6 +38,7 @@ typedef struct BMI088_imu_t {
     struct PID_t heat_pid;
     MahonyAHRS mahony_solver;
     MadgwickAHRS madgwick_solver;
+    monitor_item* monitor;
 } BMI088_imu;
 
 void BMI088_Driver_Init();
