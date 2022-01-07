@@ -106,6 +106,7 @@
 
 typedef struct dt7_config_t {
     uint8_t bsp_uart_index;
+    lost_callback lost_callback;
 } dt7_config;
 
 typedef struct dt7_rx_data_rc_t {

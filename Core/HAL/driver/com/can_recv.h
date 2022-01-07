@@ -2,6 +2,7 @@
 #define _CAN_RECV_H
 #include "datatypes.h"
 #include "stdint.h"
+#include "monitor.h"
 
 struct can_recv_config_t;
 struct can_recv_t;
@@ -14,6 +15,7 @@ struct can_recv_config_t {
     uint8_t data_len;
     uint16_t can_identifier;
     can_recv_notifiy notify_func;
+    lost_callback lost_callback;
 };
 
 struct can_recv_t {
@@ -24,6 +26,7 @@ struct can_recv_t {
     uint8_t recv_status;
     uint8_t data_updated;
     uint8_t* rxbuf;
+    monitor_item* monitor;
 };
 
 void CanRecv_Driver_Init();

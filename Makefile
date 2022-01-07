@@ -131,7 +131,6 @@ Core/HAL/lib/circular_queue.c \
 Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/APP/app.c \
-Core/APP/app_exceptions.c \
 Core/BSP/bsp.c \
 Core/BSP/interface/bsp_spi.c \
 Core/BSP/interface/bsp_gpio.c \

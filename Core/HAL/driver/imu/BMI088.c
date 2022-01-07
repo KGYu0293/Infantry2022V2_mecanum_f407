@@ -105,7 +105,7 @@ BMI088_imu *BMI088_Create(BMI088_config *config) {
     BMI088_imu *obj = (BMI088_imu *)malloc(sizeof(BMI088_imu));
     obj->config = *config;
     while (BMI088_init(obj));
-    obj->monitor = Monitor_Register(imu_lost,5,obj);
+    obj->monitor = Monitor_Register(config->lost_callback,5,obj);
     cvector_pushback(bmi088_instances, &obj);
     return obj;
 }

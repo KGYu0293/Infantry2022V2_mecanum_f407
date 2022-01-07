@@ -30,7 +30,9 @@ void Monitor_Loop() {
         item->count--;
         if (item->count <= 0) {
             item->count = 0;
-            item->callback(item->data);
+            if(item->callback != NULL){
+                item->callback(item->data);
+            }
         }
     }
 }

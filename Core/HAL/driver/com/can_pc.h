@@ -4,6 +4,7 @@
 #include "can_recv.h"
 #include "can_send.h"
 #include "datatypes.h"
+#include "monitor.h"
 #include "stdint.h"
 
 #pragma pack(1)
@@ -20,6 +21,7 @@ typedef struct canpc_config_t {
     uint8_t bsp_can_index;
     uint16_t send_identifer;
     uint16_t recv_identifer;
+    lost_callback lost_callback;
 } canpc_config;
 
 typedef struct canpc_t {

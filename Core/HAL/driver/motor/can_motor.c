@@ -68,7 +68,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     }
     PID_Init(&obj->speed_pid, &obj->config.config_speed);
     PID_Init(&obj->position_pid, &obj->config.config_position);
-    obj->monitor = Monitor_Register(motor_lost, 5, obj);
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 5, obj);
     return obj;
     // cvector_pushback(motor_instances, &obj);
 }

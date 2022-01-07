@@ -28,8 +28,10 @@ ws2812_config fanlight_config;
 
 void APP_Layer_Init() {
     // app层需要的外设配置设置
+    // lost_callback设置掉线回调函数
     // remote
     remote_dt7_config.bsp_uart_index = UART_REMOTE_PORT;
+    remote_dt7_config.lost_callback = NULL;
 
     // bmi088
     internal_imu_config.bsp_gpio_accel_index = GPIO_BMI088_ACCEL_NS;
@@ -37,6 +39,7 @@ void APP_Layer_Init() {
     internal_imu_config.bsp_pwm_heat_index = PWM_BMI088_HEAT_PORT;
     internal_imu_config.bsp_spi_index = SPI_BMI088_PORT;
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
+    internal_imu_config.lost_callback = NULL;
 
     // buzzer
     uint32_t music_id = 1;
@@ -48,6 +51,7 @@ void APP_Layer_Init() {
     pc_config.bsp_can_index = 1;
     pc_config.recv_identifer = 0x201;
     pc_config.send_identifer = 0x202;
+    pc_config.lost_callback = NULL;
 
 
     // motors
@@ -63,6 +67,7 @@ void APP_Layer_Init() {
     motor_chaiss_1_config.motor_pid_model = SPEED_LOOP;
     motor_chaiss_1_config.speed_fdb_model = MOTOR_FDB;
     motor_chaiss_1_config.position_fdb_model = MOTOR_FDB;
+    motor_chaiss_1_config.lost_callback = NULL;
     // pid参数初始化
     PID_SetConfig(&motor_chaiss_1_config.config_speed, 1, 0.4, 0, 2000, 5000);
     PID_SetConfig(&motor_chaiss_1_config.config_position, 1, 0, 0, 0, 0);

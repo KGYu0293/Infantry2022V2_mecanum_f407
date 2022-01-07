@@ -56,6 +56,7 @@
         "circular_queue.h": "c",
         "monitor.h": "c",
         "dt7_dr16.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "exceptions.h": "c"
     }
 }

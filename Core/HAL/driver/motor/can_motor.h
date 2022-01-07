@@ -23,6 +23,7 @@ typedef struct can_motor_config_t {
     struct PID_config_t config_position;
     float* speed_pid_fdb;
     float* position_pid_fdb;
+    lost_callback lost_callback;
 } can_motor_config;
 
 typedef struct can_motor_t {

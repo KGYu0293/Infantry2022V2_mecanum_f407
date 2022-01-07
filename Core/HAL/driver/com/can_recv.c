@@ -27,6 +27,7 @@ can_recv* CanRecv_Create(can_recv_config* config) {
     obj->data_updated = 0;
     cvector_pushback(can_recv_instances, &obj);
     BSP_CAN_AddFilter(obj->config.bsp_can_index, obj->config.can_identifier);
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 20, obj);
     return obj;
 }
 
