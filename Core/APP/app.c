@@ -26,6 +26,12 @@ can_motor_config motor_chaiss_1_config;
 ws2812_config fanlight_config;
 // #TODO to add other motors
 
+void motor_lost_test(void* motor){
+    printf_log("motor lost!\n");
+    can_motor* now = (can_motor*) motor;
+    now->monitor->reset(now->monitor);
+}
+
 void APP_Layer_Init() {
     // app层需要的外设配置设置
     // lost_callback设置掉线回调函数
@@ -67,7 +73,7 @@ void APP_Layer_Init() {
     motor_chaiss_1_config.motor_pid_model = SPEED_LOOP;
     motor_chaiss_1_config.speed_fdb_model = MOTOR_FDB;
     motor_chaiss_1_config.position_fdb_model = MOTOR_FDB;
-    motor_chaiss_1_config.lost_callback = NULL;
+    motor_chaiss_1_config.lost_callback = motor_lost_test;
     // pid参数初始化
     PID_SetConfig(&motor_chaiss_1_config.config_speed, 1, 0.4, 0, 2000, 5000);
     PID_SetConfig(&motor_chaiss_1_config.config_position, 1, 0, 0, 0, 0);
@@ -104,3 +110,4 @@ void APP_Log_Loop() {
         // printf_log("test_log\n");
     }
 }
+
