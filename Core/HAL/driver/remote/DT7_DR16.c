@@ -1,13 +1,13 @@
 #include "DT7_DR16.h"
 
-#include "bsp_log.h"
 #include "bsp_uart.h"
 #include "cvector.h"
 #include "exceptions.h"
 
-#define CHx_BIAS 1024  //通道中间值为1024
-
-#define Key_W 0x0001  //键盘对应的通信协议数据
+//通道中间值为1024
+#define CHx_BIAS 1024
+//键盘对应的通信协议数据
+#define Key_W 0x0001
 #define Key_S 0x0002
 #define Key_D 0x0004
 #define Key_A 0x0008
@@ -47,7 +47,7 @@ void dt7_Rx_Callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
     if (len == DT7_RX_SIZE) {
         for (size_t i = 0; i < dt7_instances->cv_len; i++) {
             dt7Remote *now = *(dt7Remote **)cvector_val_at(dt7_instances, i);
-            if (uart_index == now->config.bsp_uart_index && len == DT7_RX_SIZE) {
+            if (uart_index == now->config.bsp_uart_index) {
                 memcpy(now->primary_data, data, DT7_RX_SIZE);
                 now->monitor->reset(now->monitor);
                 dt7_data_solve(now);

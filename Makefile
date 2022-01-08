@@ -119,6 +119,7 @@ Core/HAL/driver/com/can_recv.c \
 Core/HAL/driver/motor/can_motor.c \
 Core/HAL/driver/remote/DT7_DR16.c \
 Core/HAL/driver/referee/referee.c \
+Core/HAL/driver/referee/referee_ui.c \
 Core/HAL/driver/ws2812b/ws2812b.c \
 Core/HAL/lib/common.c \
 Core/HAL/lib/pid.c \

@@ -153,7 +153,7 @@ typedef struct dt7_rx_data_t {
 } dt7_rx_data;
 
 typedef struct dt7Remote_t {
-    uint8_t primary_data[18];  // 未解算的原始数据
+    uint8_t primary_data[DT7_RX_SIZE];  // 未解算的原始数据
     dt7_rx_data data;          // 最近一次收到的数据
     dt7_rx_data last_data;     // 上一次收到的数据
 
