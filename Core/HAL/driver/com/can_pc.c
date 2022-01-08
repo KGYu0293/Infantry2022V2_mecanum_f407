@@ -10,6 +10,7 @@ canpc* CanPC_Create(canpc_config* config) {
     recv_config.can_identifier = config->recv_identifer;
     recv_config.data_len = sizeof(canpc_recv);
     recv_config.notify_func = NULL;
+    recv_config.lost_callback = config->lost_callback;
 
     send_config.bsp_can_index = config->bsp_can_index;
     send_config.can_identifier = config->send_identifer;

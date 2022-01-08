@@ -4,6 +4,7 @@
 #include "circular_queue.h"
 #include "pid.h"
 #include "stdint.h"
+#include "monitor.h"
 
 enum Motor_Model_e { MODEL_3508 = 0, MODEL_2006, MODEL_6020 };
 
@@ -22,6 +23,7 @@ typedef struct can_motor_config_t {
     struct PID_config_t config_position;
     float* speed_pid_fdb;
     float* position_pid_fdb;
+    lost_callback lost_callback;
 } can_motor_config;
 
 typedef struct can_motor_t {
@@ -44,6 +46,7 @@ typedef struct can_motor_t {
     circular_queue* position_queue;  //计算角速度的循环队列
     float position_sum;                       //队列中所有值的和
     float velocity;                  //用电机编码器计算出来的角速度（单位：度每秒）
+    monitor_item* monitor;
 } can_motor;
 
 void Can_Motor_Driver_Init();

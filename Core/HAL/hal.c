@@ -10,12 +10,12 @@
 //#include "motor.h"
 
 void HAL_Layer_Init(){
+    Monitor_Init();
     CRC16_Init();
     BMI088_Driver_Init();
     CanRecv_Driver_Init();
     Can_Motor_Driver_Init();
     dt7_driver_init();
-    Monitor_Init();
 }
 
 void HAL_Layer_Default_Loop(){

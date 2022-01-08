@@ -99,12 +99,14 @@
 #define _DT7_DR16_H_
 
 #include "stdint.h"
+#include "monitor.h"
 
 #define DT7_RX_SIZE 18
 
 
 typedef struct dt7_config_t {
     uint8_t bsp_uart_index;
+    lost_callback lost_callback;
 } dt7_config;
 
 typedef struct dt7_rx_data_rc_t {
@@ -156,6 +158,7 @@ typedef struct dt7Remote_t {
     dt7_rx_data last_data;     // 上一次收到的数据
 
     dt7_config config;
+    monitor_item* monitor;
 } dt7Remote;
 
 void dt7_driver_init(void);

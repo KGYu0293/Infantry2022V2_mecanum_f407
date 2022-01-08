@@ -1,9 +1,9 @@
 #include "DT7_DR16.h"
 
+#include "bsp_log.h"
 #include "bsp_uart.h"
 #include "cvector.h"
-
-#include "bsp_log.h"
+#include "exceptions.h"
 
 #define CHx_BIAS 1024  //通道中间值为1024
 
@@ -24,7 +24,6 @@
 #define Key_V 0x4000
 #define Key_B 0x8000
 
-
 cvector *dt7_instances;
 
 void dt7_data_solve(dt7Remote *obj);
@@ -39,6 +38,7 @@ void dt7_driver_init(void) {
 dt7Remote *dt7_Create(dt7_config *config) {
     dt7Remote *obj = (dt7Remote *)malloc(sizeof(dt7Remote));
     obj->config = *config;
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     cvector_pushback(dt7_instances, &obj);
     return obj;
 }
@@ -49,6 +49,7 @@ void dt7_Rx_Callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
             dt7Remote *now = *(dt7Remote **)cvector_val_at(dt7_instances, i);
             if (uart_index == now->config.bsp_uart_index && len == DT7_RX_SIZE) {
                 memcpy(now->primary_data, data, DT7_RX_SIZE);
+                now->monitor->reset(now->monitor);
                 dt7_data_solve(now);
             }
         }
