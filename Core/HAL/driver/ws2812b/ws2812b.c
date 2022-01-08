@@ -17,6 +17,7 @@ color_rgb purple = {14, 4, 23};
 color_rgb blue = {0, 0, 20};
 color_rgb off = {0, 0, 0};
 
+
 //工具函数，转换rgb值到一个长度24的uint16数组（TIMER的CCR寄存器为16位）
 void rgb_2_raw(uint16_t* buff, color_rgb color) {
     for (uint16_t i = 0; i < 8; ++i) {
