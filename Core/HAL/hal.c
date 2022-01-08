@@ -15,6 +15,7 @@ void HAL_Layer_Init(){
     BMI088_Driver_Init();
     CanRecv_Driver_Init();
     Can_Motor_Driver_Init();
+    
     dt7_driver_init();
 }
 

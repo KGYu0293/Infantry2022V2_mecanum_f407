@@ -61,6 +61,7 @@ void APP_Layer_Init() {
 
 
     // motors
+    
     // example :bsp_can_index：can1填充0,can2填充1
     //          motor_set_id 直接填充电调上通过闪灯次数确定的id，如闪烁次数是1，则id是1，motor_set_id填1
     //          motor_model 填写MODEL_3508/MODEL_2006/MODEL_6020
