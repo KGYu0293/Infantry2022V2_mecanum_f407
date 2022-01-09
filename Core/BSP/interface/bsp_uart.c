@@ -29,7 +29,7 @@ void BSP_UART_Init() {
         HAL_UART_DMAStop(uart_ports[i].port);
         //使能串口空闲中断
         __HAL_UART_ENABLE_IT(uart_ports[i].port, UART_IT_IDLE);  //使能串口空闲中断
-        //开启DMA接受
+        //开启DMA接收
         HAL_UART_Receive_DMA(uart_ports[i].port, uart_ports->rx_buff, BSP_UART_DMA_BUFF_SIZE);
     }
 }
@@ -42,6 +42,7 @@ void BSP_UART_Send_blocking(uint8_t uart_index, uint8_t *data, uint16_t len) { H
 void BSP_UART_Send_IT(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_IT(uart_ports[uart_index].port, data, len); }
 void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_DMA(uart_ports[uart_index].port, data, len); }
 
+// 空闲中断
 void BSP_UART_IDLECallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
     //判断是否是空闲中断
     if (RESET != __HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE)) {

@@ -103,7 +103,6 @@
 
 #define DT7_RX_SIZE 18
 
-
 typedef struct dt7_config_t {
     uint8_t bsp_uart_index;
     lost_callback lost_callback;
