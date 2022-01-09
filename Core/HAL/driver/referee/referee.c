@@ -140,13 +140,13 @@ void referee_data_solve(referee *obj, uint32_t len) {
             memcpy(&obj->rx_data.robot_interactive_data, data_pack.data, sizeof(obj->rx_data.robot_interactive_data));
             break;
         case ROBOT_INTERACTIVE_DATA_T:
-
+            // 自定义控制器 暂无
             break;
         case ROBOT_COMMAND_T:
-
+            memcpy(&obj->rx_data.robot_command, data_pack.data, sizeof(obj->rx_data.robot_command));
             break;
         case CLIENT_MAP_COMMAND_T:
-
+            memcpy(&obj->rx_data.client_map_command, data_pack.data, sizeof(obj->rx_data.client_map_command));
             break;
         default:
             break;

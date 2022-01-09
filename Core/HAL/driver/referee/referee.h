@@ -264,6 +264,8 @@ typedef struct referee_rx_data_t {
     ext_rfid_status_t rfid_status;
     ext_dart_cilent_cmd_t dart_cilent_cmd;
     ext_robot_interactive_data_t robot_interactive_data;
+    ext_robot_command_t robot_command;
+    ext_client_map_command_t client_map_command;
 } referee_rx_data;
 
 // 裁判系统外设结构体
@@ -275,6 +277,8 @@ typedef struct referee_t {
     monitor_item* monitor;
 } referee;
 
-void Referee_Data_Solve(uint8_t* frame);
+void referee_driver_init(void);
+
+referee *referee_Create(referee_config *config);
 
 #endif
