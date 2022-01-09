@@ -1,6 +1,6 @@
 #include "crc16.h"
 
-#define CRC_POLY_16 0XA001
+#define CRC_POLY_16 0X8408
 #define CRC_START_MODBUS 0xFFFF
 
 uint16_t modbus_tab16[256];
