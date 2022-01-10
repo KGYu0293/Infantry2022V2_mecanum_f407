@@ -99,6 +99,7 @@
 #define _DT7_DR16_H_
 
 #include "stdint.h"
+#include "bsp_uart.h"
 #include "monitor.h"
 
 #define DT7_RX_SIZE 18

@@ -8,6 +8,8 @@
 #include "pid.h"
 #include "stdint.h"
 
+#include "bsp_gpio.h"
+
 //此处欧拉角定义为 绕固定参考坐标轴旋转Z-Y-X 也就是 yaw pitch roll
 typedef struct imu_data_t {
     float accel[3];
