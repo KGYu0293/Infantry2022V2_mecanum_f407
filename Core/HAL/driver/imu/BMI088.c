@@ -7,7 +7,7 @@
 #include "bsp_log.h"
 #include "bsp_pwm.h"
 #include "bsp_random.h"
-#include "bsp_spi.h"
+// #include "bsp_spi.h"
 #include "common.h"
 #include "cvector.h"
 #include "stdio.h"

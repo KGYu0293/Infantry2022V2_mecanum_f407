@@ -134,6 +134,10 @@ Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/HAL/pub_sub.c \
 Core/APP/app.c \
+Core/APP/command/robot_cmd.c \
+Core/APP/chassis/chassis.c \
+Core/APP/shoot/shoot.c \
+Core/APP/gimbal/gimbal.c \
 Core/BSP/bsp.c \
 Core/BSP/interface/bsp_spi.c \
 Core/BSP/interface/bsp_gpio.c \
@@ -230,6 +234,10 @@ C_INCLUDES += \
 -ICore/HAL/monitor \
 -ICore/HAL \
 -ICore/APP \
+-ICore/APP/command \
+-ICore/APP/shoot \
+-ICore/APP/gimbal \
+-ICore/APP/chassis \
 -ICore/BSP \
 -ICore/BSP/lib \
 -ICore/BSP/interface \
