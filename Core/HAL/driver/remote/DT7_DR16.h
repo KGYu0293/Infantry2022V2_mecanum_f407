@@ -150,6 +150,9 @@ typedef struct dt7_rx_data_t {
     dt7_rx_data_rc rc;
     dt7_rx_data_mouse mouse;
     dt7_rx_data_key key_down;
+    dt7_rx_data_key key_single_press_cnt;// 不含shift与ctrl
+    dt7_rx_data_key key_shift_press_cnt;
+    dt7_rx_data_key key_ctrl_press_cnt;
 } dt7_rx_data;
 
 typedef struct dt7Remote_t {

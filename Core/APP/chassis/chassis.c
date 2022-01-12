@@ -21,9 +21,7 @@
 
 cvector *chassis_instances;
 
-void chassis_motor_lost(void *motor) {
-    printf_log("chassis motor lost!\n");
-}
+void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
@@ -77,6 +75,9 @@ Chassis *Chassis_Create() {
     PID_SetConfig(&rb_config.config_speed, 20, 0, 0, 2000, 12000);
     obj->rb = Can_Motor_Create(&rb_config);
 
+    // 定义subscriber
+    obj->chassis_cmd_suber = register_sub(chassis_cmd_topic,sizeof(Chassis_param));
+    
     return obj;
 }
 
@@ -108,7 +109,7 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 }
 
 // 小陀螺情况下的旋转速度控制函数，可以写不同的变速小陀螺
-float auto_rotate_param(void) { return 200; }
+float auto_rotate_param(void) { return 120; }
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj, Chassis_param *param) {

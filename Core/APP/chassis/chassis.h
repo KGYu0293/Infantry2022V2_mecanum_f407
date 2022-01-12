@@ -28,6 +28,8 @@ typedef struct chassis_t {
     
     float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
     float offset_y;
+
+    Subscriber* chassis_cmd_suber;
 } Chassis;
 
 Chassis *Chassis_Create(void);

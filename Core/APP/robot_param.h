@@ -1,5 +1,5 @@
-#ifndef _ROBOT_PARAM_
-#define _ROBOT_PARAM_
+#ifndef _ROBOT_PARAM_H_
+#define _ROBOT_PARAM_H_
 
 // 定义主控类型 方便统一板间can通信写法
 #define CHASSIS_BOARD
@@ -10,6 +10,14 @@
 // 各模块pub_sub的参数结构体
 // 各部分对外接口统一存放
 // 各部分通过pub_sub方式“沟通”的“通讯协议”
+
+// 定义所有需要pub/sub的话题
+extern const char* chassis_cmd_topic;
+extern const char* gimbal_cmd_topic;
+extern const char* shoot_cmd_topic;
+extern const char* chassis_uplode_topic;
+extern const char* gimbal_uplode_topic;
+extern const char* shoot_uplode_topic;
 
 // chassis
 // vx vy rotate传入时以offset系（一般为云台系）为基准
@@ -40,14 +48,18 @@ typedef struct Gimbal_param_t {
     float pitch;
 } Gimbal_param;
 
+typedef struct Gimbal_upload_data_t {
+    float yaw_encorder;
+} Gimbal_uplode_data;
+
 // shoot
 typedef struct Shoot_param_t {
     enum { shoot_stop, shoot_run } mode;
     enum { not_fire, single, Double, trible, continuous } shoot_command;
     enum { magazine_on, magazine_off } magazine_lid;  // 弹仓盖
-    uint16_t bullet_speed;          // 弹速
-    float fire_rate;                // 射频（发/秒）
-    uint16_t heat_limit_remain;     // 剩余热量，cooling_limit-cooling_heat
+    uint16_t bullet_speed;                            // 弹速
+    float fire_rate;                                  // 射频（发/秒）
+    uint16_t heat_limit_remain;                       // 剩余热量，cooling_limit-cooling_heat
 } Shoot_param;
 
 #endif

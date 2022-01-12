@@ -2,6 +2,14 @@
 
 #include "chassis.h"
 #include "robot_cmd.h"
+#include "robot_param.h"
+
+const char* chassis_cmd_topic = "cc";
+const char* gimbal_cmd_topic = "gc";
+const char* shoot_cmd_topic = "sc";
+const char* chassis_uplode_topic = "cu";
+const char* gimbal_uplode_topic = "gu";
+const char* shoot_uplode_topic = "su";
 
 // 重要模块
 Robot* robot;
@@ -25,10 +33,13 @@ void APP_Layer_Init() {
     internal_buzzer = Buzzer_Create(&internal_buzzer_config);
 
     robot = Robot_CMD_Create();
+#ifdef CHASSIS_BOARD
     chassis = Chassis_Create();
+#endif
+#ifdef GIMBAL_BOARD
     gimbal = Gimbal_Create();
     shoot = Shoot_Create();
-    // fan = Fanlight_APP_Init();
+#endif
 }
 
 void APP_Layer_default_loop() {
