@@ -30,7 +30,7 @@ void BSP_UART_Init() {
         //使能串口空闲中断
         __HAL_UART_ENABLE_IT(uart_ports[i].port, UART_IT_IDLE);  //使能串口空闲中断
         //开启DMA接收
-        HAL_UART_Receive_DMA(uart_ports[i].port, uart_ports->rx_buff, BSP_UART_DMA_BUFF_SIZE);
+        HAL_UART_Receive_DMA(uart_ports[i].port, uart_ports[i].rx_buff, BSP_UART_DMA_BUFF_SIZE);
     }
 }
 
