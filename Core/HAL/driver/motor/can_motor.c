@@ -135,6 +135,9 @@ void Can_Motor_Calc_Send() {
                     obj->current_output = obj->speed_pid.output;
                 }
                 buf[id] = obj->current_output;
+                if(obj->enable == MOTOR_STOP){
+                    buf[id] = 0;
+                }
             }
             // 如果此标识符(identifier)对应的四个电机里至少有一个被注册，就发送这个标识符的报文，如果全部没有被注册，则这个标识符无需发送
             if (identifier_send) {
