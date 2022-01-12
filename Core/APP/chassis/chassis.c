@@ -76,8 +76,8 @@ Chassis *Chassis_Create() {
     obj->rb = Can_Motor_Create(&rb_config);
 
     // 定义subscriber
-    obj->chassis_cmd_suber = register_sub(chassis_cmd_topic,sizeof(Chassis_param));
-    
+    obj->chassis_cmd_suber = register_sub(chassis_cmd_topic, sizeof(Chassis_param));
+
     return obj;
 }
 
@@ -117,8 +117,8 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
     if (param->target.offset_angle > 360) param->target.offset_angle = 360;
     float vx = param->target.vx * cos(param->target.offset_angle) + param->target.vy * sin(param->target.offset_angle);
     float vy = param->target.vx * sin(param->target.offset_angle) + param->target.vy * cos(param->target.offset_angle);
-    if (param->mode = chassis_run) mecanum_calculate(obj, vx, vy, param->target.rotate);
-    if (param->mode = chassis_rotate_run) {
+    if (param->mode == chassis_run) mecanum_calculate(obj, vx, vy, param->target.rotate);
+    if (param->mode == chassis_rotate_run) {
         float w = auto_rotate_param();
         mecanum_calculate(obj, vx, vy, w);
     }
@@ -127,15 +127,16 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
 
 void Chassis_Update(Chassis *obj) {
     // subscribe并得到param
-    Chassis_param param;
+    publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
+    Chassis_param* param = (Chassis_param*)chassis_data.data;
 
-    switch (param.mode) {
+    switch (param->mode) {
         case chassis_stop:
         case chassis_run:
-            Chassis_calculate(obj, &param);
+            Chassis_calculate(obj, param);
             break;
         case chassis_rotate_run:
-            Chassis_calculate(obj, &param);
+            Chassis_calculate(obj, param);
             break;
         default:
             break;

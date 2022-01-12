@@ -31,12 +31,12 @@ Robot* Robot_CMD_Create() {
 
 // 定义publisher和subscriber
 #ifdef CHASSIS_BOARD
-obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
+    obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
 #endif
 #ifdef GIMBAL_BOARD
-obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
-obj->gimbal_upload_suber = register_sub(gimbal_uplode_topic,sizeof(Gimbal_uplode_data));
-obj->shoot_puber = register_pub(shoot_cmd_topic);
+    obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
+    obj->gimbal_upload_suber = register_sub(gimbal_uplode_topic, sizeof(Gimbal_uplode_data));
+    obj->shoot_puber = register_pub(shoot_cmd_topic);
 #endif
     return obj;
 }
@@ -45,7 +45,6 @@ obj->shoot_puber = register_pub(shoot_cmd_topic);
 void Robot_CMD_Update(Robot* robot) {
     // 板间通信同步
     memcpy(robot->board_com.goci_data, &(robot->board_com.recv->data_rx), sizeof(robot->board_com.goci_data));
-
 
     // 另一主控通知stop
     if (robot->board_com.goci_data->now_robot_mode == robot_stop) {
@@ -62,12 +61,11 @@ void Robot_CMD_Update(Robot* robot) {
     } else {
         memcpy(&(robot->chassis_param.target), &(robot->board_com.goci_data->chassis_target), sizeof(Chassis_param_speed_target));
     }
-
+    // 发布变更
     publish_data chassis_data;
     chassis_data.data = &robot->chassis_param;
     chassis_data.len = sizeof(Chassis_param);
-
-    robot->chassis_cmd_puber->publish(robot->chassis_cmd_puber,chassis_data);
+    robot->chassis_cmd_puber->publish(robot->chassis_cmd_puber, chassis_data);
 }
 #endif
 #ifdef GIMBAL_BOARD

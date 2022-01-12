@@ -47,8 +47,10 @@ typedef struct Robot_t {
 #endif
 #ifdef GIMBAL_BOARD
     Publisher* gimbal_cmd_puber;
-    Subscriber* gimbal_upload_suber;
+    Gimbal_param gimbal_param;
     Publisher* shoot_puber;
+    Shoot_param shoot_param;
+    Subscriber* gimbal_upload_suber;
 #endif
 } Robot;
 
