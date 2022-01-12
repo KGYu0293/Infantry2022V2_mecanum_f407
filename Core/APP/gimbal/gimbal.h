@@ -1,11 +1,12 @@
 #ifndef _GIMBAL_H
 #define _GIMBAL_H
-#include "app.h"
 
-typedef struct Gimbal_param_t {
-    float yaw;
-    float pitch;
-} Gimbal_param;
+#include "pub_sub.h"
+#include "robot_param.h"
+#include "stdint.h"
+#include "bsp_log.h"
+#include "can_motor.h"
+#include "BMI088.h"
 
 typedef struct Gimbal_t {
     BMI088_imu* imu;
@@ -13,6 +14,6 @@ typedef struct Gimbal_t {
 } Gimbal;
 
 Gimbal* Gimbal_Create(void);
-void Gimbal_Update(Gimbal* obj, Gimbal_param config);
+void Gimbal_Update(Gimbal* obj);
 
 #endif

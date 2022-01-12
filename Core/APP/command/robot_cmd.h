@@ -1,17 +1,32 @@
 #ifndef _ROBOT_CMD_H_
 #define _ROBOT_CMD_H_
 
-#include "app.h"
+#include "robot_param.h"
+#include "pub_sub.h"
+#include "stdint.h"
+#include "bsp_log.h"
+// 外设
+#include "BMI088.h"
+#include "can_recv.h"
+#include "can_send.h"
+
+typedef enum robot_mode_e { robot_stop, robot_run } robot_mode;
 
 // 板间通信部分
 #pragma pack(1)
 // gimbal output chassis input 云台->底盘数据包
 typedef struct board_com_goci_data_t {
-    uint8_t gimbal_yaw_data;
+    robot_mode now_robot_mode;    // 遥控器在云台主控 包含stop模式与云台重要模块掉线
+    Chassis_param_speed_target chassis_target;
 } board_com_goci_data;
 // gimbal input chassis output数据包
 typedef struct board_com_gico_data_t {
-    uint8_t b;
+    enum { module_lost, module_working } if_chassis_board_module_lost;  // 同步底盘是否有重要模块掉线
+    imu_data chassis_imu_data;// 将底盘主控的数据发到云台
+    struct {
+        uint16_t bullet_speed_max;   // 弹速
+        uint16_t heat_limit_remain;  // 剩余热量
+    } shoot_referee_data;
 } board_com_gico_data;
 #pragma pack()
 
@@ -24,13 +39,10 @@ typedef struct board_com_t {
 
 // command结构体
 typedef struct Robot_t {
-    enum {
-        robot_stop,
-        robot_run
-    } mode;
+    robot_mode mode;
     Board_com board_com;
-    // Chassis *chassis;
 } Robot;
 
-Robot *Robot_Create(void);
+Robot *Robot_CMD_Create(void);
+void Robot_CMD_Update(Robot *obj);
 #endif

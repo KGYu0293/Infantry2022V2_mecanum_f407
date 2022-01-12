@@ -13,19 +13,11 @@
  *                 |
  * 
  */
-#include "app.h"
-
-// 底盘传入参数结构体
-// vx vy rotate传入时以offset系（一般为云台系）为基准
-// 若无云台或云台跟随底盘，offset_angle设置为0即可
-// 小陀螺模式下，rotate参数失效，旋转速度由模块内部设定
-typedef struct Chassis_param_t {
-    enum { stop, run, rotate_run } mode;
-    float vx;// 单位 mm/s
-    float vy;// 单位 mm/s
-    float rotate;// 单位 度每秒
-    float offset_angle; // vy与底盘正前方的夹角，范围0-360度，方向顺时针，即底盘y方向旋转该角度到达vy方向
-} Chassis_param;
+#include "pub_sub.h"
+#include "robot_param.h"
+#include "stdint.h"
+#include "bsp_log.h"
+#include "can_motor.h"
 
 // 定义chassis所需的外设，整合成一个结构体
 typedef struct chassis_t {
@@ -39,5 +31,5 @@ typedef struct chassis_t {
 } Chassis;
 
 Chassis *Chassis_Create(void);
-void Chassis_Update(Chassis *obj,Chassis_param param);
+void Chassis_Update(Chassis *obj);
 #endif

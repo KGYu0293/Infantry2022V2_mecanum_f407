@@ -1,4 +1,5 @@
 #include "chassis.h"
+
 #include <math.h>
 
 /* the radius of wheel(mm)，轮子半径 */
@@ -20,15 +21,8 @@
 
 cvector *chassis_instances;
 
-can_motor_config lf_config;
-can_motor_config rf_config;
-can_motor_config lb_config;
-can_motor_config rb_config;
-
 void chassis_motor_lost(void *motor) {
     printf_log("chassis motor lost!\n");
-    can_motor *now = (can_motor *)motor;
-    now->monitor->reset(now->monitor);
 }
 
 Chassis *Chassis_Create() {
@@ -38,6 +32,10 @@ Chassis *Chassis_Create() {
     obj->offset_y = ROTATE_Y_OFFSET;
 
     // 电机初始化
+    can_motor_config lf_config;
+    can_motor_config rf_config;
+    can_motor_config lb_config;
+    can_motor_config rb_config;
     lf_config.motor_model = MODEL_3508;
     lf_config.bsp_can_index = 0;
     lf_config.motor_set_id = 1;
@@ -109,24 +107,34 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
     obj->lb->speed_pid.ref = mecanum_speed[3] / PERIMETER * MOTOR_DECELE_RATIO / 360;
 }
 
+// 小陀螺情况下的旋转速度控制函数，可以写不同的变速小陀螺
+float auto_rotate_param(void) { return 200; }
+
 // 将基于offset的速度映射到实际底盘坐标系的方向上
-void Chassis_calculate(Chassis *obj, Chassis_param param) {
-    if (param.offset_angle < 0) param.offset_angle = 0;
-    if (param.offset_angle > 360) param.offset_angle = 360;
-    float vx = param.vx * cos(param.offset_angle) + param.vy * sin(param.offset_angle);
-    float vy = param.vx * sin(param.offset_angle) + param.vy * cos(param.offset_angle);
-    mecanum_calculate(obj, vx, vy, param.rotate);
+void Chassis_calculate(Chassis *obj, Chassis_param *param) {
+    if (param->target.offset_angle < 0) param->target.offset_angle = 0;
+    if (param->target.offset_angle > 360) param->target.offset_angle = 360;
+    float vx = param->target.vx * cos(param->target.offset_angle) + param->target.vy * sin(param->target.offset_angle);
+    float vy = param->target.vx * sin(param->target.offset_angle) + param->target.vy * cos(param->target.offset_angle);
+    if (param->mode = chassis_run) mecanum_calculate(obj, vx, vy, param->target.rotate);
+    if (param->mode = chassis_rotate_run) {
+        float w = auto_rotate_param();
+        mecanum_calculate(obj, vx, vy, w);
+    }
     // 缓启动 斜坡
 }
 
-void Chassis_Update(Chassis *obj, Chassis_param param) {
+void Chassis_Update(Chassis *obj) {
+    // subscribe并得到param
+    Chassis_param param;
+
     switch (param.mode) {
-        case stop:
-        case run:
-            Chassis_calculate(obj, param);
+        case chassis_stop:
+        case chassis_run:
+            Chassis_calculate(obj, &param);
             break;
-        case rotate_run:
-            Chassis_calculate(obj, param);
+        case chassis_rotate_run:
+            Chassis_calculate(obj, &param);
             break;
         default:
             break;
