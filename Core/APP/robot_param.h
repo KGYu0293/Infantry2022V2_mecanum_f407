@@ -2,8 +2,8 @@
 #define _ROBOT_PARAM_H_
 
 // 定义主控类型 方便统一板间can通信写法
-#define CHASSIS_BOARD
-// define GIMBAL_BOARD
+// #define CHASSIS_BOARD
+#define GIMBAL_BOARD
 
 #include "stdint.h"
 
@@ -11,7 +11,7 @@
 // 各部分对外接口统一存放
 // 各部分通过pub_sub方式“沟通”的“通讯协议”
 
-// 定义所有需要pub/sub的话题
+// 声明所有需要pub/sub的话题（定义只能在.c，在这里extern；否则报错重复定义）
 extern const char* chassis_cmd_topic;
 extern const char* gimbal_cmd_topic;
 extern const char* shoot_cmd_topic;

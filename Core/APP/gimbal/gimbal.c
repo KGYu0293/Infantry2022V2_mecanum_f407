@@ -1,10 +1,6 @@
 #include "gimbal.h"
 
-cvector *gimbal_instances;
-
-void gimbal_motor_lost(void* motor) {
-    printf_log("gimbal motor lost!\n");
-}
+void gimbal_motor_lost(void *motor) { printf_log("gimbal motor lost!\n"); }
 
 Gimbal *Gimbal_Create() {
     Gimbal *obj = (Gimbal *)malloc(sizeof(Gimbal));
@@ -38,5 +34,10 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
     internal_imu_config.lost_callback = NULL;
     obj->imu = BMI088_Create(&internal_imu_config);
+
+    // 定义sub
+    obj->gimbal_cmd_sub = register_sub(gimbal_cmd_topic, sizeof(Gimbal_param));
+    // 定义pub
+    obj->gimbal_yaw_data_pub = register_pub(gimbal_uplode_topic);
     return obj;
 }

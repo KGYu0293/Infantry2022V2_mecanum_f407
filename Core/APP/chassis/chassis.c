@@ -19,8 +19,6 @@
 
 #define RADIAN_COEF 57.3f  // 180°/pi
 
-cvector *chassis_instances;
-
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 
 Chassis *Chassis_Create() {
@@ -128,8 +126,9 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
 void Chassis_Update(Chassis *obj) {
     // subscribe并得到param
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
-    Chassis_param* param = (Chassis_param*)chassis_data.data;
-
+    Chassis_param *param = (Chassis_param *)chassis_data.data;
+    
+    // 应用得到的param进行控制
     switch (param->mode) {
         case chassis_stop:
         case chassis_run:
@@ -141,5 +140,4 @@ void Chassis_Update(Chassis *obj) {
         default:
             break;
     }
-    // Chassis_Motor_Update(obj);
 }

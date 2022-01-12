@@ -15,8 +15,6 @@
 /* 每发射一颗小弹增加的热量 */
 #define UNIT_HEAT_42MM 100
 
-cvector *shoot_instances;
-
 void shoot_motor_lost(void *motor) { printf_log("shoot motor lost!\n"); }
 
 Shoot *Shoot_Create(void) {

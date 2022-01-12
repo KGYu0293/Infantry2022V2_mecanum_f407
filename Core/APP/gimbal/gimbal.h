@@ -12,8 +12,8 @@ typedef struct Gimbal_t {
     BMI088_imu* imu;
     can_motor *pitch, yaw;
 
-    Subscriber gimbal_sub;
-    Publisher gimbal_yaw_data_pub;
+    Subscriber* gimbal_cmd_sub;
+    Publisher* gimbal_yaw_data_pub;
 } Gimbal;
 
 Gimbal* Gimbal_Create(void);

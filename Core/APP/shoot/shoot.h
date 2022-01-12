@@ -13,6 +13,8 @@ typedef struct Shoot_t {
     can_motor *load;
 
     int load_delta_pos;
+
+    Subscriber* shoot_cmd_suber;
 } Shoot;
 
 Shoot *Shoot_Create(void);

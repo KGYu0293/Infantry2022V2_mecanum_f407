@@ -41,9 +41,10 @@ typedef struct board_com_t {
 typedef struct Robot_t {
     robot_mode mode;
     Board_com board_com;
+    // 要长期
 #ifdef CHASSIS_BOARD
     Publisher* chassis_cmd_puber;
-    Chassis_param chassis_param;
+    Chassis_param chassis_param;// 将要pub的变量定义在结构体中以长期保存(pub的是指针，要放在指针不会销毁的地方)
 #endif
 #ifdef GIMBAL_BOARD
     Publisher* gimbal_cmd_puber;

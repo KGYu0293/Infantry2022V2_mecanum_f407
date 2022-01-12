@@ -69,5 +69,8 @@ void Robot_CMD_Update(Robot* robot) {
 }
 #endif
 #ifdef GIMBAL_BOARD
-void Robot_CMD_Update(Robot* robot) {}
+void Robot_CMD_Update(Robot* robot)
+{
+    
+}
 #endif
