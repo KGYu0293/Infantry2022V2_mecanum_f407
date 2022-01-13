@@ -2,8 +2,9 @@
 #define _ROBOT_PARAM_H_
 
 // 定义主控类型 方便统一板间can通信写法
-// #define CHASSIS_BOARD
+// 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
 #define GIMBAL_BOARD
+// #define CHASSIS_BOARD
 
 #include "stdint.h"
 
@@ -34,9 +35,10 @@ typedef struct Chassis_param_power_control_t {
     float power_now;
     uint16_t power_buffer;  // 缓冲功率
 } Chassis_param_power_control;
+typedef enum Chassis_mode_e { chassis_stop, chassis_run, chassis_rotate_run } Chassis_mode;
 
 typedef struct Chassis_param_t {
-    enum { chassis_stop, chassis_run, chassis_rotate_run } mode;
+    Chassis_mode mode;
     Chassis_param_speed_target target;
     Chassis_param_power_control power;
 } Chassis_param;
@@ -46,6 +48,8 @@ typedef struct Gimbal_param_t {
     enum { gimbal_stop, gimbal_run } mode;
     float yaw;
     float pitch;
+
+    float roatate_feedforward;
 } Gimbal_param;
 
 typedef struct Gimbal_upload_data_t {
@@ -55,7 +59,7 @@ typedef struct Gimbal_upload_data_t {
 // shoot
 typedef struct Shoot_param_t {
     enum { shoot_stop, shoot_run } mode;
-    enum { not_fire, single, Double, trible, continuous } shoot_command;
+    enum { not_fire, reverse, single, Double, trible, continuous } shoot_command;
     enum { magazine_on, magazine_off } magazine_lid;  // 弹仓盖
     uint16_t bullet_speed;                            // 弹速
     float fire_rate;                                  // 射频（发/秒）

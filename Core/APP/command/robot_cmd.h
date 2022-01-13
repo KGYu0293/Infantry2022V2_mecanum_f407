@@ -7,8 +7,10 @@
 #include "stdint.h"
 // 外设
 #include "BMI088.h"
+#include "DT7_DR16.h"
 #include "can_recv.h"
 #include "can_send.h"
+#include "referee.h"
 
 typedef enum robot_mode_e { robot_stop, robot_run } robot_mode;
 
@@ -17,6 +19,7 @@ typedef enum robot_mode_e { robot_stop, robot_run } robot_mode;
 // gimbal output chassis input 云台->底盘数据包
 typedef struct board_com_goci_data_t {
     robot_mode now_robot_mode;  // 遥控器在云台主控 包含stop模式与云台重要模块掉线
+    Chassis_mode chassis_mode;
     Chassis_param_speed_target chassis_target;
 } board_com_goci_data;
 // gimbal input chassis output数据包
@@ -38,22 +41,31 @@ typedef struct board_com_t {
 } Board_com;
 
 // command结构体
-typedef struct Robot_t {
-    robot_mode mode;
-    Board_com board_com;
-    // 要长期
-#ifdef CHASSIS_BOARD
-    Publisher* chassis_cmd_puber;
-    Chassis_param chassis_param;// 将要pub的变量定义在结构体中以长期保存(pub的是指针，要放在指针不会销毁的地方)
-#endif
 #ifdef GIMBAL_BOARD
-    Publisher* gimbal_cmd_puber;
+typedef struct Robot_t {
+    Board_com board_com;
+    robot_mode mode;
+
+    dt7Remote *remote;
+
+    Publisher *gimbal_cmd_puber;
     Gimbal_param gimbal_param;
-    Publisher* shoot_puber;
+    Publisher *shoot_puber;
     Shoot_param shoot_param;
-    Subscriber* gimbal_upload_suber;
-#endif
+    Subscriber *gimbal_upload_suber;
 } Robot;
+#endif
+#ifdef CHASSIS_BOARD
+typedef struct Robot_t {
+    Board_com board_com;
+    robot_mode mode;
+
+    Referee *referee;
+
+    Publisher *chassis_cmd_puber;
+    Chassis_param chassis_param;  // 将要pub的变量定义在结构体中以长期保存(pub的是指针，要放在指针不会销毁的地方)
+} Robot;
+#endif
 
 Robot *Robot_CMD_Create(void);
 void Robot_CMD_Update(Robot *obj);

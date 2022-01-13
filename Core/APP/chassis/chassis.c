@@ -69,7 +69,7 @@ Chassis *Chassis_Create() {
     rb_config.position_fdb_model = MOTOR_FDB;
     rb_config.speed_fdb_model = MOTOR_FDB;
     rb_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&rb_config.config_position, 2, 0, 0, 0, 5000);
+    PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&rb_config.config_speed, 20, 0, 0, 2000, 12000);
     obj->rb = Can_Motor_Create(&rb_config);
 
@@ -126,15 +126,22 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
 void Chassis_Update(Chassis *obj) {
     // subscribe并得到param
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
+    if (chassis_data.len == -1) return;  // cmd未发布指令
     Chassis_param *param = (Chassis_param *)chassis_data.data;
-    
+
     // 应用得到的param进行控制
     switch (param->mode) {
         case chassis_stop:
+            obj->lf->enable = MOTOR_STOP;
+            obj->lb->enable = MOTOR_STOP;
+            obj->rf->enable = MOTOR_STOP;
+            obj->rb->enable = MOTOR_STOP;
         case chassis_run:
-            Chassis_calculate(obj, param);
-            break;
         case chassis_rotate_run:
+            obj->lf->enable = MOTOR_ENABLE;
+            obj->lb->enable = MOTOR_ENABLE;
+            obj->rf->enable = MOTOR_ENABLE;
+            obj->rb->enable = MOTOR_ENABLE;
             Chassis_calculate(obj, param);
             break;
         default:

@@ -3,6 +3,7 @@
 // monitor处理函数
 void core_module_lost(void* obj) { printf("core_module_lost!!!robot stopped for security.\n"); }
 
+#ifdef GIMBAL_BOARD
 Robot* Robot_CMD_Create() {
     // 创建实例
     Robot* obj = (Robot*)malloc(sizeof(Robot));
@@ -12,65 +13,174 @@ Robot* Robot_CMD_Create() {
     can_recv_config recv_config;
     send_config.bsp_can_index = 1;
     recv_config.bsp_can_index = 1;
-#ifdef CHASSIS_BOARD
-    send_config.can_identifier = 0x203;
-    recv_config.can_identifier = 0x204;
-    send_config.data_len = sizeof(board_com_gico_data);
-    recv_config.data_len = sizeof(board_com_goci_data);
-#endif
-#ifdef GIMBAL_BOARD
     send_config.can_identifier = 0x204;
     recv_config.can_identifier = 0x203;
     send_config.data_len = sizeof(board_com_goci_data);
     recv_config.data_len = sizeof(board_com_gico_data);
-#endif
     recv_config.notify_func = NULL;
     recv_config.lost_callback = core_module_lost;
     obj->board_com.send = CanSend_Create(&send_config);
     obj->board_com.recv = CanRecv_Create(&recv_config);
 
-// 定义publisher和subscriber
-#ifdef CHASSIS_BOARD
-    obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
-#endif
-#ifdef GIMBAL_BOARD
+    // 定义publisher和subscriber
     obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
     obj->gimbal_upload_suber = register_sub(gimbal_uplode_topic, sizeof(Gimbal_uplode_data));
     obj->shoot_puber = register_pub(shoot_cmd_topic);
+
+    dt7_config remote_config;
+    remote_config.bsp_uart_index = UART_REMOTE_PORT;
+    remote_config.lost_callback = core_module_lost;
+    obj->remote = dt7_Create(&remote_config);
+
+    return obj;
+}
+void Robot_CMD_Update(Robot* robot) {
+    // 判断机器人工作模式
+    // 板间通信-收
+    if ((robot->board_com.recv->monitor->count < 1)) {
+        robot->mode = robot_stop;
+    } else {
+        memcpy(robot->board_com.gico_data, &(robot->board_com.recv->data_rx), sizeof(board_com_gico_data));
+        // 重要外设判断
+        if (robot->remote->monitor->count < 1) {
+            robot->mode = robot_stop;
+        }
+        // 遥控器打到stop模式（右拨杆最下）
+        else if (robot->remote->data.imput_mode == RC_Stop) {
+            robot->mode = robot_stop;
+        } else {
+            robot->mode = robot_run;
+            robot->board_com.goci_data->now_robot_mode = robot_run;
+        }
+    }
+    
+    // 机器人控制
+    if (robot->mode == robot_stop) {
+        robot->board_com.goci_data->now_robot_mode = robot_stop;
+        robot->board_com.goci_data->chassis_mode = chassis_stop;
+        robot->gimbal_param.mode = gimbal_stop;
+        robot->shoot_param.mode = shoot_stop;
+    } else if (robot->mode == robot_run) {
+        if (robot->remote->data.imput_mode == RC_Remote) {
+            // chassis vx vy
+            // 拨杆确定底盘模式与控制量
+            robot->board_com.goci_data->chassis_target.vy = 16.0f * (float)(robot->remote->data.rc.ch1 - CHx_BIAS);
+            robot->board_com.goci_data->chassis_target.vx = 16.0f * (float)(robot->remote->data.rc.ch0 - CHx_BIAS);
+            if (robot->remote->data.rc.s1 == 1) {
+                robot->board_com.goci_data->chassis_mode = chassis_rotate_run;
+                robot->board_com.goci_data->chassis_target.vy *= 0.30f;
+                robot->board_com.goci_data->chassis_target.vx *= 0.30f;
+            } else {
+                robot->board_com.goci_data->chassis_mode = chassis_run;
+            }
+            // 获取云台此时的offset
+            publish_data gimbal_offset = robot->gimbal_upload_suber->getdata(robot->gimbal_upload_suber);
+            if (gimbal_offset.len == -1) {
+                robot->board_com.goci_data->chassis_target.offset_angle = 0;
+            } else {
+                float a = (float)(*(gimbal_offset.data) - 0) * 360 / 8192;
+                robot->board_com.goci_data->chassis_target.offset_angle = a;
+            }
+
+            // shoot
+            if (robot->remote->data.rc.s1 == 2) {
+                robot->shoot_param.mode = shoot_stop;
+                if (robot->remote->data.rc.ch4 > CHx_BIAS + 400) robot->shoot_param.magazine_lid = magazine_on;
+                if (robot->remote->data.rc.ch4 > CHx_BIAS - 400) robot->shoot_param.magazine_lid = magazine_off;
+            } else {
+                robot->shoot_param.mode = shoot_run;
+                robot->shoot_param.shoot_command = continuous;
+                robot->shoot_param.fire_rate = 3.0f * (float)(robot->remote->data.rc.ch4 - CHx_BIAS);
+                robot->shoot_param.heat_limit_remain = robot->board_com.gico_data->shoot_referee_data.heat_limit_remain;
+                robot->shoot_param.bullet_speed = robot->board_com.gico_data->shoot_referee_data.bullet_speed_max;
+            }
+
+            // gimbal
+            robot->gimbal_param.pitch = 0;
+            robot->gimbal_param.yaw = 0;
+            robot->gimbal_param.roatate_feedforward = 0;
+
+        } else if (robot->remote->data.imput_mode == RC_MouseKey) {
+            // chassis
+            // shoot
+            // offset
+        }
+    }
+
+    // 板间通信-发
+    CanSend_Send(robot->board_com.send, (uint8_t*)robot->board_com.goci_data);
+}
 #endif
+
+#ifdef CHASSIS_BOARD
+Robot* Robot_CMD_Create() {
+    // 创建实例
+    Robot* obj = (Robot*)malloc(sizeof(Robot));
+
+    // 板间通信配置
+    can_send_config send_config;
+    can_recv_config recv_config;
+    send_config.bsp_can_index = 1;
+    recv_config.bsp_can_index = 1;
+    send_config.can_identifier = 0x203;
+    recv_config.can_identifier = 0x204;
+    send_config.data_len = sizeof(board_com_gico_data);
+    recv_config.data_len = sizeof(board_com_goci_data);
+    recv_config.notify_func = NULL;
+    recv_config.lost_callback = core_module_lost;
+    obj->board_com.send = CanSend_Create(&send_config);
+    obj->board_com.recv = CanRecv_Create(&recv_config);
+
+    referee_config referee_config;
+    referee_config.bsp_uart_index = UART_REFEREE_PORT;
+    obj->referee = referee_Create(&referee_config);
+
+    // 定义publisher和subscriber
+    obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
+
     return obj;
 }
 
-#ifdef CHASSIS_BOARD
 void Robot_CMD_Update(Robot* robot) {
-    // 板间通信同步
-    memcpy(robot->board_com.goci_data, &(robot->board_com.recv->data_rx), sizeof(robot->board_com.goci_data));
-
-    // 另一主控通知stop
-    if (robot->board_com.goci_data->now_robot_mode == robot_stop) {
-        robot->mode = robot_stop;
-    }
     // 底盘重要外设丢失
     if (0) {
         robot->mode = robot_stop;
         robot->board_com.gico_data->if_chassis_board_module_lost = module_lost;
+    } else {
+        robot->board_com.gico_data->if_chassis_board_module_lost = module_working;
+    }
+    // 板间通信-收
+    if (robot->board_com.recv->monitor->count < 1) {
+        robot->mode = robot_stop;
+    } else {
+        memcpy(robot->board_com.goci_data, &(robot->board_com.recv->data_rx), sizeof(board_com_goci_data));
     }
 
-    if (robot->mode = robot_stop) {
+    // 底盘控制
+    if (robot->board_com.goci_data->now_robot_mode == robot_stop) {
+        robot->mode = robot_stop;
+    }
+
+    if (robot->mode == robot_stop) {
         robot->chassis_param.mode = chassis_stop;
     } else {
         memcpy(&(robot->chassis_param.target), &(robot->board_com.goci_data->chassis_target), sizeof(Chassis_param_speed_target));
     }
+    robot->chassis_param.power.power_buffer = robot->referee->rx_data.power_heat.chassis_power_buffer;
+    robot->chassis_param.power.power_now = robot->referee->rx_data.power_heat.chassis_power;
+    robot->chassis_param.power.power_limit = robot->referee->rx_data.game_robot_state.chassis_power_limit;
+
     // 发布变更
-    publish_data chassis_data;
-    chassis_data.data = &robot->chassis_param;
-    chassis_data.len = sizeof(Chassis_param);
-    robot->chassis_cmd_puber->publish(robot->chassis_cmd_puber, chassis_data);
-}
-#endif
-#ifdef GIMBAL_BOARD
-void Robot_CMD_Update(Robot* robot)
-{
-    
+    publish_data chassis_cmd;
+    chassis_cmd.data = (uint8_t*)&robot->chassis_param;
+    chassis_cmd.len = sizeof(Chassis_param);
+    robot->chassis_cmd_puber->publish(robot->chassis_cmd_puber, chassis_cmd);
+
+    // 发送信息底盘->云台
+    // robot->board_com.gico_data->chassis_imu_data
+    robot->board_com.gico_data->shoot_referee_data.bullet_speed_max = robot->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
+    robot->board_com.gico_data->shoot_referee_data.heat_limit_remain =
+        robot->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - robot->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;
+    CanSend_Send(robot->board_com.send, (uint8_t*)robot->board_com.gico_data);
 }
 #endif

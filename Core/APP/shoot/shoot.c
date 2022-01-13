@@ -60,18 +60,22 @@ Shoot *Shoot_Create(void) {
     return obj;
 };
 
-void Shoot_load_motor_set(Shoot *obj, Shoot_param param) {
-    if (param.heat_limit_remain < UNIT_HEAT_17MM) {
-        param.shoot_command = not_fire;
+void Shoot_load_motor_set(Shoot *obj, Shoot_param* param) {
+    if (param->heat_limit_remain < UNIT_HEAT_17MM) {
+        param->shoot_command = not_fire;
     }
-    switch (param.shoot_command) {
+    switch (param->shoot_command) {
         case not_fire:
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = 0;
             break;
+        case reverse:  // 反转 防卡弹
+            obj->load->config.motor_pid_model = SPEED_LOOP;
+            obj->load->speed_pid.ref = -10 * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
+            break;
         case continuous:
             obj->load->config.motor_pid_model = SPEED_LOOP;
-            obj->load->speed_pid.ref = param.fire_rate * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
+            obj->load->speed_pid.ref = param->fire_rate * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
             break;
         case single:
             obj->load->config.motor_pid_model = POSITION_LOOP;
@@ -91,20 +95,29 @@ void Shoot_load_motor_set(Shoot *obj, Shoot_param param) {
 
 void Shoot_Update(Shoot *obj) {
     // sub并得到param
-    Shoot_param param;
-    
-    switch (param.mode) {
+    publish_data data = obj->shoot_cmd_suber->getdata(obj->shoot_cmd_suber);
+    if (data.len == -1) return;  // cmd未发布指令
+    Shoot_param *param = (Shoot_param*)data.data;
+
+    switch (param->mode) {
         case shoot_stop:
+            obj->load->enable = MOTOR_STOP;
+            obj->friction_a->enable = MOTOR_STOP;
+            obj->friction_b->enable = MOTOR_STOP;
             break;
         case shoot_run:
-            obj->friction_a->speed_pid.ref = param.bullet_speed * 100 * 360 / RADIUS;
-            obj->friction_b->speed_pid.ref = -param.bullet_speed * 100 * 360 / RADIUS;
+            obj->load->enable = MOTOR_ENABLE;
+            obj->friction_a->enable = MOTOR_ENABLE;
+            obj->friction_b->enable = MOTOR_ENABLE;
+
+            obj->friction_a->speed_pid.ref = param->bullet_speed * 100 * 360 / RADIUS;
+            obj->friction_b->speed_pid.ref = -param->bullet_speed * 100 * 360 / RADIUS;
             Shoot_load_motor_set(obj, param);
             break;
         default:
             break;
     }
-    switch (param.magazine_lid) {
+    switch (param->magazine_lid) {
         case magazine_on:
             // BSP_PWM_SetCCR();
             break;

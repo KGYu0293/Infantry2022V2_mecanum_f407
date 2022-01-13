@@ -44,16 +44,16 @@ typedef struct referee_rx_pack_t {
 
 cvector *referee_instances;
 
-void referee_data_solve(referee *obj, uint32_t len);
+void referee_data_solve(Referee *obj, uint32_t len);
 void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len);
 
 void referee_driver_init() {
-    referee_instances = cvector_create(sizeof(referee *));
+    referee_instances = cvector_create(sizeof(Referee *));
     BSP_UART_RegisterRxCallback(UART_REFEREE_PORT, referee_Rx_callback);
 }
 
-referee *referee_Create(referee_config *config) {
-    referee *obj = (referee *)malloc(sizeof(referee));
+Referee *referee_Create(referee_config *config) {
+    Referee *obj = (Referee *)malloc(sizeof(Referee));
     obj->config = *config;
     obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     cvector_pushback(referee_instances, &obj);
@@ -62,7 +62,7 @@ referee *referee_Create(referee_config *config) {
 
 void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
     for (size_t i = 0; i < referee_instances->cv_len; i++) {
-        referee *now = *(referee **)cvector_val_at(referee_instances, i);
+        Referee *now = *(Referee **)cvector_val_at(referee_instances, i);
         if (uart_index == now->config.bsp_uart_index) {
             memcpy(now->primary_data, data, REFEREE_RX_MAX_SIZE);
             now->monitor->reset(now->monitor);
@@ -71,7 +71,7 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
     }
 }
 
-void referee_data_solve(referee *obj, uint32_t len) {
+void referee_data_solve(Referee *obj, uint32_t len) {
     referee_rx_pack data_pack;
     memcpy(&data_pack.frame_header, obj->primary_data, 5);
     memcpy(&data_pack.cmd_id, obj->primary_data + 5, 2);

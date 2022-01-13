@@ -19,7 +19,6 @@ Shoot* shoot;
 
 // 共享外设
 buzzer* internal_buzzer;
-referee* robot_referee;
 
 //此处定义外设的配置文件，也可分开文件配置
 buzzer_config internal_buzzer_config;
