@@ -50,7 +50,7 @@ typedef struct Robot_t {
 
     Publisher *gimbal_cmd_puber;
     Gimbal_param gimbal_param;
-    Publisher *shoot_puber;
+    Publisher *shoot_cmd_puber;
     Shoot_param shoot_param;
     Subscriber *gimbal_upload_suber;
 } Robot;

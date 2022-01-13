@@ -25,7 +25,7 @@ Robot* Robot_CMD_Create() {
     // 定义publisher和subscriber
     obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
     obj->gimbal_upload_suber = register_sub(gimbal_uplode_topic, sizeof(Gimbal_uplode_data));
-    obj->shoot_puber = register_pub(shoot_cmd_topic);
+    obj->shoot_cmd_puber = register_pub(shoot_cmd_topic);
 
     dt7_config remote_config;
     remote_config.bsp_uart_index = UART_REMOTE_PORT;
@@ -53,7 +53,7 @@ void Robot_CMD_Update(Robot* robot) {
             robot->board_com.goci_data->now_robot_mode = robot_run;
         }
     }
-    
+
     // 机器人控制
     if (robot->mode == robot_stop) {
         robot->board_com.goci_data->now_robot_mode = robot_stop;
@@ -107,6 +107,16 @@ void Robot_CMD_Update(Robot* robot) {
         }
     }
 
+    // 发布变更
+    publish_data gimbal_cmd;
+    gimbal_cmd.data = (uint8_t*)&robot->gimbal_param;
+    gimbal_cmd.len = sizeof(Gimbal_param);
+    robot->gimbal_cmd_puber->publish(robot->gimbal_cmd_puber,gimbal_cmd);
+    publish_data shoot_cmd;
+    shoot_cmd.data = (uint8_t*)&robot->shoot_param;
+    shoot_cmd.len = sizeof(Chassis_param);
+    robot->shoot_cmd_puber->publish(robot->shoot_cmd_puber, shoot_cmd);
+    
     // 板间通信-发
     CanSend_Send(robot->board_com.send, (uint8_t*)robot->board_com.goci_data);
 }
