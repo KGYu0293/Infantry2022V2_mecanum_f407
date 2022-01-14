@@ -42,7 +42,7 @@ Gimbal *Gimbal_Create() {
     // 定义sub
     obj->gimbal_cmd_sub = register_sub(gimbal_cmd_topic, sizeof(Gimbal_param));
     // 定义pub
-    obj->gimbal_yaw_data_pub = register_pub(gimbal_uplode_topic);
+    obj->gimbal_yaw_data_pub = register_pub(gimbal_upload_topic);
     return obj;
 }
 

@@ -1,5 +1,6 @@
 #include "robot_cmd.h"
 
+
 // monitor处理函数
 void core_module_lost(void* obj) { printf("core_module_lost!!!robot stopped for security.\n"); }
 
@@ -24,7 +25,7 @@ Robot* Robot_CMD_Create() {
 
     // 定义publisher和subscriber
     obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
-    obj->gimbal_upload_suber = register_sub(gimbal_uplode_topic, sizeof(Gimbal_uplode_data));
+    obj->gimbal_upload_suber = register_sub(gimbal_upload_topic, sizeof(Gimbal_uplode_data));
     obj->shoot_cmd_puber = register_pub(shoot_cmd_topic);
 
     dt7_config remote_config;
@@ -143,6 +144,8 @@ Robot* Robot_CMD_Create() {
 
     referee_config referee_config;
     referee_config.bsp_uart_index = UART_REFEREE_PORT;
+    referee_config.lost_callback = NULL;
+    
     obj->referee = referee_Create(&referee_config);
 
     // 定义publisher和subscriber

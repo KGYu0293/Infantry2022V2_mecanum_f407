@@ -8,12 +8,7 @@
 #define REFEREE_RX_MIN_SIZE 10
 #define REFEREE_RX_MAX_SIZE 37
 
-typedef struct referee_config_t {
-    uint8_t bsp_uart_index;
-    lost_callback lost_callback;
-} referee_config;
-
-typedef enum {
+typedef enum Robot_id_e {
     RED_HERO = 1,
     RED_ENGINEER = 2,
     RED_STANDARD_1 = 3,
@@ -28,7 +23,7 @@ typedef enum {
     BLUE_STANDARD_3 = 105,
     BLUE_AERIAL = 106,
     BLUE_SENTRY = 107,
-} robot_id_e;
+} Robot_id;
 typedef enum {
     PROGRESS_UNSTART = 0,
     PROGRESS_PREPARE = 1,
@@ -37,6 +32,11 @@ typedef enum {
     PROGRESS_BATTLE = 4,
     PROGRESS_CALCULATING = 5,
 } game_progress_e;
+
+typedef struct referee_config_t {
+    uint8_t bsp_uart_index;
+    lost_callback lost_callback;
+} referee_config;
 
 // 成对使用，用以代替特有的typedef __packed struct写法
 #pragma pack(1)
@@ -238,10 +238,9 @@ typedef struct {
 // 成对使用，用以代替特有的typedef __packed struct写法
 #pragma pack()
 
-
 // 裁判系统数据
 typedef struct referee_rx_data_t {
-    robot_id_e id;
+    Robot_id id;
 
     ext_game_state_t game_state;
     ext_game_result_t game_result;
@@ -274,7 +273,7 @@ typedef struct Referee_t {
     referee_rx_data rx_data;
 
     referee_config config;
-    monitor_item* monitor;
+    monitor_item *monitor;
 } Referee;
 
 void referee_driver_init(void);

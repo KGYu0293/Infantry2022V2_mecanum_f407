@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "stdint.h"
 
@@ -16,9 +16,9 @@
 extern const char* chassis_cmd_topic;
 extern const char* gimbal_cmd_topic;
 extern const char* shoot_cmd_topic;
-extern const char* chassis_uplode_topic;
-extern const char* gimbal_uplode_topic;
-extern const char* shoot_uplode_topic;
+extern const char* chassis_upload_topic;
+extern const char* gimbal_upload_topic;
+extern const char* shoot_upload_topic;
 
 // chassis
 // vx vy rotate传入时以offset系（一般为云台系）为基准

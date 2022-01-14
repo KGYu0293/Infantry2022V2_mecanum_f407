@@ -7,9 +7,9 @@
 const char* chassis_cmd_topic = "cc";
 const char* gimbal_cmd_topic = "gc";
 const char* shoot_cmd_topic = "sc";
-const char* chassis_uplode_topic = "cu";
-const char* gimbal_uplode_topic = "gu";
-const char* shoot_uplode_topic = "su";
+const char* chassis_upload_topic = "cu";
+const char* gimbal_upload_topic = "gu";
+const char* shoot_upload_topic = "su";
 
 // 重要模块
 Robot* robot;
