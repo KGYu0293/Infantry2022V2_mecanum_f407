@@ -20,6 +20,7 @@
 #define RADIAN_COEF 57.3f  // 180°/pi
 
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
+void chassis_imu_lost(void *motor) { printf_log("chassis IMU lost!!\n"); }
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
@@ -27,7 +28,16 @@ Chassis *Chassis_Create() {
     obj->offset_x = ROTATE_X_OFFSET;
     obj->offset_y = ROTATE_Y_OFFSET;
 
-    // 电机初始化
+    // 外设初始化
+    BMI088_config internal_imu_config;
+    internal_imu_config.bsp_gpio_accel_index = GPIO_BMI088_ACCEL_NS;
+    internal_imu_config.bsp_gpio_gyro_index = GPIO_BMI088_GYRO_NS;
+    internal_imu_config.bsp_pwm_heat_index = PWM_BMI088_HEAT_PORT;
+    internal_imu_config.bsp_spi_index = SPI_BMI088_PORT;
+    internal_imu_config.temp_target = 55.0f;  //设定温度为55度
+    internal_imu_config.lost_callback = chassis_imu_lost;
+    obj->imu = BMI088_Create(&internal_imu_config);
+
     can_motor_config lf_config;
     can_motor_config rf_config;
     can_motor_config lb_config;
@@ -127,6 +137,12 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
 }
 
 void Chassis_Update(Chassis *obj) {
+    // 反馈imu信息
+    publish_data chassis_upload;
+    chassis_upload.data = (uint8_t *)&(obj->imu->data);
+    chassis_upload.len = sizeof(imu_data);
+    obj->chassis_imu_pub->publish(obj->chassis_imu_pub, chassis_upload);
+
     // subscribe并得到param
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
     if (chassis_data.len == -1) return;  // cmd未发布指令

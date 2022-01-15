@@ -64,6 +64,7 @@ typedef struct Robot_t {
 
     Publisher *chassis_cmd_puber;
     Chassis_param chassis_param;  // 将要pub的变量定义在结构体中以长期保存(pub的是指针，要放在指针不会销毁的地方)
+    Subscriber *chassis_upload_sub;
 } Robot;
 #endif
 

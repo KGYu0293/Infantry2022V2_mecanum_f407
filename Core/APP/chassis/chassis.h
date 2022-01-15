@@ -11,25 +11,28 @@
  *                 |
  *                 |
  *                 |
- * 
+ *
  */
+#include "BMI088.h"
+#include "bsp_log.h"
+#include "can_motor.h"
 #include "pub_sub.h"
 #include "robot_param.h"
 #include "stdint.h"
-#include "bsp_log.h"
-#include "can_motor.h"
 
 // 定义chassis所需的外设，整合成一个结构体
 typedef struct chassis_t {
+    BMI088_imu *imu;
     can_motor *lf;
     can_motor *rf;
     can_motor *lb;
     can_motor *rb;  // forward back left right
-    
+
     float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
     float offset_y;
 
     Subscriber* chassis_cmd_suber;
+    Publisher* chassis_imu_pub;
 } Chassis;
 
 Chassis *Chassis_Create(void);

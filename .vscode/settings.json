@@ -60,6 +60,7 @@
         "exceptions.h": "c",
         "bsp_uart.h": "c",
         "compare": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "gimbal.h": "c"
     }
 }

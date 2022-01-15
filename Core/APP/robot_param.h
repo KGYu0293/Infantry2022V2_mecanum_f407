@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-// #define GIMBAL_BOARD
-#define CHASSIS_BOARD
+#define GIMBAL_BOARD
+// #define CHASSIS_BOARD
 
 #include "stdint.h"
 
@@ -49,7 +49,7 @@ typedef struct Gimbal_param_t {
     float yaw;
     float pitch;
 
-    float roatate_feedforward;
+    float rotate_feedforward;
 } Gimbal_param;
 
 typedef struct Gimbal_upload_data_t {

@@ -19,7 +19,7 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.bsp_pwm_heat_index = PWM_BMI088_HEAT_PORT;
     internal_imu_config.bsp_spi_index = SPI_BMI088_PORT;
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
-    internal_imu_config.lost_callback = NULL;
+    internal_imu_config.lost_callback = gimbal_imu_lost;
     obj->imu = BMI088_Create(&internal_imu_config);
 
     can_motor_config yaw_config;
@@ -27,8 +27,10 @@ Gimbal *Gimbal_Create() {
     yaw_config.bsp_can_index = 0;
     yaw_config.motor_set_id = 1;
     yaw_config.motor_pid_model = POSITION_LOOP;
-    yaw_config.position_fdb_model = MOTOR_FDB;
-    yaw_config.speed_fdb_model = MOTOR_FDB;
+    yaw_config.position_fdb_model = OTHER_FDB;
+    yaw_config.position_pid_fdb =obj->yaw_pos_ref;
+    yaw_config.speed_fdb_model = OTHER_FDB;
+    yaw_config.speed_pid_fdb = obj->yaw_spe_ref;
     yaw_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&yaw_config.config_position, 2, 0, 0, 0, 5000);
     PID_SetConfig(&yaw_config.config_speed, 20, 0, 0, 2000, 12000);
@@ -38,8 +40,10 @@ Gimbal *Gimbal_Create() {
     pitch_config.bsp_can_index = 0;
     pitch_config.motor_set_id = 1;
     pitch_config.motor_pid_model = POSITION_LOOP;
-    pitch_config.position_fdb_model = MOTOR_FDB;
-    pitch_config.speed_fdb_model = MOTOR_FDB;
+    pitch_config.position_fdb_model = OTHER_FDB;
+    pitch_config.position_pid_fdb = obj->pitch_pos_ref;
+    pitch_config.speed_fdb_model = OTHER_FDB;
+    pitch_config.speed_pid_fdb  = obj->pitch_spe_ref;
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 2, 0, 0, 0, 5000);
     PID_SetConfig(&pitch_config.config_speed, 20, 0, 0, 2000, 12000);
@@ -88,7 +92,7 @@ void Gimbal_Update(Gimbal *gimbal) {
             break;
     }
 
-    // 软件限位 pitch
+    // 软件限位 pitch 使用编码器进行限位
     if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST)) gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
     {
         gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
