@@ -69,7 +69,7 @@ void Gimbal_Update(Gimbal *gimbal) {
     Gimbal_param *param = (Gimbal_param *)gimbal_data.data;
 
     // 重要外设掉线检测
-    if (gimbal->imu->monitor < 1) param->mode = gimbal_stop;
+    if (gimbal->imu->monitor->count < 1) param->mode = gimbal_stop;
 
     // 模块控制
     switch (param->mode) {
