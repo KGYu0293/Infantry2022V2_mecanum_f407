@@ -59,10 +59,10 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
         default:
             break;
     }
-    if (obj->config.speed_fdb_model == MOTOR_FDB) {
+    if (obj->config.speed_pid_fdb == NULL) {
         obj->config.speed_pid_fdb = &obj->velocity;
     }
-    if (obj->config.position_fdb_model == MOTOR_FDB) {
+    if (obj->config.position_pid_fdb == NULL) {
         obj->config.position_pid_fdb = &obj->real_position;
     }
     PID_Init(&obj->speed_pid, &obj->config.config_speed);
@@ -124,17 +124,27 @@ void Can_Motor_Calc_Send() {
                 if (obj == NULL) continue;
                 identifier_send = 1;
                 if (obj->config.motor_pid_model == POSITION_LOOP) {
-                    obj->position_pid.fdb = *obj->config.position_pid_fdb;
+                    if (obj->config.position_fdb_model == OTHER_FDB) {
+                        obj->position_pid.fdb = *obj->config.position_pid_fdb;
+                    }
+                    if (obj->config.position_fdb_model == MOTOR_FDB) {
+                        obj->position_pid.fdb = obj->real_position;
+                    }
                     PID_Calc(&obj->position_pid);
                     obj->speed_pid.ref = obj->position_pid.output;
                 }
                 if (obj->config.motor_pid_model >= SPEED_LOOP) {
+                    if (obj->config.speed_fdb_model == OTHER_FDB) {
+                        obj->speed_pid.fdb = *obj->config.speed_pid_fdb;
+                    }
+                    if (obj->config.speed_fdb_model == MOTOR_FDB) {
+                        obj->speed_pid.fdb = obj->velocity;
+                    }
                     PID_Calc(&obj->speed_pid);
-                    obj->speed_pid.fdb = *obj->config.speed_pid_fdb;
                     obj->current_output = obj->speed_pid.output;
                 }
                 buf[id] = obj->current_output;
-                if(obj->enable == MOTOR_STOP){
+                if (obj->enable == MOTOR_STOP) {
                     buf[id] = 0;
                 }
             }
