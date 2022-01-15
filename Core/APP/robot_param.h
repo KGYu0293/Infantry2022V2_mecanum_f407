@@ -35,7 +35,7 @@ typedef struct Chassis_param_power_control_t {
     float power_now;
     uint16_t power_buffer;  // 缓冲功率
 } Chassis_param_power_control;
-typedef enum Chassis_mode_e { chassis_stop, chassis_run, chassis_rotate_run } Chassis_mode;
+typedef enum Chassis_mode_e { chassis_stop, chassis_run, chassis_rotate_run, chassis_run_follow_offset } Chassis_mode;
 
 typedef struct Chassis_param_t {
     Chassis_mode mode;

@@ -115,10 +115,13 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
     if (param->target.offset_angle > 360) param->target.offset_angle = 360;
     float vx = param->target.vx * cos(param->target.offset_angle) + param->target.vy * sin(param->target.offset_angle);
     float vy = param->target.vx * sin(param->target.offset_angle) + param->target.vy * cos(param->target.offset_angle);
-    if (param->mode == chassis_run) mecanum_calculate(obj, vx, vy, param->target.rotate);
-    if (param->mode == chassis_rotate_run) {
+    if (param->mode == chassis_run)
+        mecanum_calculate(obj, vx, vy, param->target.rotate);
+    else if (param->mode == chassis_rotate_run) {
         float w = auto_rotate_param();
         mecanum_calculate(obj, vx, vy, w);
+    } else if (param->mode = chassis_run_follow_offset) {
+        float w = 1.0 * param->target.offset_angle;
     }
     // 缓启动 斜坡
 }

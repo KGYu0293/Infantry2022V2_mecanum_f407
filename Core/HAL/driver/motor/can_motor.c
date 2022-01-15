@@ -2,7 +2,6 @@
 
 #include "bsp_can.h"
 #include "bsp_log.h"
-#include "exceptions.h"
 #include "stdlib.h"
 #include "string.h"
 

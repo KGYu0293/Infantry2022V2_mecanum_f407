@@ -2,7 +2,6 @@
 
 // #include "bsp_uart.h"
 #include "cvector.h"
-#include "exceptions.h"
 
 //键盘对应的通信协议数据
 #define Key_W 0x0001
