@@ -28,9 +28,9 @@ Gimbal *Gimbal_Create() {
     yaw_config.motor_set_id = 1;
     yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
-    yaw_config.position_pid_fdb =obj->yaw_pos_ref;
+    yaw_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]);// 陀螺仪模式反馈值更新 需参照C板实际安装方向
     yaw_config.speed_fdb_model = OTHER_FDB;
-    yaw_config.speed_pid_fdb = obj->yaw_spe_ref;
+    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro[0]);
     yaw_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&yaw_config.config_position, 2, 0, 0, 0, 5000);
     PID_SetConfig(&yaw_config.config_speed, 20, 0, 0, 2000, 12000);
@@ -41,9 +41,9 @@ Gimbal *Gimbal_Create() {
     pitch_config.motor_set_id = 1;
     pitch_config.motor_pid_model = POSITION_LOOP;
     pitch_config.position_fdb_model = OTHER_FDB;
-    pitch_config.position_pid_fdb = obj->pitch_pos_ref;
+    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[2]);
     pitch_config.speed_fdb_model = OTHER_FDB;
-    pitch_config.speed_pid_fdb  = obj->pitch_spe_ref;
+    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro[2]);
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 2, 0, 0, 0, 5000);
     PID_SetConfig(&pitch_config.config_speed, 20, 0, 0, 2000, 12000);

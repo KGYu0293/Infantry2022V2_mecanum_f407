@@ -30,6 +30,7 @@
 #define CLIENT_MAP_COMMAND_T 0X0305
 
 // 收到的裁判系统数据包
+#pragma pack(1)
 typedef struct referee_rx_pack_t {
     struct {
         uint8_t SOF;
@@ -41,10 +42,11 @@ typedef struct referee_rx_pack_t {
     uint8_t data[REFEREE_RX_MAX_SIZE];
     uint16_t frame_tail;
 } referee_rx_pack;
+#pragma pack()
 
 cvector *referee_instances;
 
-void referee_data_solve(Referee *obj, uint32_t len);
+uint8_t referee_data_solve(Referee *obj, uint32_t len);
 void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len);
 
 void referee_driver_init() {
@@ -54,7 +56,10 @@ void referee_driver_init() {
 
 Referee *referee_Create(referee_config *config) {
     Referee *obj = (Referee *)malloc(sizeof(Referee));
+    memset(obj, 0, sizeof(sizeof(Referee)));
     obj->config = *config;
+    obj->receive_len = 0;
+    obj->receive_status = 0;
     obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     cvector_pushback(referee_instances, &obj);
     return obj;
@@ -64,16 +69,39 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
     for (size_t i = 0; i < referee_instances->cv_len; i++) {
         Referee *now = *(Referee **)cvector_val_at(referee_instances, i);
         if (uart_index == now->config.bsp_uart_index) {
-            memcpy(now->primary_data, data, REFEREE_RX_MAX_SIZE);
-            now->monitor->reset(now->monitor);
-            referee_data_solve(now, len);
+            // if(data[0] == 0xA5){
+            //     now->receive_len = 0;
+            //     now->receive_status = 1;
+            // }
+            // if(now->receive_len + len > REFEREE_RX_MAX_SIZE){
+            //     now->receive_status = 0;
+            //     now->receive_len = 0;
+            //     return;
+            // }
+            // memcpy(now->primary_data + now->receive_len, data ,len);
+            // now->receive_len += len;
+            // if(now->receive_len >= 5){
+            //     now->receive_target_len = (now->primary_data[0] | (uint16_t) now->primary_data[1] << 8);
+            // }
+            if (len > REFEREE_RX_MAX_SIZE) return;
+            memcpy(now->primary_data, data, len);
+            uint8_t a = referee_data_solve(now, len);
+            if (a == 1) now->monitor->reset(now->monitor);
         }
     }
 }
 
-void referee_data_solve(Referee *obj, uint32_t len) {
+uint8_t referee_data_solve(Referee *obj, uint32_t len) {
+    if (len < REFEREE_RX_MIN_SIZE) return 0;
     referee_rx_pack data_pack;
-    memcpy(&data_pack.frame_header, obj->primary_data, 5);
+    // frame_header
+    data_pack.frame_header.seq = obj->primary_data[0];
+    data_pack.frame_header.data_length = obj->primary_data[1] | (obj->primary_data[2] << 8);
+    data_pack.frame_header.SOF = obj->primary_data[3];
+    data_pack.frame_header.CRC8 = obj->primary_data[4];
+    if (data_pack.frame_header.seq != 0xA5) return 0;
+    if ((data_pack.frame_header.data_length + REFEREE_RX_MIN_SIZE) != len) return 0;
+    // 数据拷贝
     memcpy(&data_pack.cmd_id, obj->primary_data + 5, 2);
     memcpy(data_pack.data, obj->primary_data + 7, len - 9);  // data本身即为指针
     memcpy(&data_pack.frame_tail, obj->primary_data + len - 2, 2);

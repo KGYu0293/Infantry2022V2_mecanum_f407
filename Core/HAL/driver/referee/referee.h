@@ -5,8 +5,8 @@
 #include "monitor.h"
 #include "stdint.h"
 
-#define REFEREE_RX_MIN_SIZE 10
-#define REFEREE_RX_MAX_SIZE 37
+#define REFEREE_RX_MIN_SIZE 9
+#define REFEREE_RX_MAX_SIZE 128 + REFEREE_RX_MIN_SIZE
 
 typedef enum Robot_id_e {
     RED_HERO = 1,
@@ -274,6 +274,9 @@ typedef struct Referee_t {
 
     referee_config config;
     monitor_item *monitor;
+    uint8_t receive_status;
+    uint8_t receive_len;
+    uint16_t receive_target_len;
 } Referee;
 
 void referee_driver_init(void);
