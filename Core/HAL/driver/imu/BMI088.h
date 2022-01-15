@@ -14,10 +14,11 @@
 
 //此处欧拉角定义为 绕固定参考坐标轴旋转Z-Y-X 也就是 yaw pitch roll
 typedef struct imu_data_t {
-    float accel[3];
-    float gyro[3];
-    float euler[3];
-    float euler_deg[3];
+    float accel[3];// ZYX加速度
+    float gyro[3];// 角速度 度每秒
+    float euler[3];// 欧拉角 弧度
+    float euler_deg[3];// 欧拉角 角度
+    float euler_8192[3];// 欧拉角 编码器版 0-8192
 } imu_data;
 
 typedef struct BMI088_config_t {

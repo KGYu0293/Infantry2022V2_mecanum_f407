@@ -25,35 +25,21 @@
 #define HEAT_PID_MAX_OUT 1000.0f  // max out of temperature control PID
 #define HEAT_PID_MAX_IOUT 900.0f  // max out of temperature control PID
 // BMI088加速度计配置数组
-static uint8_t BMI088_accel_config[BMI088_WRITE_ACCEL_REG_NUM][3] = {
-    {BMI088_ACC_PWR_CTRL, BMI088_ACC_ENABLE_ACC_ON, BMI088_ACC_PWR_CTRL_ERROR},
-    {BMI088_ACC_PWR_CONF, BMI088_ACC_PWR_ACTIVE_MODE,
-     BMI088_ACC_PWR_CONF_ERROR},
-    {BMI088_ACC_CONF,
-     BMI088_ACC_NORMAL | BMI088_ACC_800_HZ | BMI088_ACC_CONF_MUST_Set,
-     BMI088_ACC_CONF_ERROR},
-    {BMI088_ACC_RANGE, BMI088_ACC_RANGE_3G, BMI088_ACC_RANGE_ERROR},
-    {BMI088_INT1_IO_CTRL,
-     BMI088_ACC_INT1_IO_ENABLE | BMI088_ACC_INT1_GPIO_PP |
-         BMI088_ACC_INT1_GPIO_LOW,
-     BMI088_INT1_IO_CTRL_ERROR},
-    {BMI088_INT_MAP_DATA, BMI088_ACC_INT1_DRDY_INTERRUPT,
-     BMI088_INT_MAP_DATA_ERROR}
+static uint8_t BMI088_accel_config[BMI088_WRITE_ACCEL_REG_NUM][3] = {{BMI088_ACC_PWR_CTRL, BMI088_ACC_ENABLE_ACC_ON, BMI088_ACC_PWR_CTRL_ERROR},
+                                                                     {BMI088_ACC_PWR_CONF, BMI088_ACC_PWR_ACTIVE_MODE, BMI088_ACC_PWR_CONF_ERROR},
+                                                                     {BMI088_ACC_CONF, BMI088_ACC_NORMAL | BMI088_ACC_800_HZ | BMI088_ACC_CONF_MUST_Set, BMI088_ACC_CONF_ERROR},
+                                                                     {BMI088_ACC_RANGE, BMI088_ACC_RANGE_3G, BMI088_ACC_RANGE_ERROR},
+                                                                     {BMI088_INT1_IO_CTRL, BMI088_ACC_INT1_IO_ENABLE | BMI088_ACC_INT1_GPIO_PP | BMI088_ACC_INT1_GPIO_LOW, BMI088_INT1_IO_CTRL_ERROR},
+                                                                     {BMI088_INT_MAP_DATA, BMI088_ACC_INT1_DRDY_INTERRUPT, BMI088_INT_MAP_DATA_ERROR}
 
 };
 // BMI088陀螺仪配置数组
-static uint8_t BMI088_gyro_config[BMI088_WRITE_GYRO_REG_NUM][3] = {
-    {BMI088_GYRO_RANGE, BMI088_GYRO_2000, BMI088_GYRO_RANGE_ERROR},
-    {BMI088_GYRO_BANDWIDTH,
-     BMI088_GYRO_1000_116_HZ | BMI088_GYRO_BANDWIDTH_MUST_Set,
-     BMI088_GYRO_BANDWIDTH_ERROR},
-    {BMI088_GYRO_LPM1, BMI088_GYRO_NORMAL_MODE, BMI088_GYRO_LPM1_ERROR},
-    {BMI088_GYRO_CTRL, BMI088_DRDY_ON, BMI088_GYRO_CTRL_ERROR},
-    {BMI088_GYRO_INT3_INT4_IO_CONF,
-     BMI088_GYRO_INT3_GPIO_PP | BMI088_GYRO_INT3_GPIO_LOW,
-     BMI088_GYRO_INT3_INT4_IO_CONF_ERROR},
-    {BMI088_GYRO_INT3_INT4_IO_MAP, BMI088_GYRO_DRDY_IO_INT3,
-     BMI088_GYRO_INT3_INT4_IO_MAP_ERROR}
+static uint8_t BMI088_gyro_config[BMI088_WRITE_GYRO_REG_NUM][3] = {{BMI088_GYRO_RANGE, BMI088_GYRO_2000, BMI088_GYRO_RANGE_ERROR},
+                                                                   {BMI088_GYRO_BANDWIDTH, BMI088_GYRO_1000_116_HZ | BMI088_GYRO_BANDWIDTH_MUST_Set, BMI088_GYRO_BANDWIDTH_ERROR},
+                                                                   {BMI088_GYRO_LPM1, BMI088_GYRO_NORMAL_MODE, BMI088_GYRO_LPM1_ERROR},
+                                                                   {BMI088_GYRO_CTRL, BMI088_DRDY_ON, BMI088_GYRO_CTRL_ERROR},
+                                                                   {BMI088_GYRO_INT3_INT4_IO_CONF, BMI088_GYRO_INT3_GPIO_PP | BMI088_GYRO_INT3_GPIO_LOW, BMI088_GYRO_INT3_INT4_IO_CONF_ERROR},
+                                                                   {BMI088_GYRO_INT3_INT4_IO_MAP, BMI088_GYRO_DRDY_IO_INT3, BMI088_GYRO_INT3_INT4_IO_MAP_ERROR}
 
 };
 
@@ -94,8 +80,7 @@ void BMI088_Driver_Init() {
 //更新所有的IMU
 void BMI088_Update_All() {
     for (size_t i = 0; i < bmi088_instances->cv_len; ++i) {
-        BMI088_imu *imu_now =
-            *((BMI088_imu **)cvector_val_at(bmi088_instances, i));
+        BMI088_imu *imu_now = *((BMI088_imu **)cvector_val_at(bmi088_instances, i));
         BMI088_Update(imu_now);
     }
 }
@@ -104,8 +89,9 @@ void BMI088_Update_All() {
 BMI088_imu *BMI088_Create(BMI088_config *config) {
     BMI088_imu *obj = (BMI088_imu *)malloc(sizeof(BMI088_imu));
     obj->config = *config;
-    while (BMI088_init(obj));
-    obj->monitor = Monitor_Register(config->lost_callback,5,obj);
+    while (BMI088_init(obj))
+        ;
+    obj->monitor = Monitor_Register(config->lost_callback, 5, obj);
     cvector_pushback(bmi088_instances, &obj);
     return obj;
 }
@@ -139,13 +125,11 @@ void BMI088_Update(BMI088_imu *obj) {
         ++init_count;
         if (init_count < BMI088_BIAS_INIT_DISCARD)
             return;
-        else if (init_count <
-                 BMI088_BIAS_INIT_COUNT + BMI088_BIAS_INIT_DISCARD) {
+        else if (init_count < BMI088_BIAS_INIT_COUNT + BMI088_BIAS_INIT_DISCARD) {
             obj->gyrobias[0] += obj->data.gyro[0];
             obj->gyrobias[1] += obj->data.gyro[1];
             obj->gyrobias[2] += obj->data.gyro[2];
-        } else if (init_count ==
-                   BMI088_BIAS_INIT_COUNT + BMI088_BIAS_INIT_DISCARD) {
+        } else if (init_count == BMI088_BIAS_INIT_COUNT + BMI088_BIAS_INIT_DISCARD) {
             obj->gyrobias[0] /= BMI088_BIAS_INIT_COUNT;
             obj->gyrobias[1] /= BMI088_BIAS_INIT_COUNT;
             obj->gyrobias[2] /= BMI088_BIAS_INIT_COUNT;
@@ -162,13 +146,14 @@ void BMI088_Update(BMI088_imu *obj) {
     obj->data.gyro[2] -= obj->gyrobias[2];
 
     // Mahony算法姿态解算
-    MahonyAHRS_update(&obj->mahony_solver, obj->data.gyro[0], obj->data.gyro[1],
-                      obj->data.gyro[2], obj->data.accel[0], obj->data.accel[1],
-                      obj->data.accel[2]);
+    MahonyAHRS_update(&obj->mahony_solver, obj->data.gyro[0], obj->data.gyro[1], obj->data.gyro[2], obj->data.accel[0], obj->data.accel[1], obj->data.accel[2]);
     memcpy(obj->data.euler, obj->mahony_solver.euler, sizeof(float) * 3);
     obj->data.euler_deg[0] = obj->data.euler[0] * RAD2DEG;
     obj->data.euler_deg[1] = obj->data.euler[1] * RAD2DEG;
     obj->data.euler_deg[2] = obj->data.euler[2] * RAD2DEG;
+    obj->data.euler_8192[0] = obj->data.euler_deg[0] / 360 * 8192;
+    obj->data.euler_8192[1] = obj->data.euler_deg[1] / 360 * 8192;
+    obj->data.euler_8192[2] = obj->data.euler_deg[2] / 360 * 8192;
     // MadgwickAHRS_update(&obj->madgwick_solver, obj->data.gyro[0],
     // obj->data.gyro[1], obj->data.gyro[2], obj->data.accel[0],
     // obj->data.accel[1], obj->data.accel[2]); memcpy(obj->data.euler,
@@ -201,8 +186,7 @@ void BMI088_accel_init(BMI088_imu *obj) {
         return;
     }
     for (int i = 0; i < BMI088_WRITE_ACCEL_REG_NUM; ++i) {
-        BMI088_accel_write(obj, BMI088_accel_config[i][0],
-                           BMI088_accel_config[i][1]);
+        BMI088_accel_write(obj, BMI088_accel_config[i][0], BMI088_accel_config[i][1]);
         bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
         BMI088_accel_read_single(obj, BMI088_accel_config[i][0], &res);
@@ -231,8 +215,7 @@ void BMI088_gyro_init(BMI088_imu *obj) {
         return;
     }
     for (int i = 0; i < BMI088_WRITE_GYRO_REG_NUM; ++i) {
-        BMI088_gyro_write(obj, BMI088_gyro_config[i][0],
-                          BMI088_gyro_config[i][1]);
+        BMI088_gyro_write(obj, BMI088_gyro_config[i][0], BMI088_gyro_config[i][1]);
         bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
 
         BMI088_gyro_read_single(obj, BMI088_gyro_config[i][0], &res);
@@ -266,8 +249,7 @@ void BMI088_heat_control(BMI088_imu *obj) {
     PID_Calc(&obj->heat_pid);
     // __HAL_TIM_SetCompare(obj->HEAT_PWM_BASE, obj->HAET_PWM_CHANNEL,
     //                      (uint16_t)(obj->heat_pid.output));
-    BSP_PWM_SetCCR(obj->config.bsp_pwm_heat_index,
-                   (uint16_t)(obj->heat_pid.output));
+    BSP_PWM_SetCCR(obj->config.bsp_pwm_heat_index, (uint16_t)(obj->heat_pid.output));
 }
 
 // BMI088读取函数
@@ -315,8 +297,7 @@ void BMI088_read_raw(BMI088_imu *obj) {
 // }
 
 //辅助读/写函数
-void BMI088_accel_read(BMI088_imu *obj, uint8_t reg, uint8_t *buf,
-                       uint8_t len) {
+void BMI088_accel_read(BMI088_imu *obj, uint8_t reg, uint8_t *buf, uint8_t len) {
     // BMI088_ACCEL_NS_L(obj);
     BSP_GPIO_Set(obj->config.bsp_gpio_accel_index, 0);
     spi_read_write_byte(obj->config.bsp_spi_index, reg | 0x80);

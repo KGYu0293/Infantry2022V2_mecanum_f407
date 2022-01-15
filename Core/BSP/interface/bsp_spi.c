@@ -12,7 +12,6 @@ BSP_SPI_Typedef spi_ports[DEVICE_SPI_CNT];
 
 void BSP_SPI_Init() { 
      spi_ports[0].port = &hspi1; 
-     // spi_ports[1].port = &hspi2;
 }
 
 void BSP_SPI_TransmitReceive(uint8_t spi_index, uint8_t *pTxData,
