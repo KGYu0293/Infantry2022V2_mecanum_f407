@@ -4,8 +4,8 @@
 #define PITCH_MOTOR_ENCORDER_BIAS 841
 #define YAW_MOTOR_ENCORDER_BIAS 3153
 // 云台抬头/低头限位
-#define PITCH_ENCORDER_HIGHEST YAW_MOTOR_ENCORDER_BIAS + 500
-#define PITCH_ENCORDER_LOWEST YAW_MOTOR_ENCORDER_BIAS - 500
+#define PITCH_ENCORDER_HIGHEST (YAW_MOTOR_ENCORDER_BIAS + 500)
+#define PITCH_ENCORDER_LOWEST (YAW_MOTOR_ENCORDER_BIAS - 500)
 
 void gimbal_motor_lost(void *motor) { printf_log("gimbal motor lost!\n"); }
 void gimbal_imu_lost(void *imu) { printf_log("gimbal imu lost!!!gimbal stopped.\n"); }
