@@ -12,6 +12,8 @@ enum Motor_PID_Model_e { CURRENT_LOOP = 0, SPEED_LOOP, POSITION_LOOP };  //速�
 
 enum Motor_FDB_Model_e { MOTOR_FDB = 0, OTHER_FDB };
 
+enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0, MOTOR_OUTPUT_REVERSE }; //是否输出反转
+
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
     uint8_t motor_set_id;  //电调上通过闪灯次数确定的id
@@ -19,6 +21,7 @@ typedef struct can_motor_config_t {
     enum Motor_PID_Model_e motor_pid_model;
     enum Motor_FDB_Model_e position_fdb_model;
     enum Motor_FDB_Model_e speed_fdb_model;
+    enum Motor_OUTPUT_Model_e output_model;
     struct PID_config_t config_speed;
     struct PID_config_t config_position;
     float* speed_pid_fdb;  // OTHER_FDB模式的ref指针

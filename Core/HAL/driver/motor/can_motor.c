@@ -80,7 +80,7 @@ void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uin
         Can_Motor_FeedbackData_Update(motor_instances[can_id][model_3508_2006_id < 5 ? 0 : 1][model_3508_2006_id < 5 ? model_3508_2006_id - 1 : model_3508_2006_id - 5], data);
     } else if (motors_id[can_id][MODEL_3508][model_3508_2006_id - 1]) {
         Can_Motor_FeedbackData_Update(motor_instances[can_id][model_3508_2006_id < 5 ? 0 : 1][model_3508_2006_id < 5 ? model_3508_2006_id - 1 : model_3508_2006_id - 5], data);
-    } else if (motors_id[can_id][MODEL_6020][model_6020_id - 1]) {
+    } else if (model_6020_id < 9 && motors_id[can_id][MODEL_6020][model_6020_id - 1]) {
         Can_Motor_FeedbackData_Update(motor_instances[can_id][model_6020_id < 5 ? 1 : 2][model_6020_id < 5 ? model_6020_id - 1 : model_6020_id - 5], data);
     }
 }
@@ -144,6 +144,7 @@ void Can_Motor_Calc_Send() {
                     obj->current_output = obj->speed_pid.output;
                 }
                 buf[id] = obj->current_output;
+                if(obj->config.output_model == MOTOR_OUTPUT_REVERSE) buf[id] *= -1;
                 if (obj->enable == MOTOR_STOP) {
                     buf[id] = 0;
                 }

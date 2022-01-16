@@ -15,11 +15,17 @@
 /* 每发射一颗小弹增加的热量 */
 #define UNIT_HEAT_42MM 100
 
-void shoot_motor_lost(void *motor) { printf_log("shoot motor lost!\n"); }
+void shoot_motor_lost(void *motor) {
+    can_motor *now = (can_motor *)motor;
+    printf_log("shoot motor can:%d id:%d lost!\n", now->config.bsp_can_index, now->config.motor_set_id);
+}
 
 Shoot *Shoot_Create(void) {
     Shoot *obj = (Shoot *)malloc(sizeof(Shoot));
     obj->load_delta_pos = 8192 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
+
+    //
+    obj->shoot_cmd_suber = register_sub(shoot_cmd_topic, 1);
 
     // 电机初始化
     can_motor_config friction_a_config;
@@ -31,36 +37,36 @@ Shoot *Shoot_Create(void) {
     friction_a_config.speed_fdb_model = MOTOR_FDB;
     friction_a_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_a_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_a_config.config_speed, 20, 0, 0, 2000, 16384);
+    PID_SetConfig(&friction_a_config.config_speed, 20, 0, 0, 2000, 0);
     obj->friction_a = Can_Motor_Create(&friction_a_config);
 
     can_motor_config friction_b_config;
     friction_b_config.motor_model = MODEL_3508;
     friction_b_config.bsp_can_index = 0;
-    friction_b_config.motor_set_id = 1;
+    friction_b_config.motor_set_id = 2;
     friction_b_config.motor_pid_model = SPEED_LOOP;
     friction_b_config.position_fdb_model = MOTOR_FDB;
     friction_b_config.speed_fdb_model = MOTOR_FDB;
     friction_b_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_b_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_b_config.config_speed, 20, 0, 0, 2000, 16384);
+    PID_SetConfig(&friction_b_config.config_speed, 20, 0, 0, 2000, 0);
     obj->friction_b = Can_Motor_Create(&friction_b_config);
 
     can_motor_config load_config;
     load_config.motor_model = MODEL_2006;
     load_config.bsp_can_index = 0;
-    load_config.motor_set_id = 1;
+    load_config.motor_set_id = 3;
     load_config.motor_pid_model = POSITION_LOOP;
     load_config.position_fdb_model = MOTOR_FDB;
     load_config.speed_fdb_model = MOTOR_FDB;
     load_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&load_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 16384);
+    PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 0);
     obj->load = Can_Motor_Create(&load_config);
     return obj;
 };
 
-void Shoot_load_motor_set(Shoot *obj, Shoot_param* param) {
+void Shoot_load_motor_set(Shoot *obj, Shoot_param *param) {
     if (param->heat_limit_remain < UNIT_HEAT_17MM) {
         param->shoot_command = not_fire;
     }
@@ -71,22 +77,22 @@ void Shoot_load_motor_set(Shoot *obj, Shoot_param* param) {
             break;
         case reverse:  // 反转 防卡弹
             obj->load->config.motor_pid_model = SPEED_LOOP;
-            obj->load->speed_pid.ref = -10 * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
+            obj->load->speed_pid.ref = 10 * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
             break;
         case continuous:
             obj->load->config.motor_pid_model = SPEED_LOOP;
-            obj->load->speed_pid.ref = param->fire_rate * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
+            obj->load->speed_pid.ref = -param->fire_rate * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
             break;
         case single:
             obj->load->config.motor_pid_model = POSITION_LOOP;
-            obj->load->position_pid.ref = obj->load->real_position + obj->load_delta_pos;
+            obj->load->position_pid.ref = obj->load->real_position - obj->load_delta_pos;
         case Double:
             obj->load->config.motor_pid_model = POSITION_LOOP;
-            obj->load->position_pid.ref = obj->load->real_position + (2 * obj->load_delta_pos);
+            obj->load->position_pid.ref = obj->load->real_position - (2 * obj->load_delta_pos);
             break;
         case trible:
             obj->load->config.motor_pid_model = POSITION_LOOP;
-            obj->load->position_pid.ref = obj->load->real_position + (3 * obj->load_delta_pos);
+            obj->load->position_pid.ref = obj->load->real_position - (3 * obj->load_delta_pos);
             break;
         default:
             break;
@@ -97,7 +103,7 @@ void Shoot_Update(Shoot *obj) {
     // sub并得到param
     publish_data data = obj->shoot_cmd_suber->getdata(obj->shoot_cmd_suber);
     if (data.len == -1) return;  // cmd未发布指令
-    Shoot_param *param = (Shoot_param*)data.data;
+    Shoot_param *param = (Shoot_param *)data.data;
 
     switch (param->mode) {
         case shoot_stop:

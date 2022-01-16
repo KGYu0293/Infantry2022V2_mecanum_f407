@@ -12,12 +12,13 @@
 #include "bsp_spi.h"
 #include "bsp_pwm.h"
 
-//此处欧拉角定义为 绕固定参考坐标轴旋转Z-Y-X 也就是 yaw pitch roll
+//此处欧拉角定义为 绕固定参考坐标轴旋转X-Y-Y 也就是 pitch roll yaw
 typedef struct imu_data_t {
     float accel[3];// ZYX加速度
+    //按陀螺仪原始角速度定义 pitch roll yaw
     float gyro[3];// 角速度 度每秒
-    float euler[3];// 欧拉角 弧度
-    float euler_deg[3];// 欧拉角 角度
+    float euler[3];// 欧拉角 弧度 
+    float euler_deg[3];// 欧拉角 角度 
     float euler_8192[3];// 欧拉角 编码器版 0-8192
 } imu_data;
 

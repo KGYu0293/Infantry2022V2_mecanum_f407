@@ -53,11 +53,11 @@ void APP_Layer_default_loop() {
 // APP层的函数，机器人命令层中枢，在app.h中声明并直接在rtos.c中执行
 void APP_RobotCmd_Loop() {
     // 调用各部分update
-    if (gimbal->imu->bias_init_success) {
+    // if (gimbal->imu->bias_init_success) {
         Robot_CMD_Update(robot);
         Gimbal_Update(gimbal);
         Shoot_Update(shoot);
-    }
+    // }
 }
 #endif
 

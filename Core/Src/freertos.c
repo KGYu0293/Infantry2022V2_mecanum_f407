@@ -86,6 +86,13 @@ const osThreadAttr_t MonitorTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
+/* Definitions for RobotCMDTask */
+osThreadId_t RobotCMDTaskHandle;
+const osThreadAttr_t RobotCMDTask_attributes = {
+  .name = "RobotCMDTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -97,6 +104,7 @@ void StartImuTask(void *argument);
 void StartLogTask(void *argument);
 void StartMotorTask(void *argument);
 void StartMonitorTask(void *argument);
+void StartRobotCMDTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -141,6 +149,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of MonitorTask */
   MonitorTaskHandle = osThreadNew(StartMonitorTask, NULL, &MonitorTask_attributes);
+
+  /* creation of RobotCMDTask */
+  RobotCMDTaskHandle = osThreadNew(StartRobotCMDTask, NULL, &RobotCMDTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -243,14 +254,35 @@ void StartMonitorTask(void *argument)
 {
   /* USER CODE BEGIN StartMonitorTask */
   /* Infinite loop */
-  portTickType currentTimeMotor;
-  currentTimeMotor = xTaskGetTickCount();
+  portTickType currentTimeMonitor;
+  currentTimeMonitor = xTaskGetTickCount();
   for(;;)
   {
     Monitor_Loop();
-    vTaskDelayUntil(&currentTimeMotor, 100);
+    vTaskDelayUntil(&currentTimeMonitor, 100);
   }
   /* USER CODE END StartMonitorTask */
+}
+
+/* USER CODE BEGIN Header_StartRobotCMDTask */
+/**
+* @brief Function implementing the RobotCMDTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartRobotCMDTask */
+void StartRobotCMDTask(void *argument)
+{
+  /* USER CODE BEGIN StartRobotCMDTask */
+  /* Infinite loop */
+  portTickType currentTimeRobotCMD;
+  currentTimeRobotCMD = xTaskGetTickCount();
+  for(;;)
+  {
+    APP_RobotCmd_Loop();
+    vTaskDelayUntil(&currentTimeRobotCMD, 2);
+  }
+  /* USER CODE END StartRobotCMDTask */
 }
 
 /* Private application code --------------------------------------------------*/

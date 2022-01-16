@@ -88,9 +88,9 @@ void MadgwickAHRS_update(MadgwickAHRS *obj, float gx, float gy, float gz,
     obj->q3 *= recipNorm;
 
     // Euler
-    obj->euler[2] = atan2(2 * (obj->q0 * obj->q1 + obj->q2 * obj->q3),
+    obj->euler[0] = atan2(2 * (obj->q0 * obj->q1 + obj->q2 * obj->q3),
                           1 - 2 * (obj->q1 * obj->q1 + obj->q2 * obj->q2));
     obj->euler[1] = asin(2 * (obj->q0 * obj->q2 - obj->q3 * obj->q1));
-    obj->euler[0] = atan2(2 * (obj->q0 * obj->q3 + obj->q1 * obj->q2),
+    obj->euler[2] = atan2(2 * (obj->q0 * obj->q3 + obj->q1 * obj->q2),
                           1 - 2 * (obj->q2 * obj->q2 + obj->q3 * obj->q3));
 }

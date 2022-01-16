@@ -61,6 +61,8 @@
         "bsp_uart.h": "c",
         "compare": "cpp",
         "new": "cpp",
-        "gimbal.h": "c"
+        "gimbal.h": "c",
+        "bmi088def.h": "c",
+        "robot_cmd.h": "c"
     }
 }

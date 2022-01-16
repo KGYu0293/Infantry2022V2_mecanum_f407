@@ -24,16 +24,17 @@ Gimbal *Gimbal_Create() {
 
     can_motor_config yaw_config;
     yaw_config.motor_model = MODEL_6020;
-    yaw_config.bsp_can_index = 0;
+    yaw_config.bsp_can_index = 1;
     yaw_config.motor_set_id = 1;
     yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
-    yaw_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]);// 陀螺仪模式反馈值更新 需参照C板实际安装方向
+    yaw_config.position_pid_fdb = &(obj->imu->data.euler_8192[2]);// 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z
     yaw_config.speed_fdb_model = OTHER_FDB;
-    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro[0]);
+    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro[2]);
+    yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
     yaw_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&yaw_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&yaw_config.config_speed, 20, 0, 0, 2000, 12000);
+    PID_SetConfig(&yaw_config.config_speed, 20, 0, 0, 2000, 5000);
     obj->yaw = Can_Motor_Create(&yaw_config);
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
@@ -41,16 +42,17 @@ Gimbal *Gimbal_Create() {
     pitch_config.motor_set_id = 1;
     pitch_config.motor_pid_model = POSITION_LOOP;
     pitch_config.position_fdb_model = OTHER_FDB;
-    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[2]);
+    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]); // 此处使用陀螺仪pitch轴X
     pitch_config.speed_fdb_model = OTHER_FDB;
-    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro[2]);
+    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro[0]);
+    pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 20, 0, 0, 2000, 12000);
+    PID_SetConfig(&pitch_config.config_speed, 20, 0, 0, 2000, 5000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
-    obj->gimbal_cmd_sub = register_sub(gimbal_cmd_topic, sizeof(Gimbal_param));
+    obj->gimbal_cmd_sub = register_sub(gimbal_cmd_topic, 1);
     // 定义pub
     obj->gimbal_yaw_data_pub = register_pub(gimbal_upload_topic);
     return obj;
@@ -65,6 +67,7 @@ void Gimbal_Update(Gimbal *gimbal) {
 
     // 取得控制参数
     publish_data gimbal_data = gimbal->gimbal_cmd_sub->getdata(gimbal->gimbal_cmd_sub);
+   
     if (gimbal_data.len == -1) return;  // cmd未工作
     Gimbal_param *param = (Gimbal_param *)gimbal_data.data;
 
@@ -93,11 +96,11 @@ void Gimbal_Update(Gimbal *gimbal) {
     }
 
     // 软件限位 pitch 使用编码器进行限位
-    if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST)) gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
-    {
-        gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
-        gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-        if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
-        if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
-    }
+    // if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST)) gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
+    // {
+    //     gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
+    //     gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
+    //     if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
+    //     if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
+    // }
 }

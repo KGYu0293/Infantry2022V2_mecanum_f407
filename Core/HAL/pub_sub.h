@@ -4,7 +4,7 @@
 #include "cvector.h"
 #include "circular_queue.h"
 #include "stdint.h"
-
+struct internal_topic;
 typedef struct publish_data_t {
     uint8_t* data;
     int len;
@@ -12,7 +12,7 @@ typedef struct publish_data_t {
 
 typedef struct publisher_t {
     const char* pub_topic;
-    cvector* subs;
+    struct internal_topic* topic;
     void (*publish)(struct publisher_t* pub, publish_data data);
 } Publisher;
 

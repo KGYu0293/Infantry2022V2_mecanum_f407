@@ -23,7 +23,7 @@ void OnProjectLoad (void) {
   // Dialog-generated settings
   //
   Project.SetDevice ("STM32F407IG");
-  Project.SetHostIF ("USB", "123456");
+  Project.SetHostIF ("USB", "20720857");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("12 MHz");
   Project.AddPathSubstitute ("E:/STM32Prj/STM32F407_2022_framework", "$(ProjectDir)");
@@ -33,6 +33,7 @@ void OnProjectLoad (void) {
   //
   // User settings
   //
+  Edit.SysVar (VAR_HSS_SPEED, FREQ_500_HZ);
   Project.SetOSPlugin ("FreeRTOSPlugin");
   File.Open ("$(ProjectDir)/build/STM32F407_2022_framework.elf");
 }
