@@ -24,8 +24,8 @@ Gimbal *Gimbal_Create() {
 
     can_motor_config yaw_config;
     yaw_config.motor_model = MODEL_6020;
-    yaw_config.bsp_can_index = 1;
-    yaw_config.motor_set_id = 1;
+    yaw_config.bsp_can_index = 1;//1
+    yaw_config.motor_set_id = 1;//1
     yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
     yaw_config.position_pid_fdb = &(obj->imu->data.euler_8192[2]);// 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z

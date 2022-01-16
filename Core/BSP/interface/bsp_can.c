@@ -66,6 +66,7 @@ void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
     txconf.IDE = CAN_ID_STD;
     txconf.RTR = CAN_RTR_DATA;
     txconf.DLC = len;
+    while(HAL_CAN_GetTxMailboxesFreeLevel(can_devices[can_id].device) == 0);
     HAL_CAN_AddTxMessage(can_devices[can_id].device, &txconf, data,
                          &can_devices[can_id].tx_mailbox);
 }
