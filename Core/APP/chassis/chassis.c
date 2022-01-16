@@ -100,16 +100,16 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 
     r_x = WHEELTRACK / 2 + obj->offset_x;
     r_y = WHEELBASE / 2 - obj->offset_y;
-    mecanum_speed[0] = vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[0] = -vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
     r_x = WHEELTRACK / 2 - obj->offset_x;
     r_y = WHEELBASE / 2 - obj->offset_y;
-    mecanum_speed[1] = vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[1] = -vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
     r_x = WHEELTRACK / 2 - obj->offset_x;
     r_y = WHEELBASE / 2 + obj->offset_y;
-    mecanum_speed[2] = -vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[2] = vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
     r_x = WHEELTRACK / 2 + obj->offset_x;
     r_y = WHEELBASE / 2 + obj->offset_y;
-    mecanum_speed[3] = -vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[3] = vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
 
     obj->lf->speed_pid.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
     obj->rf->speed_pid.ref = mecanum_speed[1] / PERIMETER * MOTOR_DECELE_RATIO * 360;
@@ -118,21 +118,19 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 }
 
 // 小陀螺情况下的旋转速度控制函数，可以写不同的变速小陀螺
-float auto_rotate_param(void) { return 120; }
+float auto_rotate_param(void) { return 150; }
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj, Chassis_param *param) {
-    // if (param->target.offset_angle < 0) param->target.offset_angle = 0;
-    // if (param->target.offset_angle > 360) param->target.offset_angle = 360;
-    float vx = param->target.vx * cos(param->target.offset_angle) + param->target.vy * sin(param->target.offset_angle);
-    float vy = param->target.vx * sin(param->target.offset_angle) + param->target.vy * cos(param->target.offset_angle);
+    float vx = param->target.vx * cos(-param->target.offset_angle * DEG2RAD) + param->target.vy * sin(-param->target.offset_angle * DEG2RAD);
+    float vy = -param->target.vx * sin(-param->target.offset_angle * DEG2RAD) + param->target.vy * cos(-param->target.offset_angle * DEG2RAD);
     if (param->mode == chassis_run)
         mecanum_calculate(obj, vx, vy, param->target.rotate);
     else if (param->mode == chassis_rotate_run) {
         float w = auto_rotate_param();
         mecanum_calculate(obj, vx, vy, w);
     } else if (param->mode == chassis_run_follow_offset) {
-        float w = -7.0f * (param->target.offset_angle);
+        float w = 6.5f * (param->target.offset_angle);
         mecanum_calculate(obj, vx, vy, w);
     }
     // 缓启动 斜坡

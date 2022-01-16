@@ -1,8 +1,8 @@
 #include "gimbal.h"
 
 // 云台水平并朝向底盘正前方时云台和底盘的编码器值
-#define PITCH_MOTOR_ENCORDER_BIAS
-#define YAW_MOTOR_ENCORDER_BIAS
+#define PITCH_MOTOR_ENCORDER_BIAS 841
+#define YAW_MOTOR_ENCORDER_BIAS 3153
 // 云台抬头/低头限位
 #define PITCH_ENCORDER_HIGHEST YAW_MOTOR_ENCORDER_BIAS + 500
 #define PITCH_ENCORDER_LOWEST YAW_MOTOR_ENCORDER_BIAS - 500
@@ -24,16 +24,16 @@ Gimbal *Gimbal_Create() {
 
     can_motor_config yaw_config;
     yaw_config.motor_model = MODEL_6020;
-    yaw_config.bsp_can_index = 1;//1
-    yaw_config.motor_set_id = 1;//1
+    yaw_config.bsp_can_index = 1;  // 1
+    yaw_config.motor_set_id = 1;   // 1
     yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
-    yaw_config.position_pid_fdb = &(obj->imu->data.euler_8192[2]);// 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z
+    yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z
     yaw_config.speed_fdb_model = OTHER_FDB;
     yaw_config.speed_pid_fdb = &(obj->imu->data.gyro[2]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
     yaw_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&yaw_config.config_position, 2, 0, 0, 0, 5000);
+    PID_SetConfig(&yaw_config.config_position, 1, 0, 0, 0, 5000);
     PID_SetConfig(&yaw_config.config_speed, 20, 0, 0, 2000, 5000);
     obj->yaw = Can_Motor_Create(&yaw_config);
     can_motor_config pitch_config;
@@ -42,13 +42,13 @@ Gimbal *Gimbal_Create() {
     pitch_config.motor_set_id = 1;
     pitch_config.motor_pid_model = POSITION_LOOP;
     pitch_config.position_fdb_model = OTHER_FDB;
-    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]); // 此处使用陀螺仪pitch轴X
+    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]);  // 此处使用陀螺仪pitch轴X
     pitch_config.speed_fdb_model = OTHER_FDB;
     pitch_config.speed_pid_fdb = &(obj->imu->data.gyro[0]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&pitch_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 20, 0, 0, 2000, 5000);
+    PID_SetConfig(&pitch_config.config_position, 1, 0, 0, 0, 5000);
+    PID_SetConfig(&pitch_config.config_speed, 20, 0, 0, 2000, 6000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
@@ -61,13 +61,13 @@ Gimbal *Gimbal_Create() {
 void Gimbal_Update(Gimbal *gimbal) {
     // 反馈yaw编码器信息
     publish_data gimbal_uplode;
-    gimbal_uplode.data = &gimbal->yaw->fdbPosition;
+    gimbal_uplode.data = (uint8_t *)&gimbal->yaw->fdbPosition;
     gimbal_uplode.len = 2;
     gimbal->gimbal_yaw_data_pub->publish(gimbal->gimbal_yaw_data_pub, gimbal_uplode);
 
     // 取得控制参数
     publish_data gimbal_data = gimbal->gimbal_cmd_sub->getdata(gimbal->gimbal_cmd_sub);
-   
+
     if (gimbal_data.len == -1) return;  // cmd未工作
     Gimbal_param *param = (Gimbal_param *)gimbal_data.data;
 
@@ -87,7 +87,6 @@ void Gimbal_Update(Gimbal *gimbal) {
             // 设定陀螺仪控制
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
-            // 设定位置
             gimbal->yaw->position_pid.ref = param->yaw;
             gimbal->pitch->position_pid.ref = param->pitch;
             break;

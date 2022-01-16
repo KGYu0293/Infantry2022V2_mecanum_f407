@@ -20,6 +20,9 @@ typedef struct imu_data_t {
     float euler[3];// 欧拉角 弧度 
     float euler_deg[3];// 欧拉角 角度 
     float euler_8192[3];// 欧拉角 编码器版 0-8192
+    
+    int round;
+    float yaw_8192_real;
 } imu_data;
 
 typedef struct BMI088_config_t {

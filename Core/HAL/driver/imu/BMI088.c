@@ -108,6 +108,7 @@ uint8_t BMI088_init(BMI088_imu *obj) {
     memset(obj->gyrobias, 0, sizeof(float) * 3);
     MahonyAHRS_init(&obj->mahony_solver, 2 * 1.0, 2 * 0.0001, 500.0f);
     MadgwickAHRS_init(&obj->madgwick_solver, 0.00, 500.0f);
+    obj->data.round = 0;
     return obj->init_error;
 }
 // BMI088更新函数
@@ -154,6 +155,12 @@ void BMI088_Update(BMI088_imu *obj) {
     obj->data.euler_8192[0] = obj->data.euler_deg[0] / 360 * 8192;
     obj->data.euler_8192[1] = obj->data.euler_deg[1] / 360 * 8192;
     obj->data.euler_8192[2] = obj->data.euler_deg[2] / 360 * 8192;
+
+    static float last_yaw = 0;
+    if ((obj->data.euler_8192[2] - last_yaw) > 4096) obj->data.round--;
+    if ((obj->data.euler_8192[2] - last_yaw) < -4096) obj->data.round++;
+    obj->data.yaw_8192_real = obj->data.euler_8192[2] + obj->data.round * 8192;
+    last_yaw = obj->data.euler_8192[2];
     // MadgwickAHRS_update(&obj->madgwick_solver, obj->data.gyro[0],
     // obj->data.gyro[1], obj->data.gyro[2], obj->data.accel[0],
     // obj->data.accel[1], obj->data.accel[2]); memcpy(obj->data.euler,

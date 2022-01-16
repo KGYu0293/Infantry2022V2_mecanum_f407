@@ -67,8 +67,8 @@ void Robot_CMD_Update(Robot* robot) {
         if (robot->remote->data.imput_mode == RC_Remote) {
             // gimbal
             robot->gimbal_param.mode = gimbal_run;
-            robot->gimbal_param.yaw = -(1.0f * (float)robot->remote->data.rc.ch2 - CHx_BIAS);
-            robot->gimbal_param.pitch = -(1.0f * (float)robot->remote->data.rc.ch3 - CHx_BIAS);
+            robot->gimbal_param.yaw -= 0.05f * ((float)robot->remote->data.rc.ch2 - CHx_BIAS);
+            robot->gimbal_param.pitch = -1.0f * ((float)robot->remote->data.rc.ch3 - CHx_BIAS);
             robot->gimbal_param.rotate_feedforward = 0;
 
             // chassis
@@ -77,8 +77,8 @@ void Robot_CMD_Update(Robot* robot) {
             robot->board_com.goci_data->chassis_target.vx = 16.0f * (float)(robot->remote->data.rc.ch0 - CHx_BIAS);
             if (robot->remote->data.rc.s1 == 1) {
                 robot->board_com.goci_data->chassis_mode = chassis_rotate_run;
-                robot->board_com.goci_data->chassis_target.vy *= 0.30f;
-                robot->board_com.goci_data->chassis_target.vx *= 0.30f;
+                robot->board_com.goci_data->chassis_target.vy *= 0.60f;
+                robot->board_com.goci_data->chassis_target.vx *= 0.60f;
             } else {
                 robot->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
             }
@@ -89,17 +89,12 @@ void Robot_CMD_Update(Robot* robot) {
             } else {
                 short init_forward = 3152;
                 short x = *(short*)(gimbal_offset.data);
-                // printf_log("%d\n",(int)x);
-                // if (b < 0) b += 8192;
-                // float a = (float)b * 360 / 8192;
                 short tmp;
-                if(x > init_forward && x <= 8192 - init_forward){
+                if (x > init_forward && x <= 8192 - init_forward) {
                     tmp = x - init_forward;
-                }
-                else if(x > 8192 - init_forward){
-                    tmp = - 8192 + x - init_forward;
-                }
-                else{
+                } else if (x > 8192 - init_forward) {
+                    tmp = -8192 + x - init_forward;
+                } else {
                     tmp = x - init_forward;
                 }
                 robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
@@ -140,6 +135,8 @@ void Robot_CMD_Update(Robot* robot) {
         robot->board_com.goci_data->now_robot_mode = robot_stop;
     else
         robot->board_com.goci_data->now_robot_mode = robot_run;
+    // //debug
+    // robot->board_com.goci_data->chassis_mode = chassis_stop;
     CanSend_Send(robot->board_com.send, (uint8_t*)robot->board_com.goci_data);
 }
 #endif
