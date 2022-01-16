@@ -62,7 +62,6 @@ void APP_RobotCmd_Loop() {
 #endif
 
 #ifdef CHASSIS_BOARD
-
 void APP_Layer_default_loop() {
     if (chassis->imu->bias_init_success) {
         Buzzer_Update(internal_buzzer);
@@ -71,9 +70,9 @@ void APP_Layer_default_loop() {
 // APP层的函数，机器人命令层中枢，在app.h中声明并直接在rtos.c中执行
 void APP_RobotCmd_Loop() {
     // 调用各部分update
-    if (chassis->imu->bias_init_success) {
+    // if (chassis->imu->bias_init_success) {
         Robot_CMD_Update(robot);
         Chassis_Update(chassis);
-    }
+    // }
 }
 #endif

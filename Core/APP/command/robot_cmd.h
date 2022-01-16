@@ -25,7 +25,7 @@ typedef struct board_com_goci_data_t {
 // gimbal input chassis output数据包
 typedef struct board_com_gico_data_t {
     enum { module_lost, module_working } if_chassis_board_module_lost;  // 同步底盘是否有重要模块掉线
-    imu_data chassis_imu_data;                                          // 将底盘主控的数据发到云台
+    float gyro_yaw;                                                     // 将底盘主控的数据发到云台
     struct {
         uint16_t bullet_speed_max;   // 弹速
         uint16_t heat_limit_remain;  // 剩余热量

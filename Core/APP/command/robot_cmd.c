@@ -44,7 +44,7 @@ void Robot_CMD_Update(Robot* robot) {
     if ((robot->board_com.recv->monitor->count < 1)) {
         robot->mode = robot_stop;
     } else {
-        memcpy(robot->board_com.gico_data, &(robot->board_com.recv->data_rx), sizeof(board_com_gico_data));
+        memcpy(robot->board_com.gico_data, robot->board_com.recv->data_rx.data, sizeof(board_com_gico_data));
         // 重要外设判断
         if (robot->remote->monitor->count < 1) {
             robot->mode = robot_stop;
@@ -101,7 +101,7 @@ void Robot_CMD_Update(Robot* robot) {
             } else {
                 robot->shoot_param.mode = shoot_run;
                 robot->shoot_param.shoot_command = continuous;
-                robot->shoot_param.fire_rate = 3.0f * (float)(robot->remote->data.rc.ch4 - CHx_BIAS);
+                robot->shoot_param.fire_rate = 0.01f * (float)(robot->remote->data.rc.ch4 - CHx_BIAS);
                 robot->shoot_param.heat_limit_remain = robot->board_com.gico_data->shoot_referee_data.heat_limit_remain;
                 robot->shoot_param.bullet_speed = robot->board_com.gico_data->shoot_referee_data.bullet_speed_max;
             }
@@ -151,11 +151,12 @@ Robot* Robot_CMD_Create() {
     referee_config referee_config;
     referee_config.bsp_uart_index = UART_REFEREE_PORT;
     referee_config.lost_callback = NULL;
-    obj->referee = referee_Create(&referee_config);
+    // obj->referee = referee_Create(&referee_config);
 
     // 定义publisher和subscriber
     obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
 
+    obj->chassis_upload_sub = register_sub(chassis_upload_topic,1);
     obj->mode = robot_stop;
     return obj;
 }
@@ -165,7 +166,7 @@ void Robot_CMD_Update(Robot* robot) {
     if (robot->board_com.recv->monitor->count < 1) {
         robot->mode = robot_stop;
     } else {
-        memcpy(robot->board_com.goci_data, &(robot->board_com.recv->data_rx), sizeof(board_com_goci_data));
+        memcpy(robot->board_com.goci_data, robot->board_com.recv->data_rx.data, sizeof(board_com_goci_data));
         // 底盘重要外设丢失
         if (0) {
             robot->mode = robot_stop;
@@ -188,9 +189,12 @@ void Robot_CMD_Update(Robot* robot) {
         robot->chassis_param.mode = robot->board_com.goci_data->chassis_mode;
         memcpy(&(robot->chassis_param.target), &(robot->board_com.goci_data->chassis_target), sizeof(Chassis_param_speed_target));
     }
-    robot->chassis_param.power.power_buffer = robot->referee->rx_data.power_heat.chassis_power_buffer;
-    robot->chassis_param.power.power_now = robot->referee->rx_data.power_heat.chassis_power;
-    robot->chassis_param.power.power_limit = robot->referee->rx_data.game_robot_state.chassis_power_limit;
+    // robot->chassis_param.power.power_buffer = robot->referee->rx_data.power_heat.chassis_power_buffer;
+    // robot->chassis_param.power.power_now = robot->referee->rx_data.power_heat.chassis_power;
+    // robot->chassis_param.power.power_limit = robot->referee->rx_data.game_robot_state.chassis_power_limit;
+    robot->chassis_param.power.power_buffer = 0;
+    robot->chassis_param.power.power_now = 30;
+    robot->chassis_param.power.power_limit = 50;
 
     // 发布变更
     publish_data chassis_cmd;
@@ -201,13 +205,16 @@ void Robot_CMD_Update(Robot* robot) {
     // 获取底盘imu数据
     publish_data chassis_imu_data = robot->chassis_upload_sub->getdata(robot->chassis_upload_sub);
     if (chassis_imu_data.len == -1)
-        memset(&(robot->board_com.gico_data)->chassis_imu_data, 0, sizeof(imu_data));
+        robot->board_com.gico_data->gyro_yaw = 0;
     else
-        memcpy(&(robot->board_com.gico_data)->chassis_imu_data, chassis_imu_data.data, sizeof(imu_data));
+        // memcpy(&(robot->board_com.gico_data)->chassis_imu_data, chassis_imu_data.data, sizeof(imu_data));
+        robot->board_com.gico_data->gyro_yaw = ((imu_data*)chassis_imu_data.data)->gyro[2];
     // 发送信息底盘->云台
-    robot->board_com.gico_data->shoot_referee_data.bullet_speed_max = robot->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
-    robot->board_com.gico_data->shoot_referee_data.heat_limit_remain =
-        robot->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - robot->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;
+    // robot->board_com.gico_data->shoot_referee_data.bullet_speed_max = robot->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
+    // robot->board_com.gico_data->shoot_referee_data.heat_limit_remain =
+    //     robot->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - robot->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;
+    robot->board_com.gico_data->shoot_referee_data.bullet_speed_max = 15;
+    robot->board_com.gico_data->shoot_referee_data.heat_limit_remain = 30;
     CanSend_Send(robot->board_com.send, (uint8_t*)robot->board_com.gico_data);
 }
 #endif

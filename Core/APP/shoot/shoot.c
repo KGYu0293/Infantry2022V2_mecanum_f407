@@ -49,7 +49,7 @@ Shoot *Shoot_Create(void) {
     friction_b_config.speed_fdb_model = MOTOR_FDB;
     friction_b_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_b_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_b_config.config_speed, 20, 0, 0, 2000, 0);
+    PID_SetConfig(&friction_b_config.config_speed, 20, 0, 0, 2000, 600);
     obj->friction_b = Can_Motor_Create(&friction_b_config);
 
     can_motor_config load_config;
@@ -61,7 +61,7 @@ Shoot *Shoot_Create(void) {
     load_config.speed_fdb_model = MOTOR_FDB;
     load_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&load_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 0);
+    PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 600);
     obj->load = Can_Motor_Create(&load_config);
     return obj;
 };

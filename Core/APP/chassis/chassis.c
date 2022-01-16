@@ -83,8 +83,9 @@ Chassis *Chassis_Create() {
     PID_SetConfig(&rb_config.config_speed, 20, 0, 0, 2000, 0);
     obj->rb = Can_Motor_Create(&rb_config);
 
+    obj->chassis_imu_pub = register_pub(chassis_upload_topic);
     // 定义subscriber
-    obj->chassis_cmd_suber = register_sub(chassis_cmd_topic, sizeof(Chassis_param));
+    obj->chassis_cmd_suber = register_sub(chassis_cmd_topic, 1);
 
     return obj;
 }

@@ -2,6 +2,7 @@
 
 #include "bsp_can.h"
 #include "crc16.h"
+#include "bsp_log.h"
 #include "cvector.h"
 
 
@@ -21,6 +22,7 @@ void CanSend_Send(can_send* obj, uint8_t* data) {
     memcpy(obj->txbuf + 2 + obj->config.data_len, &crc_now, 2);
     for (uint32_t idx = 0; idx < obj->buf_len; idx += 8) {
         uint32_t dlc = obj->buf_len - idx >= 8 ? 8 : obj->buf_len - idx;
+        printf_log("dlc:%d\n",dlc);
         BSP_CAN_Send(obj->config.bsp_can_index, obj->config.can_identifier, obj->txbuf + idx, dlc);
     }
 }
