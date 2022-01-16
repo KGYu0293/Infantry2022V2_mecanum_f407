@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "stdint.h"
 
@@ -28,7 +28,7 @@ typedef struct Chassis_param_speed_target_t {
     float vx;            // 单位 mm/s
     float vy;            // 单位 mm/s
     float rotate;        // 单位 度每秒
-    float offset_angle;  // vy与底盘正前方的夹角，范围0-360度，方向顺时针，即底盘y方向旋转该角度到达vy方向
+    float offset_angle;  // vy与底盘正前方的夹角，范围-180 +180度，方向顺时针，即底盘y方向旋转该角度到达vy方向
 } Chassis_param_speed_target;
 typedef struct Chassis_param_power_control_t {
     uint8_t power_limit;

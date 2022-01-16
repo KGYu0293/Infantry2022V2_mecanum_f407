@@ -54,7 +54,6 @@ void Robot_CMD_Update(Robot* robot) {
             robot->mode = robot_stop;
         } else {
             robot->mode = robot_run;
-            robot->board_com.goci_data->now_robot_mode = robot_run;
         }
     }
 
@@ -88,8 +87,22 @@ void Robot_CMD_Update(Robot* robot) {
             if (gimbal_offset.len == -1) {
                 robot->board_com.goci_data->chassis_target.offset_angle = 0;
             } else {
-                float a = (float)(*(gimbal_offset.data) - 0) * 360 / 8192;
-                robot->board_com.goci_data->chassis_target.offset_angle = a;
+                short init_forward = 3152;
+                short x = *(short*)(gimbal_offset.data);
+                // printf_log("%d\n",(int)x);
+                // if (b < 0) b += 8192;
+                // float a = (float)b * 360 / 8192;
+                short tmp;
+                if(x > init_forward && x <= 8192 - init_forward){
+                    tmp = x - init_forward;
+                }
+                else if(x > 8192 - init_forward){
+                    tmp = - 8192 + x - init_forward;
+                }
+                else{
+                    tmp = x - init_forward;
+                }
+                robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
             }
 
             // shoot
@@ -123,6 +136,10 @@ void Robot_CMD_Update(Robot* robot) {
     robot->shoot_cmd_puber->publish(robot->shoot_cmd_puber, shoot_cmd);
 
     // 板间通信-发
+    if (robot->mode == robot_stop)
+        robot->board_com.goci_data->now_robot_mode = robot_stop;
+    else
+        robot->board_com.goci_data->now_robot_mode = robot_run;
     CanSend_Send(robot->board_com.send, (uint8_t*)robot->board_com.goci_data);
 }
 #endif
@@ -156,7 +173,7 @@ Robot* Robot_CMD_Create() {
     // 定义publisher和subscriber
     obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
 
-    obj->chassis_upload_sub = register_sub(chassis_upload_topic,1);
+    obj->chassis_upload_sub = register_sub(chassis_upload_topic, 1);
     obj->mode = robot_stop;
     return obj;
 }
@@ -173,12 +190,12 @@ void Robot_CMD_Update(Robot* robot) {
             robot->board_com.gico_data->if_chassis_board_module_lost = module_lost;
         } else {
             robot->board_com.gico_data->if_chassis_board_module_lost = module_working;
-        }
-        // 主板stop指令
-        if (robot->board_com.goci_data->now_robot_mode == robot_stop) {
-            robot->mode = robot_stop;
-        } else {
-            robot->mode = robot_run;
+            // 主板stop指令
+            if (robot->board_com.goci_data->now_robot_mode == robot_stop) {
+                robot->mode = robot_stop;
+            } else {
+                robot->mode = robot_run;
+            }
         }
     }
 

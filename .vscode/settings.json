@@ -63,6 +63,7 @@
         "new": "cpp",
         "gimbal.h": "c",
         "bmi088def.h": "c",
-        "robot_cmd.h": "c"
+        "robot_cmd.h": "c",
+        "robot_param.h": "c"
     }
 }

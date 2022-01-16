@@ -49,8 +49,8 @@ Chassis *Chassis_Create() {
     lf_config.position_fdb_model = MOTOR_FDB;
     lf_config.speed_fdb_model = MOTOR_FDB;
     lf_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&lf_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&lf_config.config_speed, 20, 0, 0, 2000, 0);
+    PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 5000);
+    PID_SetConfig(&lf_config.config_speed, 3, 0, 2, 2000, 2000);
     obj->lf = Can_Motor_Create(&lf_config);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
@@ -59,8 +59,8 @@ Chassis *Chassis_Create() {
     rf_config.position_fdb_model = MOTOR_FDB;
     rf_config.speed_fdb_model = MOTOR_FDB;
     rf_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&rf_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&rf_config.config_speed, 20, 0, 0, 2000, 0);
+    PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 5000);
+    PID_SetConfig(&rf_config.config_speed, 3, 0, 2, 2000, 2000);
     obj->rf = Can_Motor_Create(&rf_config);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
@@ -69,8 +69,8 @@ Chassis *Chassis_Create() {
     lb_config.position_fdb_model = MOTOR_FDB;
     lb_config.speed_fdb_model = MOTOR_FDB;
     lb_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&lb_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&lb_config.config_speed, 20, 0, 0, 2000, 0);
+    PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 5000);
+    PID_SetConfig(&lb_config.config_speed, 3, 0, 2, 2000, 2000);
     obj->lb = Can_Motor_Create(&lb_config);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
@@ -80,7 +80,7 @@ Chassis *Chassis_Create() {
     rb_config.speed_fdb_model = MOTOR_FDB;
     rb_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&rb_config.config_speed, 20, 0, 0, 2000, 0);
+    PID_SetConfig(&rb_config.config_speed, 3, 0, 2, 2000, 2000);
     obj->rb = Can_Motor_Create(&rb_config);
 
     obj->chassis_imu_pub = register_pub(chassis_upload_topic);
@@ -111,10 +111,10 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
     r_y = WHEELBASE / 2 + obj->offset_y;
     mecanum_speed[3] = -vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
 
-    obj->lf->speed_pid.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO / 360;  // rpm: *60  度/s: /360
-    obj->rf->speed_pid.ref = mecanum_speed[1] / PERIMETER * MOTOR_DECELE_RATIO / 360;
-    obj->rb->speed_pid.ref = mecanum_speed[2] / PERIMETER * MOTOR_DECELE_RATIO / 360;
-    obj->lb->speed_pid.ref = mecanum_speed[3] / PERIMETER * MOTOR_DECELE_RATIO / 360;
+    obj->lf->speed_pid.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
+    obj->rf->speed_pid.ref = mecanum_speed[1] / PERIMETER * MOTOR_DECELE_RATIO * 360;
+    obj->rb->speed_pid.ref = mecanum_speed[2] / PERIMETER * MOTOR_DECELE_RATIO * 360;
+    obj->lb->speed_pid.ref = mecanum_speed[3] / PERIMETER * MOTOR_DECELE_RATIO * 360;
 }
 
 // 小陀螺情况下的旋转速度控制函数，可以写不同的变速小陀螺
@@ -122,8 +122,8 @@ float auto_rotate_param(void) { return 120; }
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj, Chassis_param *param) {
-    if (param->target.offset_angle < 0) param->target.offset_angle = 0;
-    if (param->target.offset_angle > 360) param->target.offset_angle = 360;
+    // if (param->target.offset_angle < 0) param->target.offset_angle = 0;
+    // if (param->target.offset_angle > 360) param->target.offset_angle = 360;
     float vx = param->target.vx * cos(param->target.offset_angle) + param->target.vy * sin(param->target.offset_angle);
     float vy = param->target.vx * sin(param->target.offset_angle) + param->target.vy * cos(param->target.offset_angle);
     if (param->mode == chassis_run)
@@ -132,12 +132,13 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
         float w = auto_rotate_param();
         mecanum_calculate(obj, vx, vy, w);
     } else if (param->mode == chassis_run_follow_offset) {
-        float w = 1.0 * param->target.offset_angle;
+        float w = -7.0f * (param->target.offset_angle);
         mecanum_calculate(obj, vx, vy, w);
     }
     // 缓启动 斜坡
 }
 
+Chassis_param *param;
 void Chassis_Update(Chassis *obj) {
     // 反馈imu信息
     publish_data chassis_upload;
@@ -148,7 +149,7 @@ void Chassis_Update(Chassis *obj) {
     // subscribe并得到param
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
     if (chassis_data.len == -1) return;  // cmd未发布指令
-    Chassis_param *param = (Chassis_param *)chassis_data.data;
+    param = (Chassis_param *)chassis_data.data;
 
     // 应用得到的param进行控制
     switch (param->mode) {
@@ -157,15 +158,15 @@ void Chassis_Update(Chassis *obj) {
             obj->lb->enable = MOTOR_STOP;
             obj->rf->enable = MOTOR_STOP;
             obj->rb->enable = MOTOR_STOP;
+            break;
         case chassis_run:
         case chassis_rotate_run:
+        case chassis_run_follow_offset:
             obj->lf->enable = MOTOR_ENABLE;
             obj->lb->enable = MOTOR_ENABLE;
             obj->rf->enable = MOTOR_ENABLE;
             obj->rb->enable = MOTOR_ENABLE;
             Chassis_calculate(obj, param);
-            break;
-        default:
             break;
     }
 }

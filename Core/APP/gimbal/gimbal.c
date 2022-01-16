@@ -61,8 +61,8 @@ Gimbal *Gimbal_Create() {
 void Gimbal_Update(Gimbal *gimbal) {
     // 反馈yaw编码器信息
     publish_data gimbal_uplode;
-    gimbal_uplode.data = (uint8_t *)&gimbal->yaw->fdbPosition;
-    gimbal_uplode.len = sizeof(gimbal->yaw->fdbPosition);
+    gimbal_uplode.data = &gimbal->yaw->fdbPosition;
+    gimbal_uplode.len = 2;
     gimbal->gimbal_yaw_data_pub->publish(gimbal->gimbal_yaw_data_pub, gimbal_uplode);
 
     // 取得控制参数
