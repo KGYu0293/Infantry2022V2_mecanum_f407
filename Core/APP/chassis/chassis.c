@@ -50,7 +50,7 @@ Chassis *Chassis_Create() {
     lf_config.speed_fdb_model = MOTOR_FDB;
     lf_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&lf_config.config_speed, 3, 0, 2, 2000, 2000);
+    PID_SetConfig(&lf_config.config_speed, 3, 0, 2, 2000, 2500);
     obj->lf = Can_Motor_Create(&lf_config);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
@@ -60,7 +60,7 @@ Chassis *Chassis_Create() {
     rf_config.speed_fdb_model = MOTOR_FDB;
     rf_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&rf_config.config_speed, 3, 0, 2, 2000, 2000);
+    PID_SetConfig(&rf_config.config_speed, 3, 0, 2, 2000, 2500);
     obj->rf = Can_Motor_Create(&rf_config);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
@@ -70,7 +70,7 @@ Chassis *Chassis_Create() {
     lb_config.speed_fdb_model = MOTOR_FDB;
     lb_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&lb_config.config_speed, 3, 0, 2, 2000, 2000);
+    PID_SetConfig(&lb_config.config_speed, 3, 0, 2, 2000, 2500);
     obj->lb = Can_Motor_Create(&lb_config);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
@@ -80,9 +80,10 @@ Chassis *Chassis_Create() {
     rb_config.speed_fdb_model = MOTOR_FDB;
     rb_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&rb_config.config_speed, 3, 0, 2, 2000, 2000);
+    PID_SetConfig(&rb_config.config_speed, 3, 0, 2, 2000, 2500);
     obj->rb = Can_Motor_Create(&rb_config);
 
+    // 定义pub
     obj->chassis_imu_pub = register_pub(chassis_upload_topic);
     // 定义subscriber
     obj->chassis_cmd_suber = register_sub(chassis_cmd_topic, 1);
@@ -122,8 +123,8 @@ float auto_rotate_param(void) { return 150; }
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj, Chassis_param *param) {
-    float vx = param->target.vx * cos(-param->target.offset_angle * DEG2RAD) + param->target.vy * sin(-param->target.offset_angle * DEG2RAD);
-    float vy = -param->target.vx * sin(-param->target.offset_angle * DEG2RAD) + param->target.vy * cos(-param->target.offset_angle * DEG2RAD);
+    float vx = param->target.vx * cos(param->target.offset_angle * DEG2RAD) - param->target.vy * sin(param->target.offset_angle * DEG2RAD);
+    float vy = param->target.vx * sin(param->target.offset_angle * DEG2RAD) + param->target.vy * cos(param->target.offset_angle * DEG2RAD);
     if (param->mode == chassis_run)
         mecanum_calculate(obj, vx, vy, param->target.rotate);
     else if (param->mode == chassis_rotate_run) {
