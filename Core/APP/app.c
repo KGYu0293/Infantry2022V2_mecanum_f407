@@ -25,7 +25,12 @@ buzzer_config internal_buzzer_config;
 
 void APP_Layer_Init() {
     // buzzer
+#ifdef CHASSIS_BOARD
     uint32_t music_id = 1;
+#endif
+#ifdef GIMBAL_BOARD
+    uint32_t music_id = 2;
+#endif
     internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
@@ -54,9 +59,9 @@ void APP_Layer_default_loop() {
 void APP_RobotCmd_Loop() {
     // 调用各部分update
     // if (gimbal->imu->bias_init_success) {
-        Robot_CMD_Update(robot);
-        Gimbal_Update(gimbal);
-        Shoot_Update(shoot);
+    Robot_CMD_Update(robot);
+    Gimbal_Update(gimbal);
+    Shoot_Update(shoot);
     // }
 }
 #endif
@@ -71,8 +76,8 @@ void APP_Layer_default_loop() {
 void APP_RobotCmd_Loop() {
     // 调用各部分update
     // if (chassis->imu->bias_init_success) {
-        Robot_CMD_Update(robot);
-        Chassis_Update(chassis);
+    Robot_CMD_Update(robot);
+    Chassis_Update(chassis);
     // }
 }
 #endif
