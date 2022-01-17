@@ -127,7 +127,7 @@ void Robot_CMD_Update(Robot* robot) {
     robot->gimbal_cmd_puber->publish(robot->gimbal_cmd_puber, gimbal_cmd);
     publish_data shoot_cmd;
     shoot_cmd.data = (uint8_t*)&robot->shoot_param;
-    shoot_cmd.len = sizeof(Chassis_param);
+    shoot_cmd.len = sizeof(Shoot_param);
     robot->shoot_cmd_puber->publish(robot->shoot_cmd_puber, shoot_cmd);
 
     // 板间通信-发
@@ -221,7 +221,6 @@ void Robot_CMD_Update(Robot* robot) {
     if (chassis_imu_data.len == -1)
         robot->board_com.gico_data->gyro_yaw = 0;
     else
-        // memcpy(&(robot->board_com.gico_data)->chassis_imu_data, chassis_imu_data.data, sizeof(imu_data));
         robot->board_com.gico_data->gyro_yaw = ((imu_data*)chassis_imu_data.data)->gyro[2];
     // 发送信息底盘->云台
     // robot->board_com.gico_data->shoot_referee_data.bullet_speed_max = robot->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
