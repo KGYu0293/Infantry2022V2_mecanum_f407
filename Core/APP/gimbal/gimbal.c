@@ -72,7 +72,7 @@ void Gimbal_Update(Gimbal *gimbal) {
     Gimbal_param *param = (Gimbal_param *)gimbal_data.data;
 
     // 重要外设掉线检测
-    if (gimbal->imu->monitor->count < 1) param->mode = gimbal_stop;
+    if ((gimbal->imu->monitor->count < 1) || !(gimbal->imu->bias_init_success)) param->mode = gimbal_stop;
 
     // 模块控制
     switch (param->mode) {
@@ -94,12 +94,12 @@ void Gimbal_Update(Gimbal *gimbal) {
             break;
     }
 
-    // 软件限位 使用编码器对pitch轴进行限位
-    if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
-    {
-        gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
-        gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-        if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
-        if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
-    }
+    // // 软件限位 使用编码器对pitch轴进行限位 待测
+    // if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
+    // {
+    //     gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
+    //     gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
+    //     if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
+    //     if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
+    // }
 }
