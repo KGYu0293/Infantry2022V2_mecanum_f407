@@ -121,6 +121,7 @@ Core/HAL/driver/remote/DT7_DR16.c \
 Core/HAL/driver/referee/referee.c \
 Core/HAL/driver/referee/referee_ui.c \
 Core/HAL/driver/ws2812b/ws2812b.c \
+Core/HAL/driver/super_cap/super_cap_wuli.c \
 Core/HAL/driver/radiotube/radiotube.c \
 Core/HAL/lib/common.c \
 Core/HAL/lib/pid.c \
@@ -230,6 +231,7 @@ C_INCLUDES += \
 -ICore/HAL/driver/referee \
 -ICore/HAL/driver/ws2812b \
 -ICore/HAL/driver/radiotube \
+-ICore/HAL/driver/super_cap \
 -ICore/HAL/lib \
 -ICore/HAL/monitor \
 -ICore/HAL \

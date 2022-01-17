@@ -65,6 +65,7 @@
         "bmi088def.h": "c",
         "robot_cmd.h": "c",
         "robot_param.h": "c",
-        "chassis.h": "c"
+        "chassis.h": "c",
+        "super_cap_wuli.h": "c"
     }
 }
