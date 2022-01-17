@@ -54,25 +54,30 @@ Gimbal *Gimbal_Create() {
     // 定义sub
     obj->gimbal_cmd_sub = register_sub(gimbal_cmd_topic, 1);
     // 定义pub
-    obj->gimbal_yaw_data_pub = register_pub(gimbal_upload_topic);
+    obj->gimbal_upload_pub = register_pub(gimbal_upload_topic);
     return obj;
 }
 
 void Gimbal_Update(Gimbal *gimbal) {
-    // 反馈yaw编码器信息
-    publish_data gimbal_uplode;
-    gimbal_uplode.data = (uint8_t *)&gimbal->yaw->fdbPosition;
-    gimbal_uplode.len = 2;
-    gimbal->gimbal_yaw_data_pub->publish(gimbal->gimbal_yaw_data_pub, gimbal_uplode);
-
     // 取得控制参数
     publish_data gimbal_data = gimbal->gimbal_cmd_sub->getdata(gimbal->gimbal_cmd_sub);
-
     if (gimbal_data.len == -1) return;  // cmd未工作
     Gimbal_param *param = (Gimbal_param *)gimbal_data.data;
 
     // 重要外设掉线检测
-    if ((gimbal->imu->monitor->count < 1) || !(gimbal->imu->bias_init_success)) param->mode = gimbal_stop;
+    if ((gimbal->imu->monitor->count < 1) || !(gimbal->imu->bias_init_success)) {
+        param->mode = gimbal_stop;
+        gimbal->gimbal_upload_data.gimbal_module_status = module_lost;
+    } else {
+        gimbal->gimbal_upload_data.gimbal_module_status = module_working;
+    }
+
+    // 反馈yaw编码器信息以及云台imu是否正常工作
+    publish_data gimbal_uplode;
+    gimbal->gimbal_upload_data.yaw_encorder = gimbal->yaw->fdbPosition;
+    gimbal_uplode.data = &(gimbal->gimbal_upload_data);
+    gimbal_uplode.len = sizeof(Gimbal_uplode_data);
+    gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_uplode);
 
     // 模块控制
     switch (param->mode) {

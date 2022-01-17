@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-// #define GIMBAL_BOARD
-#define CHASSIS_BOARD
+#define GIMBAL_BOARD
+// #define CHASSIS_BOARD
 
 #include "stdint.h"
 
@@ -19,6 +19,8 @@ extern const char* shoot_cmd_topic;
 extern const char* chassis_upload_topic;
 extern const char* gimbal_upload_topic;
 extern const char* shoot_upload_topic;
+
+typedef enum Module_status_e {module_lost, module_working} Module_status;
 
 // chassis
 // vx vy rotate传入时以offset系（一般为云台系）为基准
@@ -53,7 +55,8 @@ typedef struct Gimbal_param_t {
 } Gimbal_param;
 
 typedef struct Gimbal_upload_data_t {
-    float yaw_encorder;
+    Module_status gimbal_module_status;
+    short yaw_encorder;
 } Gimbal_uplode_data;
 
 // shoot

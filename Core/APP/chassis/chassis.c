@@ -45,6 +45,7 @@ Chassis *Chassis_Create() {
     cap_config.super_cap_wuli_rx_id = SUPER_CAP_WULI_RX_ID;
     cap_config.super_cap_wuli_tx_id = SUPER_CAP_WULI_TX_ID;
     cap_config.lost_callback = chassis_super_cap_lost;
+    obj->super_cap = Super_cap_wuli_Create(&cap_config);
 
     can_motor_config lf_config;
     can_motor_config rf_config;

@@ -35,6 +35,6 @@ void HAL_Motor_Calc_Loop(){
     Can_Motor_Calc_Send();
 }
 
-void HAL_Super_cap_wuli_Calc_Loop(){
+void HAL_Super_cap_wuli_Loop(){
     Super_cap_wuli_Send();
 }

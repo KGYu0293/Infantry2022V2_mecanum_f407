@@ -39,6 +39,29 @@ Robot* Robot_CMD_Create() {
     return obj;
 }
 void Robot_CMD_Update(Robot* robot) {
+    publish_data gimbal_data_fdb = robot->gimbal_upload_suber->getdata(robot->gimbal_upload_suber);
+    if (gimbal_data_fdb.len == -1) {
+        // 此处 不能加 如果sub不到就return
+        robot->board_com.goci_data->chassis_target.offset_angle = 0;
+    } else {
+        Gimbal_uplode_data* gimbal_upload_data = (Gimbal_uplode_data*)gimbal_data_fdb.data;
+        
+        if (gimbal_upload_data->gimbal_module_status == module_lost)robot->if_gimbal_imu_lost = module_lost;
+        else robot->if_gimbal_imu_lost = module_working;
+        // 获取云台offset
+        short init_forward = 3152;// 云台朝向底盘正前时云台yaw编码器值
+        short x = gimbal_upload_data->yaw_encorder;
+        short tmp;
+        if (x > init_forward && x <= 8192 - init_forward) {
+            tmp = x - init_forward;
+        } else if (x > 8192 - init_forward) {
+            tmp = -8192 + x - init_forward;
+        } else {
+            tmp = x - init_forward;
+        }
+        robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
+    }
+
     // 判断机器人工作模式
     // 板间通信-收
     if ((robot->board_com.recv->monitor->count < 1)) {
@@ -46,7 +69,7 @@ void Robot_CMD_Update(Robot* robot) {
     } else {
         memcpy(robot->board_com.gico_data, robot->board_com.recv->data_rx.data, sizeof(board_com_gico_data));
         // 重要外设判断
-        if (robot->remote->monitor->count < 1) {
+        if ((robot->remote->monitor->count < 1) || (robot->if_gimbal_imu_lost == module_lost)){
             robot->mode = robot_stop;
         }
         // 遥控器打到stop模式（右拨杆最下）
@@ -81,23 +104,6 @@ void Robot_CMD_Update(Robot* robot) {
                 robot->board_com.goci_data->chassis_target.vx *= 0.60f;
             } else {
                 robot->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
-            }
-            // 获取云台此时的offset
-            publish_data gimbal_offset = robot->gimbal_upload_suber->getdata(robot->gimbal_upload_suber);
-            if (gimbal_offset.len == -1) {
-                robot->board_com.goci_data->chassis_target.offset_angle = 0;
-            } else {
-                short init_forward = 3152;
-                short x = *(short*)(gimbal_offset.data);
-                short tmp;
-                if (x > init_forward && x <= 8192 - init_forward) {
-                    tmp = x - init_forward;
-                } else if (x > 8192 - init_forward) {
-                    tmp = -8192 + x - init_forward;
-                } else {
-                    tmp = x - init_forward;
-                }
-                robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
             }
 
             // shoot
