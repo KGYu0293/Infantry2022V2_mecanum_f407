@@ -21,6 +21,7 @@
 
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 void chassis_imu_lost(void *motor) { printf_log("chassis IMU lost!!\n"); }
+void chassis_super_cap_lost(void *motor) { printf_log("super cap lost!!\n"); }
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
@@ -37,6 +38,13 @@ Chassis *Chassis_Create() {
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
     internal_imu_config.lost_callback = chassis_imu_lost;
     obj->imu = BMI088_Create(&internal_imu_config);
+
+    // 超级电容
+    super_cap_wuli_config cap_config;
+    cap_config.bsp_can_index = 0;
+    cap_config.super_cap_wuli_rx_id = SUPER_CAP_WULI_RX_ID;
+    cap_config.super_cap_wuli_tx_id = SUPER_CAP_WULI_TX_ID;
+    cap_config.lost_callback = chassis_super_cap_lost;
 
     can_motor_config lf_config;
     can_motor_config rf_config;

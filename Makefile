@@ -148,6 +148,7 @@ Core/BSP/interface/bsp_pwm.c \
 Core/BSP/lib/bsp_random.c \
 Core/BSP/lib/bsp_delay.c \
 Core/BSP/lib/bsp_log.c \
+Core/BSP/lib/bsp_reset.c \
 Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c \
 Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c
 # ASM sources

@@ -19,10 +19,12 @@
 #include "pub_sub.h"
 #include "robot_param.h"
 #include "stdint.h"
+#include "super_cap_wuli.h"
 
 // 定义chassis所需的外设，整合成一个结构体
 typedef struct chassis_t {
     BMI088_imu *imu;
+    Super_cap_wuli *super_cap;
     can_motor *lf;
     can_motor *rf;
     can_motor *lb;
@@ -31,8 +33,8 @@ typedef struct chassis_t {
     float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
     float offset_y;
 
-    Subscriber* chassis_cmd_suber;
-    Publisher* chassis_imu_pub;
+    Subscriber *chassis_cmd_suber;
+    Publisher *chassis_imu_pub;
 } Chassis;
 
 Chassis *Chassis_Create(void);
