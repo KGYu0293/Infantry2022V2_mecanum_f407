@@ -36,47 +36,40 @@ Robot* Robot_CMD_Create() {
     obj->remote = dt7_Create(&remote_config);
 
     obj->mode = robot_stop;
+    obj->ready = 0;
     return obj;
 }
 void Robot_CMD_Update(Robot* robot) {
-    publish_data gimbal_data_fdb = robot->gimbal_upload_suber->getdata(robot->gimbal_upload_suber);
-    if (gimbal_data_fdb.len == -1) {
-        // 此处 不能加 如果sub不到就return
-        robot->board_com.goci_data->chassis_target.offset_angle = 0;
-    } else {
-        Gimbal_uplode_data* gimbal_upload_data = (Gimbal_uplode_data*)gimbal_data_fdb.data;
-        
-        if (gimbal_upload_data->gimbal_module_status == module_lost)robot->if_gimbal_imu_lost = module_lost;
-        else robot->if_gimbal_imu_lost = module_working;
-        // 获取云台offset
-        short init_forward = 3152;// 云台朝向底盘正前时云台yaw编码器值
-        short x = gimbal_upload_data->yaw_encorder;
-        short tmp;
-        if (x > init_forward && x <= 8192 - init_forward) {
-            tmp = x - init_forward;
-        } else if (x > 8192 - init_forward) {
-            tmp = -8192 + x - init_forward;
-        } else {
-            tmp = x - init_forward;
-        }
-        robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
-    }
-
     // 判断机器人工作模式
+    //初始化为RUN
+    robot->mode = robot_run;
+    Gimbal_uplode_data* gimbal_upload_data;
+
     // 板间通信-收
     if ((robot->board_com.recv->monitor->count < 1)) {
         robot->mode = robot_stop;
+    }
+    // 判断云台IMU是否上线
+    publish_data gimbal_data_fdb = robot->gimbal_upload_suber->getdata(robot->gimbal_upload_suber);
+    if (gimbal_data_fdb.len == -1) {
+        robot->board_com.goci_data->chassis_target.offset_angle = 0;
+        robot->mode = robot_stop;
     } else {
-        memcpy(robot->board_com.gico_data, robot->board_com.recv->data_rx.data, sizeof(board_com_gico_data));
-        // 重要外设判断
-        if ((robot->remote->monitor->count < 1) || (robot->if_gimbal_imu_lost == module_lost)){
+        gimbal_upload_data = (Gimbal_uplode_data*)gimbal_data_fdb.data;
+        if (gimbal_upload_data->gimbal_module_status == module_lost) robot->mode = robot_stop;
+    }
+
+    //除了遥控器之外都已经上线
+    if (robot->mode == robot_run){
+        robot->ready = 1;
+    }
+
+    // 遥控器判断
+    if (robot->remote->monitor->count < 1) {
+        robot->mode = robot_stop;
+    } else {
+        if (robot->remote->data.imput_mode == RC_Stop) {
             robot->mode = robot_stop;
-        }
-        // 遥控器打到stop模式（右拨杆最下）
-        else if (robot->remote->data.imput_mode == RC_Stop) {
-            robot->mode = robot_stop;
-        } else {
-            robot->mode = robot_run;
         }
     }
 
@@ -105,6 +98,18 @@ void Robot_CMD_Update(Robot* robot) {
             } else {
                 robot->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
             }
+            // 获取云台offset
+            short init_forward = 3152;  // 云台朝向底盘正前时云台yaw编码器值
+            short x = gimbal_upload_data->yaw_encorder;
+            short tmp;
+            if (x > init_forward && x <= 8192 - init_forward) {
+                tmp = x - init_forward;
+            } else if (x > 8192 - init_forward) {
+                tmp = -8192 + x - init_forward;
+            } else {
+                tmp = x - init_forward;
+            }
+            robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
 
             // shoot
             robot->shoot_param.mode = shoot_run;
@@ -190,9 +195,9 @@ void Robot_CMD_Update(Robot* robot) {
         // 底盘重要外设丢失
         if (0) {
             robot->mode = robot_stop;
-            robot->board_com.gico_data->if_chassis_board_module_lost = module_lost;
+            robot->board_com.gico_data->chassis_board_status = module_lost;
         } else {
-            robot->board_com.gico_data->if_chassis_board_module_lost = module_working;
+            robot->board_com.gico_data->chassis_board_status = module_working;
             // 主板stop指令
             if (robot->board_com.goci_data->now_robot_mode == robot_stop) {
                 robot->mode = robot_stop;
