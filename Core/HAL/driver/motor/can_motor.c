@@ -68,6 +68,8 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     PID_Init(&obj->speed_pid, &obj->config.config_speed);
     PID_Init(&obj->position_pid, &obj->config.config_position);
     obj->monitor = Monitor_Register(obj->config.lost_callback, 5, obj);
+
+    obj->enable = MOTOR_STOP;
     return obj;
     // cvector_pushback(motor_instances, &obj);
 }
@@ -144,7 +146,7 @@ void Can_Motor_Calc_Send() {
                     obj->current_output = obj->speed_pid.output;
                 }
                 buf[id] = obj->current_output;
-                if(obj->config.output_model == MOTOR_OUTPUT_REVERSE) buf[id] *= -1;
+                if (obj->config.output_model == MOTOR_OUTPUT_REVERSE) buf[id] *= -1;
                 if (obj->enable == MOTOR_STOP) {
                     buf[id] = 0;
                 }

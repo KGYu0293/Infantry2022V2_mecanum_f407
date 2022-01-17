@@ -93,6 +93,13 @@ const osThreadAttr_t RobotCMDTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for SuperCapTask */
+osThreadId_t SuperCapTaskHandle;
+const osThreadAttr_t SuperCapTask_attributes = {
+  .name = "SuperCapTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -105,6 +112,7 @@ void StartLogTask(void *argument);
 void StartMotorTask(void *argument);
 void StartMonitorTask(void *argument);
 void StartRobotCMDTask(void *argument);
+void StartCapTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -152,6 +160,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of RobotCMDTask */
   RobotCMDTaskHandle = osThreadNew(StartRobotCMDTask, NULL, &RobotCMDTask_attributes);
+
+  /* creation of SuperCapTask */
+  SuperCapTaskHandle = osThreadNew(StartCapTask, NULL, &SuperCapTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -283,6 +294,27 @@ void StartRobotCMDTask(void *argument)
     vTaskDelayUntil(&currentTimeRobotCMD, 2);
   }
   /* USER CODE END StartRobotCMDTask */
+}
+
+/* USER CODE BEGIN Header_StartCapTask */
+/**
+* @brief Function implementing the SuperCapTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartCapTask */
+void StartCapTask(void *argument)
+{
+  /* USER CODE BEGIN StartCapTask */
+  /* Infinite loop */
+  portTickType currentTimeSuperCap;
+  currentTimeSuperCap = xTaskGetTickCount();
+  for(;;)
+  {
+    HAL_Super_cap_wuli_Loop();
+    vTaskDelayUntil(&currentTimeSuperCap, 2);
+  }
+  /* USER CODE END StartCapTask */
 }
 
 /* Private application code --------------------------------------------------*/
