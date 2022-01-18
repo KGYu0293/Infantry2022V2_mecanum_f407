@@ -1,5 +1,4 @@
 #include "BMI088.h"
-
 #include "BMI088def.h"
 #include "BMI088reg.h"
 #include "bsp_delay.h"
@@ -12,7 +11,6 @@
 #include "cvector.h"
 #include "stdio.h"
 #include "string.h"
-
 ////BMI088全局配置
 #define BMI088_ACCEL_SEN BMI088_ACCEL_3G_SEN
 #define BMI088_GYRO_SEN BMI088_GYRO_2000_SEN
@@ -58,7 +56,6 @@ void BMI088_read_raw(BMI088_imu *obj);
 // void BMI088_ACCEL_NS_H(BMI088_imu *obj);
 // void BMI088_GYRO_NS_L(BMI088_imu *obj);
 // void BMI088_GYRO_NS_H(BMI088_imu *obj);
-
 void BMI088_accel_read(BMI088_imu *obj, uint8_t reg, uint8_t *buf, uint8_t len);
 void BMI088_accel_read_single(BMI088_imu *obj, uint8_t reg, uint8_t *buf);
 void BMI088_accel_write(BMI088_imu *obj, uint8_t reg, uint8_t data);
@@ -149,6 +146,9 @@ void BMI088_Update(BMI088_imu *obj) {
     // Mahony算法姿态解算
     MahonyAHRS_update(&obj->mahony_solver, obj->data.gyro[0], obj->data.gyro[1], obj->data.gyro[2], obj->data.accel[0], obj->data.accel[1], obj->data.accel[2]);
     memcpy(obj->data.euler, obj->mahony_solver.euler, sizeof(float) * 3);
+    obj->data.gyro_deg[0] = obj->data.gyro[0] * RAD2DEG;
+    obj->data.gyro_deg[1] = obj->data.gyro[1] * RAD2DEG;
+    obj->data.gyro_deg[2] = obj->data.gyro[2] * RAD2DEG;
     obj->data.euler_deg[0] = obj->data.euler[0] * RAD2DEG;
     obj->data.euler_deg[1] = obj->data.euler[1] * RAD2DEG;
     obj->data.euler_deg[2] = obj->data.euler[2] * RAD2DEG;
@@ -180,7 +180,6 @@ void BMI088_accel_init(BMI088_imu *obj) {
     BMI088_accel_write(obj, BMI088_ACC_SOFTRESET, BMI088_ACC_SOFTRESET_VALUE);
     bsp_delay_ms(100);
     // check normal
-
     // dummy read
     BMI088_accel_read_single(obj, BMI088_ACC_CHIP_ID, &res);
     bsp_delay_us(BMI088_COM_WAIT_SENSOR_TIME);
@@ -302,7 +301,6 @@ void BMI088_read_raw(BMI088_imu *obj) {
 // void BMI088_GYRO_NS_H(BMI088_imu *obj) {
 //     HAL_GPIO_WritePin(obj->GYRO_NS_BASE, obj->GYRO_NS_PIN, GPIO_PIN_SET);
 // }
-
 //辅助读/写函数
 void BMI088_accel_read(BMI088_imu *obj, uint8_t reg, uint8_t *buf, uint8_t len) {
     // BMI088_ACCEL_NS_L(obj);
