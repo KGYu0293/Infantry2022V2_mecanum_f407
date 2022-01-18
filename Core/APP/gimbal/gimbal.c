@@ -33,8 +33,8 @@ Gimbal *Gimbal_Create() {
     yaw_config.speed_pid_fdb = &(obj->imu->data.gyro[2]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
     yaw_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&yaw_config.config_position, 1, 0, 0, 0, 5000);
-    PID_SetConfig(&yaw_config.config_speed, 20, 0, 0, 2000, 5000);
+    PID_SetConfig(&yaw_config.config_position, 1.65, 0.014, 0, 3200, 5000);
+    PID_SetConfig(&yaw_config.config_speed, 235, 3, 10, 2000, 22000);
     obj->yaw = Can_Motor_Create(&yaw_config);
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
@@ -47,8 +47,8 @@ Gimbal *Gimbal_Create() {
     pitch_config.speed_pid_fdb = &(obj->imu->data.gyro[0]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&pitch_config.config_position, 1, 0, 0, 0, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 20, 0, 0, 2000, 6000);
+    PID_SetConfig(&pitch_config.config_position, 1.2, 0.002, 1.1, 2500, 5000);
+    PID_SetConfig(&pitch_config.config_speed, 210, 1.4, 80, 2500, 22000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
