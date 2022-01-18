@@ -140,7 +140,7 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
         float w = auto_rotate_param();
         mecanum_calculate(obj, vx, vy, w);
     } else if (param->mode == chassis_run_follow_offset) {
-        float w = 6.5f * (param->target.offset_angle);
+        float w = 0.05f * (param->target.offset_angle) * fabs(param->target.offset_angle);// 采用二次函数
         mecanum_calculate(obj, vx, vy, w);
     }
     // 缓启动 斜坡

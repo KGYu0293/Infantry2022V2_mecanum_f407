@@ -24,8 +24,8 @@ Gimbal *Gimbal_Create() {
 
     can_motor_config yaw_config;
     yaw_config.motor_model = MODEL_6020;
-    yaw_config.bsp_can_index = 1;  // 1
-    yaw_config.motor_set_id = 1;   // 1
+    yaw_config.bsp_can_index = 1;
+    yaw_config.motor_set_id = 1;
     yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
     yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z
@@ -47,14 +47,15 @@ Gimbal *Gimbal_Create() {
     pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[0]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&pitch_config.config_position, 1.2, 0.002, 1.1, 2500, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 210, 1.4, 80, 2500, 22000);
+    PID_SetConfig(&pitch_config.config_position, 1.25, 0.002, 0, 2500, 5000);
+    PID_SetConfig(&pitch_config.config_speed, 115, 0.7, 0, 2500, 22000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
     obj->gimbal_cmd_sub = register_sub(gimbal_cmd_topic, 1);
     // 定义pub
     obj->gimbal_upload_pub = register_pub(gimbal_upload_topic);
+
     return obj;
 }
 
@@ -85,29 +86,38 @@ void Gimbal_Update(Gimbal *gimbal) {
     // 模块控制
     switch (param->mode) {
         case gimbal_stop:
-            gimbal->pitch->enable = MOTOR_STOP;
             gimbal->yaw->enable = MOTOR_STOP;
+            gimbal->pitch->enable = MOTOR_STOP;
             break;
         case gimbal_run:
             // 启动电机
-            gimbal->pitch->enable = MOTOR_ENABLE;
             gimbal->yaw->enable = MOTOR_ENABLE;
+            gimbal->pitch->enable = MOTOR_ENABLE;
             // 设定陀螺仪控制
+            gimbal->yaw->config.speed_fdb_model = OTHER_FDB;
+            gimbal->yaw->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
             gimbal->yaw->position_pid.ref = param->yaw;
             gimbal->pitch->position_pid.ref = param->pitch;
             break;
-        default:
+        // 跟随底盘
+        case gimbal_middle:
+            gimbal->yaw->config.speed_fdb_model = MOTOR_FDB;
+            gimbal->yaw->config.position_fdb_model = MOTOR_FDB;
+            gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
+            gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
+            gimbal->yaw->position_pid.ref = YAW_MOTOR_ENCORDER_BIAS;
+            gimbal->pitch->position_pid.ref = PITCH_MOTOR_ENCORDER_BIAS;
             break;
     }
 
-    // // 软件限位 使用编码器对pitch轴进行限位 待测
-    // if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
-    // {
-    //     gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
-    //     gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-    //     if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
-    //     if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
-    // }
+    // 软件限位 使用编码器对pitch轴进行限位 待测
+    if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
+    {
+        gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
+        gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
+        if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
+        if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
+    }
 }

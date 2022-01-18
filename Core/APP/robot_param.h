@@ -47,7 +47,7 @@ typedef struct Chassis_param_t {
 
 // gimbal
 typedef struct Gimbal_param_t {
-    enum { gimbal_stop, gimbal_run } mode;
+    enum { gimbal_stop, gimbal_run, gimbal_middle } mode;
     float yaw;
     float pitch;
 
