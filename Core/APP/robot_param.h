@@ -57,6 +57,7 @@ typedef struct Gimbal_param_t {
 typedef struct Gimbal_upload_data_t {
     Module_status gimbal_module_status;
     short yaw_encorder;
+    float gimbal_imu_euler[3];
 } Gimbal_uplode_data;
 
 // shoot

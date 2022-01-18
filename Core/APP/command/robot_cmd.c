@@ -1,7 +1,8 @@
 #include "robot_cmd.h"
 
 // monitor处理函数
-void core_module_lost(void* obj) { printf("core_module_lost!!!robot stopped for security.\n"); }
+void core_module_lost(void* obj) { printf_log("core_module_lost!!!robot stopped for security.\n"); }
+void pc_lost(void* obj) { printf_log("pc lost!\n"); }
 
 #ifdef GIMBAL_BOARD
 Robot* Robot_CMD_Create() {
@@ -24,6 +25,14 @@ Robot* Robot_CMD_Create() {
     obj->board_com.goci_data = malloc(sizeof(board_com_goci_data));
     obj->board_com.gico_data = malloc(sizeof(board_com_gico_data));
 
+    // 小电脑通信配置
+    canpc_config pc_config;
+    pc_config.bsp_can_index = 1;
+    pc_config.recv_identifer = 0x001;
+    pc_config.send_identifer = 0x002;
+    pc_config.lost_callback = pc_lost;
+    obj->pc = CanPC_Create(&pc_config);
+
     // 定义publisher和subscriber
     obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
     obj->gimbal_upload_suber = register_sub(gimbal_upload_topic, 1);
@@ -39,6 +48,7 @@ Robot* Robot_CMD_Create() {
     obj->ready = 0;
     return obj;
 }
+
 void Robot_CMD_Update(Robot* robot) {
     // 判断机器人工作模式
     //初始化为RUN
@@ -59,8 +69,8 @@ void Robot_CMD_Update(Robot* robot) {
         if (gimbal_upload_data->gimbal_module_status == module_lost) robot->mode = robot_stop;
     }
 
-    //除了遥控器之外都已经上线
-    if (robot->mode == robot_run){
+    // 除了遥控器之外都已经上线
+    if (robot->mode == robot_run) {
         robot->ready = 1;
     }
 
@@ -80,6 +90,22 @@ void Robot_CMD_Update(Robot* robot) {
         robot->gimbal_param.mode = gimbal_stop;
         robot->shoot_param.mode = shoot_stop;
     } else if (robot->mode == robot_run) {
+        // 小电脑通信 
+        CanPC_Send(robot->pc,(canpc_send*)gimbal_upload_data->gimbal_imu_euler);
+        // 获取云台offset
+        short init_forward = 3152;  // 云台朝向底盘正前时云台yaw编码器值
+        short x = gimbal_upload_data->yaw_encorder;
+        short tmp;
+        if (x > init_forward && x <= 8192 - init_forward) {
+            tmp = x - init_forward;
+        } else if (x > 8192 - init_forward) {
+            tmp = -8192 + x - init_forward;
+        } else {
+            tmp = x - init_forward;
+        }
+        robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
+
+        // 遥控器控制模式
         if (robot->remote->data.imput_mode == RC_Remote) {
             // gimbal
             robot->gimbal_param.mode = gimbal_run;
@@ -98,18 +124,6 @@ void Robot_CMD_Update(Robot* robot) {
             } else {
                 robot->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
             }
-            // 获取云台offset
-            short init_forward = 3152;  // 云台朝向底盘正前时云台yaw编码器值
-            short x = gimbal_upload_data->yaw_encorder;
-            short tmp;
-            if (x > init_forward && x <= 8192 - init_forward) {
-                tmp = x - init_forward;
-            } else if (x > 8192 - init_forward) {
-                tmp = -8192 + x - init_forward;
-            } else {
-                tmp = x - init_forward;
-            }
-            robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
 
             // shoot
             robot->shoot_param.mode = shoot_run;
@@ -124,11 +138,18 @@ void Robot_CMD_Update(Robot* robot) {
                 robot->shoot_param.heat_limit_remain = robot->board_com.gico_data->shoot_referee_data.heat_limit_remain;
                 robot->shoot_param.bullet_speed = robot->board_com.gico_data->shoot_referee_data.bullet_speed_max;
             }
-
-        } else if (robot->remote->data.imput_mode == RC_MouseKey) {
+        }
+        // 键鼠模式
+        else if (robot->remote->data.imput_mode == RC_MouseKey) {
             // chassis
+            // gimbal
             // shoot
-            // offset
+            // 按C开关弹仓
+            if (robot->remote->data.key_single_press_cnt.c % 2)
+                robot->shoot_param.magazine_lid = magazine_off;
+            else
+                robot->shoot_param.magazine_lid = magazine_on;
+            // 手动瞄准
         }
     }
     // 发布变更
@@ -141,13 +162,11 @@ void Robot_CMD_Update(Robot* robot) {
     shoot_cmd.len = sizeof(Shoot_param);
     robot->shoot_cmd_puber->publish(robot->shoot_cmd_puber, shoot_cmd);
 
-    // 板间通信-发
+    // 通信-发
     if (robot->mode == robot_stop)
         robot->board_com.goci_data->now_robot_mode = robot_stop;
     else
         robot->board_com.goci_data->now_robot_mode = robot_run;
-    // //debug
-    // robot->board_com.goci_data->chassis_mode = chassis_stop;
     CanSend_Send(robot->board_com.send, (uint8_t*)robot->board_com.goci_data);
 }
 #endif

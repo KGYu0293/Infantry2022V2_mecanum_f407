@@ -8,6 +8,7 @@
 // 外设
 #include "BMI088.h"
 #include "DT7_DR16.h"
+#include "can_pc.h"
 #include "can_recv.h"
 #include "can_send.h"
 #include "referee.h"
@@ -25,7 +26,7 @@ typedef struct board_com_goci_data_t {
 // gimbal input chassis output数据包
 typedef struct board_com_gico_data_t {
     Module_status chassis_board_status;  // 同步底盘是否有重要模块掉线
-    float gyro_yaw;                            // 将底盘主控的imu数据发到云台
+    float gyro_yaw;                      // 将底盘主控的imu数据发到云台
     struct {
         uint16_t bullet_speed_max;   // 弹速
         uint16_t heat_limit_remain;  // 剩余热量
@@ -46,6 +47,8 @@ typedef struct Robot_t {
     Board_com board_com;
     robot_mode mode;
     uint8_t ready;
+
+    canpc *pc;
     dt7Remote *remote;
 
     Publisher *gimbal_cmd_puber;

@@ -33,8 +33,8 @@ Gimbal *Gimbal_Create() {
     yaw_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[2]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
     yaw_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&yaw_config.config_position, 94.538, 0.802, 0, 3200, 285000);
-    PID_SetConfig(&yaw_config.config_speed, 4.1015, 0.05236, 0.1745, 2000, 22000);
+    PID_SetConfig(&yaw_config.config_position, 1.65, 0.014, 0, 3200, 5000);
+    PID_SetConfig(&yaw_config.config_speed, 235, 3, 10, 2000, 22000);
     obj->yaw = Can_Motor_Create(&yaw_config);
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
@@ -47,8 +47,8 @@ Gimbal *Gimbal_Create() {
     pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[0]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&pitch_config.config_position, 68.755, 0.1146, 63.025, 2500, 285000);
-    PID_SetConfig(&pitch_config.config_speed, 3.6652, 0.02443, 1.3963, 2500, 22000);
+    PID_SetConfig(&pitch_config.config_position, 1.2, 0.002, 1.1, 2500, 5000);
+    PID_SetConfig(&pitch_config.config_speed, 210, 1.4, 80, 2500, 22000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
@@ -75,7 +75,10 @@ void Gimbal_Update(Gimbal *gimbal) {
     // 反馈yaw编码器信息以及云台imu是否正常工作
     publish_data gimbal_uplode;
     gimbal->gimbal_upload_data.yaw_encorder = gimbal->yaw->fdbPosition;
-    gimbal_uplode.data = &(gimbal->gimbal_upload_data);
+    gimbal->gimbal_upload_data.gimbal_imu_euler[0] = gimbal->imu->data.euler[0];
+    gimbal->gimbal_upload_data.gimbal_imu_euler[1] = gimbal->imu->data.euler[1];
+    gimbal->gimbal_upload_data.gimbal_imu_euler[2] = gimbal->imu->data.euler[2];
+    gimbal_uplode.data = (uint8_t *)&(gimbal->gimbal_upload_data);
     gimbal_uplode.len = sizeof(Gimbal_uplode_data);
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_uplode);
 

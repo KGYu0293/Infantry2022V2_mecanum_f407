@@ -67,6 +67,7 @@
         "robot_param.h": "c",
         "chassis.h": "c",
         "super_cap_wuli.h": "c",
-        "bsp_reset.h": "c"
+        "bsp_reset.h": "c",
+        "can_pc.h": "c"
     }
 }
