@@ -30,11 +30,11 @@ Gimbal *Gimbal_Create() {
     yaw_config.position_fdb_model = OTHER_FDB;
     yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z
     yaw_config.speed_fdb_model = OTHER_FDB;
-    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro[2]);
+    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[2]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
     yaw_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&yaw_config.config_position, 1.65, 0.014, 0, 3200, 5000);
-    PID_SetConfig(&yaw_config.config_speed, 235, 3, 10, 2000, 22000);
+    PID_SetConfig(&yaw_config.config_position, 94.538, 0.802, 0, 3200, 285000);
+    PID_SetConfig(&yaw_config.config_speed, 4.1015, 0.05236, 0.1745, 2000, 22000);
     obj->yaw = Can_Motor_Create(&yaw_config);
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
@@ -44,11 +44,11 @@ Gimbal *Gimbal_Create() {
     pitch_config.position_fdb_model = OTHER_FDB;
     pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]);  // 此处使用陀螺仪pitch轴X
     pitch_config.speed_fdb_model = OTHER_FDB;
-    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro[0]);
+    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[0]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&pitch_config.config_position, 1.2, 0.002, 1.1, 2500, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 210, 1.4, 80, 2500, 22000);
+    PID_SetConfig(&pitch_config.config_position, 68.755, 0.1146, 63.025, 2500, 285000);
+    PID_SetConfig(&pitch_config.config_speed, 3.6652, 0.02443, 1.3963, 2500, 22000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
