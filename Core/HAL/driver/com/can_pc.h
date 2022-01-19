@@ -9,11 +9,13 @@
 
 #pragma pack(1)
 typedef struct canpc_send_t {
-    float euler_deg[3];
+    float euler[3];
+    uint8_t auto_mode_flag;
 } canpc_send;
 
 typedef struct canpc_recv_t {
-    float x, y;
+    float euler[3];
+    float fire_flag;
 } canpc_recv;
 #pragma pack()
 
