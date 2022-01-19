@@ -37,7 +37,7 @@ Shoot *Shoot_Create(void) {
     friction_a_config.speed_fdb_model = MOTOR_FDB;
     friction_a_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_a_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_a_config.config_speed, 20, 0, 0, 2000, 600);
+    PID_SetConfig(&friction_a_config.config_speed, 4, 0.015, 0.8, 2000, 5000);
     obj->friction_a = Can_Motor_Create(&friction_a_config);
 
     can_motor_config friction_b_config;
@@ -49,7 +49,7 @@ Shoot *Shoot_Create(void) {
     friction_b_config.speed_fdb_model = MOTOR_FDB;
     friction_b_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_b_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_b_config.config_speed, 20, 0, 0, 2000, 600);
+    PID_SetConfig(&friction_b_config.config_speed, 4, 0.015, 0.8, 2000, 5000);
     obj->friction_b = Can_Motor_Create(&friction_b_config);
 
     can_motor_config load_config;
@@ -116,6 +116,9 @@ void Shoot_Update(Shoot *obj) {
 
             obj->friction_a->speed_pid.ref = param->bullet_speed * 100 * 360 / RADIUS;
             obj->friction_b->speed_pid.ref = -param->bullet_speed * 100 * 360 / RADIUS;
+            // 弹速27.0-27.4的实测ref
+            obj->friction_a->speed_pid.ref = 41300;
+            obj->friction_b->speed_pid.ref = -41300;
             Shoot_load_motor_set(obj, param);
             break;
     }
