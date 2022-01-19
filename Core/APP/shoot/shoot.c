@@ -37,7 +37,7 @@ Shoot *Shoot_Create(void) {
     friction_a_config.speed_fdb_model = MOTOR_FDB;
     friction_a_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_a_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_a_config.config_speed, 20, 0, 0, 2000, 0);
+    PID_SetConfig(&friction_a_config.config_speed, 20, 0, 0, 2000, 600);
     obj->friction_a = Can_Motor_Create(&friction_a_config);
 
     can_motor_config friction_b_config;
@@ -94,8 +94,6 @@ void Shoot_load_motor_set(Shoot *obj, Shoot_param *param) {
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - (3 * obj->load_delta_pos);
             break;
-        default:
-            break;
     }
 }
 
@@ -120,8 +118,6 @@ void Shoot_Update(Shoot *obj) {
             obj->friction_b->speed_pid.ref = -param->bullet_speed * 100 * 360 / RADIUS;
             Shoot_load_motor_set(obj, param);
             break;
-        default:
-            break;
     }
     switch (param->magazine_lid) {
         case magazine_on:
@@ -129,8 +125,6 @@ void Shoot_Update(Shoot *obj) {
             break;
         case magazine_off:
             // BSP_PWM_SetCCR();
-            break;
-        default:
             break;
     }
 }

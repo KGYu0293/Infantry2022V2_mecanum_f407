@@ -139,18 +139,57 @@ void Robot_CMD_Update(Robot* robot) {
                 robot->shoot_param.bullet_speed = robot->board_com.gico_data->shoot_referee_data.bullet_speed_max;
             }
         }
+
         // 键鼠控制模式
         else if (robot->remote->data.imput_mode == RC_MouseKey) {
-            // shoot
-            // 按C开关弹仓
-            if (robot->remote->data.key_single_press_cnt.c % 2)
-                robot->shoot_param.magazine_lid = magazine_off;
-            else
-                robot->shoot_param.magazine_lid = magazine_on;
-            // 手动瞄准
-
-            // chassis
+            // robot_state
             static enum { chassis_follow_gimbal, gimbal_follow_chassis, independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
+            static enum { auto_aim_off, auto_aim_on, auto_aim_AtkBuff } auto_aim_mode;
+
+            // 按一下r:小陀螺
+            if (robot->remote->data.key_single_press_cnt.r != robot->remote->last_data.key_single_press_cnt.r) {
+                if (robot->board_com.goci_data->chassis_mode != chassis_rotate_run) {
+                    robot->board_com.goci_data->chassis_mode = chassis_rotate_run;
+                    chassis_gimbal_follow_mode = independent;
+                } else {
+                    chassis_gimbal_follow_mode = chassis_follow_gimbal;
+                }
+            }
+            // x:跟随底盘(飞坡)
+            if (robot->remote->data.key_single_press_cnt.x != robot->remote->last_data.key_single_press_cnt.x) {
+                if (robot->board_com.goci_data->chassis_mode != chassis_run) {
+                    robot->board_com.goci_data->chassis_mode = chassis_run;
+                    chassis_gimbal_follow_mode = gimbal_follow_chassis;
+                } else {
+                    chassis_gimbal_follow_mode = chassis_follow_gimbal;
+                }
+            }
+            // v:云台底盘独立
+            if (robot->remote->data.key_single_press_cnt.v != robot->remote->last_data.key_single_press_cnt.v) {
+                chassis_gimbal_follow_mode = independent;
+            }
+            // z:爬坡 （）待添加
+
+            // f:自瞄
+            if (robot->remote->data.key_single_press_cnt.f != robot->remote->last_data.key_single_press_cnt.f) {
+                if (auto_aim_mode != auto_aim_on)
+                    auto_aim_mode = auto_aim_on;
+                else
+                    auto_aim_mode = auto_aim_off;
+            }
+            // g:小符  // b:大符
+            if (robot->remote->data.key_single_press_cnt.g != robot->remote->last_data.key_single_press_cnt.g) {
+                if (auto_aim_mode != auto_aim_on)
+                    auto_aim_mode = auto_aim_on;
+                else
+                    auto_aim_mode = auto_aim_off;
+            }
+
+            if ((auto_aim_mode != auto_aim_off) && (chassis_gimbal_follow_mode == gimbal_follow_chassis)) {
+                chassis_gimbal_follow_mode = chassis_follow_gimbal;
+            }
+
+            // robot_param
             // 平移
             if (robot->remote->data.key_down.w) robot->board_com.goci_data->chassis_target.vy = 8000;
             if (robot->remote->data.key_down.s) robot->board_com.goci_data->chassis_target.vy = -8000;
@@ -166,40 +205,8 @@ void Robot_CMD_Update(Robot* robot) {
                 robot->board_com.goci_data->chassis_target.vx *= 3;
                 robot->board_com.goci_data->chassis_target.vy *= 3;
             }
-
-            // 转向 低通滤波
-            // 按一下r:小陀螺
-            if (robot->remote->data.key_single_press_cnt.r != robot->remote->last_data.key_single_press_cnt.r) {
-                if (robot->board_com.goci_data->chassis_mode != chassis_rotate_run) {
-                    robot->board_com.goci_data->chassis_mode = chassis_rotate_run;
-                    chassis_gimbal_follow_mode = independent;
-                } else {
-                    chassis_gimbal_follow_mode = chassis_follow_gimbal;
-                }
-            }
-            // x:跟随底盘
-            if (robot->remote->data.key_single_press_cnt.x != robot->remote->last_data.key_single_press_cnt.x) {
-                if (robot->board_com.goci_data->chassis_mode != chassis_run) {
-                    robot->board_com.goci_data->chassis_mode = chassis_run;
-                    chassis_gimbal_follow_mode = gimbal_follow_chassis;
-                } else {
-                    chassis_gimbal_follow_mode = chassis_follow_gimbal;
-                }
-            }
-            // v:云台底盘独立
-            if (robot->remote->data.key_single_press_cnt.v != robot->remote->last_data.key_single_press_cnt.v) {
-                chassis_gimbal_follow_mode = independent;
-            }
-            // z:爬坡 （）待添加
-
-            // gimbal
+            // rotate/gimbal
             switch (chassis_gimbal_follow_mode) {
-                case chassis_follow_gimbal:
-                    robot->gimbal_param.yaw -= 0.5f * (0.7f * (robot->remote->data.mouse.x) + 0.3f * (robot->remote->last_data.mouse.x));
-                    if (robot->remote->data.key_down.q) robot->gimbal_param.yaw -= 15;
-                    if (robot->remote->data.key_down.e) robot->gimbal_param.yaw += 15;
-                    robot->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
-                    break;
                 case gimbal_follow_chassis:
                     robot->board_com.goci_data->chassis_target.rotate -= 0.5f * (0.7f * (robot->remote->data.mouse.x) + 0.3f * (robot->remote->last_data.mouse.x));
                     if (robot->remote->data.key_down.q) robot->board_com.goci_data->chassis_target.rotate = -90;
@@ -207,13 +214,26 @@ void Robot_CMD_Update(Robot* robot) {
                     robot->board_com.goci_data->chassis_mode = chassis_run;
                     robot->gimbal_param.mode = gimbal_middle;
                     break;
+                case chassis_follow_gimbal:
+                    robot->gimbal_param.yaw -= 0.5f * (0.7f * (robot->remote->data.mouse.x) + 0.3f * (robot->remote->last_data.mouse.x));
+                    if (robot->remote->data.key_down.q) robot->gimbal_param.yaw -= 15;
+                    if (robot->remote->data.key_down.e) robot->gimbal_param.yaw += 15;
+                    robot->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
+                    break;
                 case independent:
                     robot->gimbal_param.yaw -= 0.5f * (0.7f * (robot->remote->data.mouse.x) + 0.3f * (robot->remote->last_data.mouse.x));
                     if (robot->remote->data.key_down.q) robot->board_com.goci_data->chassis_target.rotate = -90;
                     if (robot->remote->data.key_down.e) robot->board_com.goci_data->chassis_target.rotate = 90;
                     break;
             }
-            
+            // gimbal_auto_aim
+
+            // shoot
+            // 按C开关弹仓
+            if (robot->remote->data.key_single_press_cnt.c % 2)
+                robot->shoot_param.magazine_lid = magazine_off;
+            else
+                robot->shoot_param.magazine_lid = magazine_on;
         }
     }
     // 发布变更
