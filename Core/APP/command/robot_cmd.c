@@ -109,7 +109,7 @@ void Robot_CMD_Update(Robot* robot) {
         if (robot->remote->data.imput_mode == RC_Remote) {
             // gimbal
             robot->gimbal_param.mode = gimbal_run;
-            robot->gimbal_param.yaw -= 0.05f * ((float)robot->remote->data.rc.ch2 - CHx_BIAS);
+            robot->gimbal_param.yaw -= 0.04f * ((float)robot->remote->data.rc.ch2 - CHx_BIAS);
             robot->gimbal_param.pitch = -1.0f * ((float)robot->remote->data.rc.ch3 - CHx_BIAS);
             robot->gimbal_param.rotate_feedforward = 0;
 
