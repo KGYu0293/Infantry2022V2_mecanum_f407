@@ -14,8 +14,10 @@ typedef struct canpc_send_t {
 } canpc_send;
 
 typedef struct canpc_recv_t {
-    float euler[3];
-    float fire_flag;
+    float pitch;
+    float roll;
+    float yaw;
+    float wait_time;// 开火延迟时间
 } canpc_recv;
 #pragma pack()
 

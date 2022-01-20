@@ -48,7 +48,7 @@ Gimbal *Gimbal_Create() {
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 1.4, 0.003, 1.6, 2500, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 220, 0.7, 1, 5000, 25000);
+    PID_SetConfig(&pitch_config.config_speed, 200, 0.7, 20, 5000, 25000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
@@ -112,12 +112,12 @@ void Gimbal_Update(Gimbal *gimbal) {
             break;
     }
 
-    // 软件限位 使用编码器对pitch轴进行限位 待测
-    if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
-    {
-        gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
-        gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-        if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
-        if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
-    }
+    // 软件限位 使用编码器对pitch轴进行限位 有锅
+    // if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
+    // {
+    //     gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
+    //     gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
+    //     if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
+    //     if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
+    // }
 }

@@ -54,6 +54,8 @@ void Robot_CMD_Update(Robot* robot) {
     //初始化为RUN
     robot->mode = robot_run;
     Gimbal_uplode_data* gimbal_upload_data;
+    // 小电脑通信结构体
+    canpc_send pc_send_data = {0,0,0};
 
     // 板间通信-收
     if ((robot->board_com.recv->monitor->count < 1)) {
@@ -66,6 +68,9 @@ void Robot_CMD_Update(Robot* robot) {
         robot->mode = robot_stop;
     } else {
         gimbal_upload_data = (Gimbal_uplode_data*)gimbal_data_fdb.data;
+        pc_send_data.euler[0] = gimbal_upload_data->gimbal_imu_euler[0];
+        pc_send_data.euler[1] = gimbal_upload_data->gimbal_imu_euler[1];
+        pc_send_data.euler[2] = gimbal_upload_data->gimbal_imu_euler[2];
         if (gimbal_upload_data->gimbal_module_status == module_lost) robot->mode = robot_stop;
     }
 
@@ -82,7 +87,6 @@ void Robot_CMD_Update(Robot* robot) {
             robot->mode = robot_stop;
         }
     }
-
     // 机器人控制
     if (robot->mode == robot_stop) {
         robot->board_com.goci_data->now_robot_mode = robot_stop;
@@ -90,8 +94,6 @@ void Robot_CMD_Update(Robot* robot) {
         robot->gimbal_param.mode = gimbal_stop;
         robot->shoot_param.mode = shoot_stop;
     } else if (robot->mode == robot_run) {
-        // 小电脑通信
-        CanPC_Send(robot->pc, (canpc_send*)gimbal_upload_data->gimbal_imu_euler);
         // 获取云台offset
         short init_forward = 3152;  // 云台朝向底盘正前时云台yaw编码器值
         short x = gimbal_upload_data->yaw_encorder;
@@ -104,7 +106,8 @@ void Robot_CMD_Update(Robot* robot) {
             tmp = x - init_forward;
         }
         robot->board_com.goci_data->chassis_target.offset_angle = tmp / 8192.0 * 360.0;
-
+        // 自瞄关
+        pc_send_data.auto_mode_flag = 0;
         // 遥控器控制模式
         if (robot->remote->data.imput_mode == RC_Remote) {
             // gimbal
@@ -144,7 +147,7 @@ void Robot_CMD_Update(Robot* robot) {
         else if (robot->remote->data.imput_mode == RC_MouseKey) {
             // robot_state
             static enum { chassis_follow_gimbal, gimbal_follow_chassis, independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
-            static enum { auto_aim_off, auto_aim_on, auto_aim_AtkBuff } auto_aim_mode;
+            static enum { auto_aim_off, auto_aim_on, auto_aim_AtkBuff_small, auto_aim_AtkBuff_big } auto_aim_mode;
 
             // 按一下r:小陀螺
             if (robot->remote->data.key_single_press_cnt.r != robot->remote->last_data.key_single_press_cnt.r) {
@@ -177,12 +180,34 @@ void Robot_CMD_Update(Robot* robot) {
                 else
                     auto_aim_mode = auto_aim_off;
             }
-            // g:小符  // b:大符
+            // g:小符
             if (robot->remote->data.key_single_press_cnt.g != robot->remote->last_data.key_single_press_cnt.g) {
-                if (auto_aim_mode != auto_aim_on)
-                    auto_aim_mode = auto_aim_on;
+                if (auto_aim_mode != auto_aim_AtkBuff_small)
+                    auto_aim_mode = auto_aim_AtkBuff_small;
                 else
                     auto_aim_mode = auto_aim_off;
+            }
+            // b:大符
+            if (robot->remote->data.key_single_press_cnt.g != robot->remote->last_data.key_single_press_cnt.g) {
+                if (auto_aim_mode != auto_aim_AtkBuff_big)
+                    auto_aim_mode = auto_aim_AtkBuff_big;
+                else
+                    auto_aim_mode = auto_aim_off;
+            }
+            
+            switch (auto_aim_mode) {
+                case auto_aim_off:
+                    pc_send_data.auto_mode_flag = 0;
+                    break;
+                case auto_aim_on:
+                    pc_send_data.auto_mode_flag = 1;
+                    break;
+                case auto_aim_AtkBuff_small:
+                    pc_send_data.auto_mode_flag = 2;
+                    break;
+                case auto_aim_AtkBuff_big:
+                    pc_send_data.auto_mode_flag = 3;
+                    break;
             }
 
             if ((auto_aim_mode != auto_aim_off) && (chassis_gimbal_follow_mode == gimbal_follow_chassis)) {
@@ -245,6 +270,9 @@ void Robot_CMD_Update(Robot* robot) {
     shoot_cmd.data = (uint8_t*)&robot->shoot_param;
     shoot_cmd.len = sizeof(Shoot_param);
     robot->shoot_cmd_puber->publish(robot->shoot_cmd_puber, shoot_cmd);
+
+    // 小电脑通信
+    CanPC_Send(robot->pc, &pc_send_data);
 
     // 板间通信-发
     if (robot->mode == robot_stop)
