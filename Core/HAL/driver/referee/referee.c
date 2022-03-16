@@ -58,10 +58,10 @@ Referee *referee_Create(referee_config *config) {
     Referee *obj = (Referee *)malloc(sizeof(Referee));
     memset(obj, 0, sizeof(sizeof(Referee)));
     obj->config = *config;
-    obj->receive_len = 0;
-    obj->receive_status = 0;
     obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     cvector_pushback(referee_instances, &obj);
+    // 数据接收队列
+    obj->primart_data = create_circular_queue(sizeof(uint8_t), );
     return obj;
 }
 
@@ -69,22 +69,11 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
     for (size_t i = 0; i < referee_instances->cv_len; i++) {
         Referee *now = *(Referee **)cvector_val_at(referee_instances, i);
         if (uart_index == now->config.bsp_uart_index) {
-            // if(data[0] == 0xA5){
-            //     now->receive_len = 0;
-            //     now->receive_status = 1;
-            // }
-            // if(now->receive_len + len > REFEREE_RX_MAX_SIZE){
-            //     now->receive_status = 0;
-            //     now->receive_len = 0;
-            //     return;
-            // }
-            // memcpy(now->primary_data + now->receive_len, data ,len);
-            // now->receive_len += len;
-            // if(now->receive_len >= 5){
-            //     now->receive_target_len = (now->primary_data[0] | (uint16_t) now->primary_data[1] << 8);
-            // }
-            if (len > REFEREE_RX_MAX_SIZE) return;
-            memcpy(now->primary_data, data, len);
+            // if (len > REFEREE_RX_MAX_SIZE) return;
+            for (size_t i = 0; i < len; i++) {
+                circular_queue_push(now->primart_data, data[i]);
+                // memcpy(now->primary_data, data, len);
+            }
             uint8_t a = referee_data_solve(now, len);
             if (a == 1) now->monitor->reset(now->monitor);
         }

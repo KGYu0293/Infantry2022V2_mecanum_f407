@@ -2,11 +2,13 @@
 #define _REFEREE_H_
 
 #include "cvector.h"
+#include "circular_queue.h"
 #include "monitor.h"
 #include "stdint.h"
 
 #define REFEREE_RX_MIN_SIZE 9
 #define REFEREE_RX_MAX_SIZE 128 + REFEREE_RX_MIN_SIZE
+#define REFEREE_RX_QUENE_MAX_LEN 1024
 
 typedef enum Robot_id_e {
     RED_HERO = 1,
@@ -269,18 +271,16 @@ typedef struct referee_rx_data_t {
 
 // 裁判系统外设结构体
 typedef struct Referee_t {
-    uint8_t primary_data[REFEREE_RX_MAX_SIZE];
+    // uint8_t primary_data[REFEREE_RX_MAX_SIZE];
+    circular_queue* primart_data;
     referee_rx_data rx_data;
 
     referee_config config;
     monitor_item *monitor;
-    uint8_t receive_status;
-    uint8_t receive_len;
-    uint16_t receive_target_len;
 } Referee;
 
 void referee_driver_init(void);
 
-Referee *referee_Create(referee_config *config);
+Referee *referee_Create(Referee* obj, referee_config *config);
 
 #endif
