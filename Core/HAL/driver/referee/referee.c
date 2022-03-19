@@ -4,6 +4,16 @@
 #include "cvector.h"
 // 待测
 
+// 固定起始帧
+#define REFEREE_SOF 0xA5
+// 裁判系统串口协议中最小整包长度
+#define REFEREE_RX_MIN_SIZE 9
+#define REFEREE_RX_FRAME_MAX_SIZE 128
+// 裁判系统串口协议中最大整包长度
+#define REFEREE_RX_MAX_SIZE REFEREE_RX_FRAME_MAX_SIZE + REFEREE_RX_MIN_SIZE
+// 接收缓冲队列最大长度
+#define REFEREE_RX_QUENE_MAX_LEN 1024
+
 // cmd_id 命令码ID
 #define GAME_STATE_CMD_ID 0x0001
 #define GAME_RESULT_CMD_ID 0x0002
@@ -44,9 +54,14 @@ typedef struct referee_rx_pack_t {
 } referee_rx_pack;
 #pragma pack()
 
+typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length_low, s_header_length_high, s_header_seq, s_header_crc8, s_crc16 } referee_unpack_step;
+typedef struct referee_unpack_tool_t {
+    referee_rx_pack rx_pack;
+    referee_unpack_step step;
+} referee_unpack_tool;
+
 cvector *referee_instances;
 
-uint8_t referee_data_solve(Referee *obj, uint32_t len);
 void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len);
 
 void referee_driver_init() {
@@ -72,15 +87,53 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
             // if (len > REFEREE_RX_MAX_SIZE) return;
             for (size_t i = 0; i < len; i++) {
                 circular_queue_push(now->primart_data, data[i]);
-                // memcpy(now->primary_data, data, len);
+                ;
             }
-            uint8_t a = referee_data_solve(now, len);
-            if (a == 1) now->monitor->reset(now->monitor);
+            // uint8_t a = referee_data_solve(now, len);
+            // if (a == 1)
+            now->monitor->reset(now->monitor);
         }
     }
 }
 
-uint8_t referee_data_solve(Referee *obj, uint32_t len) {
+void referee_data_solve(Referee *obj) {
+    uint8_t byte_now = 0;
+
+    referee_unpack_tool tool;
+    while (obj->primart_data.cq_len) {
+        byte_now = circular_queue_pop(obj->primart_data);
+        switch (tool.step) {
+            case s_header_sof:
+                if (byte_now == REFEREE_SOF) {
+                    tool.step++;
+                } else {
+                }
+                break;
+            case s_header_length_low:
+                tool.rx_pack.frame_header.data_length = byte_now;
+                tool.step++;
+                break;
+            case s_header_length_high:
+                tool.rx_pack.frame_header.data_length |= (byte_now << 8);
+
+                if (tool.rx_pack.frame_header.data_length <) {
+                } else {
+                    tool.step = s_header_sof;
+                }
+                break;
+            case s_header_seq:
+                tool.step++;
+                break;
+            case s_header_crc8:
+            
+                break;
+            case s_crc16:
+                break;
+        }
+    }
+}
+
+uint8_t referee_solve_pack(Referee *obj, uint32_t len) {
     if (len < REFEREE_RX_MIN_SIZE) return 0;
     referee_rx_pack data_pack;
     // frame_header
