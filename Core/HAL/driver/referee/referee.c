@@ -8,15 +8,13 @@
 #define REFEREE_SOF 0xA5
 // 单个接收数据包最小整包长度
 #define REFEREE_RX_MIN_SIZE 9
-// 单个接收数据包最大帧长度
-#define REFEREE_RX_FRAME_MAX_SIZE 128
 // 单个接收数据包最大整包长度
-#define REFEREE_RX_MAX_SIZE REFEREE_RX_FRAME_MAX_SIZE + REFEREE_RX_MIN_SIZE
+#define REFEREE_RX_MAX_SIZE 128
 // 单个接收数据包中各部分长度
 #define REFEREE_PACK_LEN_HEADER 5
 #define REFEREE_PACK_LEN_CMD_ID 2
 #define REFEREE_PACK_LEN_TAIL 2
-#define REFEREE_PACK_LEN_DATA_MAX REFEREE_RX_FRAME_MAX_SIZE - REFEREE_RX_FRAME_MAX_SIZE - REFEREE_PACK_LEN_CMD_ID - REFEREE_PACK_LEN_TAIL
+#define REFEREE_PACK_LEN_DATA_MAX REFEREE_RX_MAX_SIZE - REFEREE_PACK_LEN_HEADER - REFEREE_PACK_LEN_CMD_ID - REFEREE_PACK_LEN_TAIL
 
 // 接收缓冲队列最大长度
 #define REFEREE_RX_QUENE_MAX_LEN 1024
@@ -65,7 +63,6 @@ typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length_low, s_he
 typedef struct referee_unpack_tool_t {
     referee_rx_pack rx_pack;
     referee_unpack_step step;
-    uint8_t rx_frame_buf[];
 } referee_unpack_tool;
 
 cvector *referee_instances;
@@ -112,9 +109,11 @@ void referee_data_solve(Referee *obj) {
         byte_now = circular_queue_pop(obj->primary_data);
         switch (tool.step) {
             case s_header_sof:
+                // 包错误判断-固定起始字节
                 if (byte_now == REFEREE_SOF) {
                     tool.step++;
                 } else {
+                    tool.step = 0;
                 }
                 break;
             case s_header_length_low:
@@ -144,102 +143,92 @@ void referee_data_solve(Referee *obj) {
                 }
                 break;
             case s_crc16:
-                
-                    // 包错误判断-CRC16校验
-                    if (1) {
-                        referee_solve_pack();
-                    }
+
+                // 包错误判断-CRC16校验
+                if (1) {
+                    referee_solve_pack(obj, &(tool.rx_pack));
+                }
+                break;
+
+            default:
+                tool.step = 0;
                 break;
         }
     }
 }
 
-// uint8_t referee_solve_pack(Referee *obj, uint32_t len) {
-//     if (len < REFEREE_RX_MIN_SIZE) return 0;
-//     referee_rx_pack data_pack;
-//     // frame_header
-//     data_pack.frame_header.seq = obj->primary_data[0];
-//     data_pack.frame_header.data_length = obj->primary_data[1] | (obj->primary_data[2] << 8);
-//     data_pack.frame_header.SOF = obj->primary_data[3];
-//     data_pack.frame_header.CRC8 = obj->primary_data[4];
-//     if (data_pack.frame_header.seq != 0xA5) return 0;
-//     if ((data_pack.frame_header.data_length + REFEREE_RX_MIN_SIZE) != len) return 0;
-//     // 数据拷贝
-//     memcpy(&data_pack.cmd_id, obj->primary_data + 5, 2);
-//     memcpy(data_pack.data, obj->primary_data + 7, len - 9);  // data本身即为指针
-//     memcpy(&data_pack.frame_tail, obj->primary_data + len - 2, 2);
-
-//     switch (data_pack.cmd_id) {
-//         case GAME_STATE_CMD_ID:
-//             memcpy(&obj->rx_data.game_state, data_pack.data, sizeof(obj->rx_data.game_state));
-//             break;
-//         case GAME_RESULT_CMD_ID:
-//             memcpy(&obj->rx_data.game_result, data_pack.data, sizeof(obj->rx_data.game_result));
-//             break;
-//         case GAME_ROBOT_HP_CMD_ID:
-//             memcpy(&obj->rx_data.robot_HP, data_pack.data, sizeof(obj->rx_data.robot_HP));
-//             break;
-//         case DART_STATUS_ID:
-//             memcpy(&obj->rx_data.dart_status, data_pack.data, sizeof(obj->rx_data.dart_status));
-//             break;
-//         case FIELD_EVENTS_CMD_ID:
-//             memcpy(&obj->rx_data.event, data_pack.data, sizeof(obj->rx_data.event));
-//             break;
-//         case SUPPLY_PROJECTILE_ACTION_CMD_ID:
-//             memcpy(&obj->rx_data.supply_projectile_action, data_pack.data, sizeof(obj->rx_data.supply_projectile_action));
-//             break;
-//         case SUPPLY_PROJECTILE_BOOKING_CMD_ID:
-//             // RM对抗赛尚未开放
-//             break;
-//         case REFEREE_WARNING_CMD_ID:
-//             memcpy(&obj->rx_data.referee_warning, data_pack.data, sizeof(obj->rx_data.referee_warning));
-//             break;
-//         case DART_REMAINING_TIME_ID:
-//             memcpy(&obj->rx_data.dart_remaining_time, data_pack.data, sizeof(obj->rx_data.dart_remaining_time));
-//             break;
-//         case ROBOT_STATE_CMD_ID:
-//             memcpy(&obj->rx_data.game_robot_state, data_pack.data, sizeof(obj->rx_data.game_robot_state));
-//             break;
-//         case POWER_HEAT_DATA_CMD_ID:
-//             memcpy(&obj->rx_data.power_heat, data_pack.data, sizeof(obj->rx_data.power_heat));
-//             break;
-//         case ROBOT_POS_CMD_ID:
-//             memcpy(&obj->rx_data.robot_pos, data_pack.data, sizeof(obj->rx_data.robot_pos));
-//             break;
-//         case BUFF_MUSK_CMD_ID:
-//             memcpy(&obj->rx_data.buff, data_pack.data, sizeof(obj->rx_data.buff));
-//             break;
-//         case AERIAL_ROBOT_ENERGY_CMD_ID:
-//             memcpy(&obj->rx_data.aerial_robot_energy, data_pack.data, sizeof(obj->rx_data.aerial_robot_energy));
-//             break;
-//         case ROBOT_HURT_CMD_ID:
-//             memcpy(&obj->rx_data.robot_hurt, data_pack.data, sizeof(obj->rx_data.robot_hurt));
-//             break;
-//         case SHOOT_DATA_CMD_ID:
-//             memcpy(&obj->rx_data.shoot_data, data_pack.data, sizeof(obj->rx_data.shoot_data));
-//             break;
-//         case BULLET_REMAINING_CMD_ID:
-//             memcpy(&obj->rx_data.bullet_remaining, data_pack.data, sizeof(obj->rx_data.bullet_remaining));
-//             break;
-//         case RFID_STATUS_ID:
-//             memcpy(&obj->rx_data.rfid_status, data_pack.data, sizeof(obj->rx_data.rfid_status));
-//             break;
-//         case DART_CILENT_CMD_T:
-//             memcpy(&obj->rx_data.dart_cilent_cmd, data_pack.data, sizeof(obj->rx_data.dart_cilent_cmd));
-//             break;
-//         case STUDENT_INTERACTIVE_DATA_CMD_ID:
-//             memcpy(&obj->rx_data.robot_interactive_data, data_pack.data, sizeof(obj->rx_data.robot_interactive_data));
-//             break;
-//         case ROBOT_INTERACTIVE_DATA_T:
-//             // 自定义控制器 暂无
-//             break;
-//         case ROBOT_COMMAND_T:
-//             memcpy(&obj->rx_data.robot_command, data_pack.data, sizeof(obj->rx_data.robot_command));
-//             break;
-//         case CLIENT_MAP_COMMAND_T:
-//             memcpy(&obj->rx_data.client_map_command, data_pack.data, sizeof(obj->rx_data.client_map_command));
-//             break;
-//         default:
-//             break;
-//     }
-// }
+uint8_t referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
+    switch (rx_pack->cmd_id) {
+        case GAME_STATE_CMD_ID:
+            memcpy(&obj->rx_data.game_state, rx_pack->data, sizeof(obj->rx_data.game_state));
+            break;
+        case GAME_RESULT_CMD_ID:
+            memcpy(&obj->rx_data.game_result, rx_pack->data, sizeof(obj->rx_data.game_result));
+            break;
+        case GAME_ROBOT_HP_CMD_ID:
+            memcpy(&obj->rx_data.robot_HP, rx_pack->data, sizeof(obj->rx_data.robot_HP));
+            break;
+        case DART_STATUS_ID:
+            memcpy(&obj->rx_data.dart_status, rx_pack->data, sizeof(obj->rx_data.dart_status));
+            break;
+        case FIELD_EVENTS_CMD_ID:
+            memcpy(&obj->rx_data.event, rx_pack->data, sizeof(obj->rx_data.event));
+            break;
+        case SUPPLY_PROJECTILE_ACTION_CMD_ID:
+            memcpy(&obj->rx_data.supply_projectile_action, rx_pack->data, sizeof(obj->rx_data.supply_projectile_action));
+            break;
+        case SUPPLY_PROJECTILE_BOOKING_CMD_ID:
+            // RM对抗赛尚未开放
+            break;
+        case REFEREE_WARNING_CMD_ID:
+            memcpy(&obj->rx_data.referee_warning, rx_pack->data, sizeof(obj->rx_data.referee_warning));
+            break;
+        case DART_REMAINING_TIME_ID:
+            memcpy(&obj->rx_data.dart_remaining_time, rx_pack->data, sizeof(obj->rx_data.dart_remaining_time));
+            break;
+        case ROBOT_STATE_CMD_ID:
+            memcpy(&obj->rx_data.game_robot_state, rx_pack->data, sizeof(obj->rx_data.game_robot_state));
+            break;
+        case POWER_HEAT_DATA_CMD_ID:
+            memcpy(&obj->rx_data.power_heat, rx_pack->data, sizeof(obj->rx_data.power_heat));
+            break;
+        case ROBOT_POS_CMD_ID:
+            memcpy(&obj->rx_data.robot_pos, rx_pack->data, sizeof(obj->rx_data.robot_pos));
+            break;
+        case BUFF_MUSK_CMD_ID:
+            memcpy(&obj->rx_data.buff, rx_pack->data, sizeof(obj->rx_data.buff));
+            break;
+        case AERIAL_ROBOT_ENERGY_CMD_ID:
+            memcpy(&obj->rx_data.aerial_robot_energy, rx_pack->data, sizeof(obj->rx_data.aerial_robot_energy));
+            break;
+        case ROBOT_HURT_CMD_ID:
+            memcpy(&obj->rx_data.robot_hurt, rx_pack->data, sizeof(obj->rx_data.robot_hurt));
+            break;
+        case SHOOT_DATA_CMD_ID:
+            memcpy(&obj->rx_data.shoot_data, rx_pack->data, sizeof(obj->rx_data.shoot_data));
+            break;
+        case BULLET_REMAINING_CMD_ID:
+            memcpy(&obj->rx_data.bullet_remaining, rx_pack->data, sizeof(obj->rx_data.bullet_remaining));
+            break;
+        case RFID_STATUS_ID:
+            memcpy(&obj->rx_data.rfid_status, rx_pack->data, sizeof(obj->rx_data.rfid_status));
+            break;
+        case DART_CILENT_CMD_T:
+            memcpy(&obj->rx_data.dart_cilent_cmd, rx_pack->data, sizeof(obj->rx_data.dart_cilent_cmd));
+            break;
+        case STUDENT_INTERACTIVE_DATA_CMD_ID:
+            memcpy(&obj->rx_data.robot_interactive_data, rx_pack->data, sizeof(obj->rx_data.robot_interactive_data));
+            break;
+        case ROBOT_INTERACTIVE_DATA_T:
+            // 自定义控制器 暂无
+            break;
+        case ROBOT_COMMAND_T:
+            memcpy(&obj->rx_data.robot_command, rx_pack->data, sizeof(obj->rx_data.robot_command));
+            break;
+        case CLIENT_MAP_COMMAND_T:
+            memcpy(&obj->rx_data.client_map_command, rx_pack->data, sizeof(obj->rx_data.client_map_command));
+            break;
+        default:
+            break;
+    }
+}
