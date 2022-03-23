@@ -6,6 +6,8 @@
 #include "monitor.h"
 #include "stdint.h"
 
+#include "crc16.h"
+
 typedef enum Robot_id_e {
     RED_HERO = 1,
     RED_ENGINEER = 2,
@@ -268,7 +270,7 @@ typedef struct referee_rx_data_t {
 // 裁判系统外设结构体
 typedef struct Referee_t {
     // uint8_t primary_data[REFEREE_RX_MAX_SIZE];
-    circular_queue *primart_data;
+    circular_queue *primary_data;
     referee_rx_data rx_data;
 
     referee_config config;
@@ -277,6 +279,6 @@ typedef struct Referee_t {
 
 void referee_driver_init(void);
 
-Referee *referee_Create(Referee *obj, referee_config *config);
+Referee *referee_Create(referee_config *config);
 
 #endif

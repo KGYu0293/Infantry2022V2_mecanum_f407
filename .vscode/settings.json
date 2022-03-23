@@ -69,6 +69,7 @@
         "super_cap_wuli.h": "c",
         "bsp_reset.h": "c",
         "can_pc.h": "c",
-        "pub_sub.h": "c"
+        "pub_sub.h": "c",
+        "referee.h": "c"
     }
 }
