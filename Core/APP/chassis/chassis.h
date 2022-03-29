@@ -21,14 +21,26 @@
 #include "stdint.h"
 #include "super_cap_wuli.h"
 
+typedef struct Powcrtl_t {
+    int speed_max[3];              //限制三轴速度档位
+    int speed_limit;               //功率环输出的速度限制
+    struct PID_t motorpower_pid;   //功率环pid
+    struct PID_t powerbuffer_pid;  //功率环pid
+    float power_limit_set;         //用户设置底盘功率档位
+    float power_buffer_target;     //缓冲能量目标值
+} Powcrtl;
+
 // 定义chassis所需的外设，整合成一个结构体
 typedef struct chassis_t {
     BMI088_imu *imu;
+    uint8_t if_supercap;  //是否具有超级电容
     Super_cap_wuli *super_cap;
     can_motor *lf;
     can_motor *rf;
     can_motor *lb;
     can_motor *rb;  // forward back left right
+
+    Powcrtl powcrtl;
 
     float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
     float offset_y;

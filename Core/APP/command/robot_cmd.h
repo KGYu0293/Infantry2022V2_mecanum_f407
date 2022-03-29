@@ -19,6 +19,7 @@ typedef enum robot_mode_e { robot_stop, robot_run } robot_mode;
 #pragma pack(1)
 // gimbal output chassis input 云台->底盘数据包
 typedef struct board_com_goci_data_t {
+    uint8_t if_supercap_on;  // 电容是否开启
     robot_mode now_robot_mode;  // 遥控器在云台主控 包含stop模式与云台重要模块掉线
     Chassis_mode chassis_mode;
     Chassis_param_speed_target chassis_target;

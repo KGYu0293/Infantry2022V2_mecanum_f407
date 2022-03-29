@@ -24,6 +24,7 @@ Robot* Robot_CMD_Create() {
     obj->board_com.recv = CanRecv_Create(&recv_config);
     obj->board_com.goci_data = malloc(sizeof(board_com_goci_data));
     obj->board_com.gico_data = malloc(sizeof(board_com_gico_data));
+    obj->board_com.goci_data->if_supercap_on = 0;//电容默认关闭
 
     // 小电脑通信配置
     canpc_config pc_config;
@@ -55,7 +56,7 @@ void Robot_CMD_Update(Robot* robot) {
     robot->mode = robot_run;
     Gimbal_uplode_data* gimbal_upload_data;
     // 小电脑通信结构体
-    canpc_send pc_send_data = {0,0,0};
+    canpc_send pc_send_data = {0, 0, 0};
 
     // 板间通信-收
     if ((robot->board_com.recv->monitor->count < 1)) {
@@ -146,8 +147,13 @@ void Robot_CMD_Update(Robot* robot) {
         // 键鼠控制模式
         else if (robot->remote->data.imput_mode == RC_MouseKey) {
             // robot_state
-            static enum { chassis_follow_gimbal, gimbal_follow_chassis, independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
-            static enum { auto_aim_off, auto_aim_on, auto_aim_AtkBuff_small, auto_aim_AtkBuff_big } auto_aim_mode;
+            static enum { chassis_follow_gimbal,
+                          gimbal_follow_chassis,
+                          independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
+            static enum { auto_aim_off,
+                          auto_aim_on,
+                          auto_aim_AtkBuff_small,
+                          auto_aim_AtkBuff_big } auto_aim_mode;
 
             // 按一下r:小陀螺
             if (robot->remote->data.key_single_press_cnt.r != robot->remote->last_data.key_single_press_cnt.r) {
@@ -194,7 +200,7 @@ void Robot_CMD_Update(Robot* robot) {
                 else
                     auto_aim_mode = auto_aim_off;
             }
-            
+
             switch (auto_aim_mode) {
                 case auto_aim_off:
                     pc_send_data.auto_mode_flag = 0;
@@ -260,6 +266,11 @@ void Robot_CMD_Update(Robot* robot) {
             else
                 robot->shoot_param.magazine_lid = magazine_on;
         }
+
+       /*  //电容为可开关模式则解注释
+        if (robot->remote->data.key_single_press_cnt.c != robot->remote->last_data.key_single_press_cnt.c)
+            robot->board_com.goci_data->if_supercap_on = 1 - robot->board_com.goci_data->if_supercap_on; */
+        robot->board_com.goci_data->if_supercap_on = 1;
     }
     // 发布变更
     publish_data gimbal_cmd;
@@ -351,6 +362,7 @@ void Robot_CMD_Update(Robot* robot) {
     robot->chassis_param.power.power_buffer = 0;
     robot->chassis_param.power.power_now = 30;
     robot->chassis_param.power.power_limit = 50;
+    robot->chassis_param.power.if_supercap_on = robot->board_com.gico_data->if_supercap_on;
 
     // 发布变更
     publish_data chassis_cmd;
