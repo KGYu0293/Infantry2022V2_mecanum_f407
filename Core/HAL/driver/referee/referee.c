@@ -59,7 +59,7 @@ typedef struct referee_rx_pack_t {
 } referee_rx_pack;
 #pragma pack()
 // 解包辅助结构体
-typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length_low, s_header_length_high, s_header_seq, s_header_crc8, s_cmd_id, s_data, s_crc16 } referee_unpack_step;
+typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length, s_header_seq, s_header_crc8, s_cmd_id, s_data, s_crc16 } referee_unpack_step;
 typedef struct referee_unpack_tool_t {
     referee_rx_pack rx_pack;
     referee_unpack_step step;
@@ -116,22 +116,40 @@ void referee_data_solve(Referee *obj) {
                     tool.step = 0;
                 }
                 break;
-            case s_header_length_low:
-                tool.rx_pack.frame_header.data_length = byte_now;
-                tool.step++;
-                break;
-            case s_header_length_high:
-                tool.rx_pack.frame_header.data_length |= (byte_now << 8);
 
-                // 包错误判断-长度超范围
-                if (tool.rx_pack.frame_header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
-                    tool.step = 0;
+            case s_header_length:
+                if (obj->primary_data->cq_len >= 2) {
+                    tool.rx_pack.frame_header.data_length = byte_now;
+                    byte_now = circular_queue_pop(obj->primary_data);
+                    tool.rx_pack.frame_header.data_length |= (byte_now << 8);
+                    // 包错误判断-长度超范围
+                    if (tool.rx_pack.frame_header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
+                        tool.step = 0;
+                    } else {
+                        tool.step++;
+                    }
                 } else {
-                    tool.step++;
+                    tool.step = 0;
                 }
                 break;
+                // case s_header_length_low:
+                //     tool.rx_pack.frame_header.data_length = byte_now;
+                //     tool.step++;
+                //     break;
+                // case s_header_length_high:
+                //     tool.rx_pack.frame_header.data_length |= (byte_now << 8);
+
+                //     // 包错误判断-长度超范围
+                //     if (tool.rx_pack.frame_header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
+                //         tool.step = 0;
+                //     } else {
+                //         tool.step++;
+                //     }
+                //     break;
+
             case s_header_seq:
                 // 没看出来这个数有啥意义 暂时不管
+                tool.rx_pack.frame_header.seq = byte_now;
                 tool.step++;
                 break;
             case s_header_crc8:
@@ -169,8 +187,10 @@ void referee_data_solve(Referee *obj) {
 
                 // 包错误判断-CRC16校验
                 if (1) {
+                    // 包提取完成 拷贝数据
                     referee_solve_pack(obj, &(tool.rx_pack));
                 }
+                tool.step = 0;
                 break;
 
             default:
