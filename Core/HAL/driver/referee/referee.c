@@ -59,7 +59,7 @@ typedef struct referee_rx_pack_t {
 } referee_rx_pack;
 #pragma pack()
 // 解包辅助结构体
-typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length_low, s_header_length_high, s_header_seq, s_header_crc8, s_crc16 } referee_unpack_step;
+typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length_low, s_header_length_high, s_header_seq, s_header_crc8, s_cmd_id, s_data, s_crc16 } referee_unpack_step;
 typedef struct referee_unpack_tool_t {
     referee_rx_pack rx_pack;
     referee_unpack_step step;
@@ -101,11 +101,11 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
 }
 
 void referee_data_solve(Referee *obj) {
-    uint8_t byte_now = 0;
+    uint16_t byte_now = 0;
     referee_unpack_tool tool;
 
     // 反复弹出直到缓冲队列长度为0
-    while (obj->primary_data.cq_len > 0) {
+    while (obj->primary_data->cq_len > 0) {
         byte_now = circular_queue_pop(obj->primary_data);
         switch (tool.step) {
             case s_header_sof:
@@ -137,6 +137,29 @@ void referee_data_solve(Referee *obj) {
             case s_header_crc8:
                 // 包错误判断-CRC8校验
                 if (1) {
+                    tool.step++;
+                } else {
+                    tool.step = 0;
+                }
+                break;
+            case s_cmd_id:
+                if (obj->primary_data->cq_len >= 2) {
+                    tool.rx_pack.cmd_id = (byte_now << 8);
+                    byte_now = circular_queue_pop(obj->primary_data);
+                    tool.rx_pack.cmd_id |= byte_now;
+                    tool.step++;
+                }
+                uint8_t first_data_flag = 0;
+                break;
+            case s_data:
+                if (obj->primary_data->cq_len > tool.rx_pack.frame_header.data_length) {
+                    for (size_t i = 0; i++; i < tool.rx_pack.frame_header.data_length) {
+                        if (first_data_flag != 0) {
+                            byte_now = circular_queue_pop(obj->primary_data);
+                        }
+                        tool.rx_pack.data[i] = byte_now;
+                        first_data_flag = 1;
+                    }
                     tool.step++;
                 } else {
                     tool.step = 0;
