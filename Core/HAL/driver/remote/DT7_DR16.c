@@ -95,49 +95,54 @@ void dt7_data_solve(dt7Remote *obj) {
     obj->data.key_down.v = (keyboard & Key_V) > 0;
     obj->data.key_down.b = (keyboard & Key_B) > 0;
 
-    // 键盘按下次数计数 单按 ctrl+ shift+分开处理 不含shift与ctrl本身
-    if ((obj->data.key_down.w != obj->last_data.key_down.w) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.w++;
-    if ((obj->data.key_down.s != obj->last_data.key_down.s) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.s++;
-    if ((obj->data.key_down.d != obj->last_data.key_down.d) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.d++;
-    if ((obj->data.key_down.a != obj->last_data.key_down.a) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.a++;
-    if ((obj->data.key_down.q != obj->last_data.key_down.q) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.q++;
-    if ((obj->data.key_down.e != obj->last_data.key_down.e) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.e++;
-    if ((obj->data.key_down.r != obj->last_data.key_down.r) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.r++;
-    if ((obj->data.key_down.f != obj->last_data.key_down.f) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.f++;
-    if ((obj->data.key_down.g != obj->last_data.key_down.g) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.g++;
-    if ((obj->data.key_down.z != obj->last_data.key_down.z) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.z++;
-    if ((obj->data.key_down.x != obj->last_data.key_down.x) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.x++;
-    if ((obj->data.key_down.c != obj->last_data.key_down.c) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.c++;
-    if ((obj->data.key_down.v != obj->last_data.key_down.v) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.v++;
-    if ((obj->data.key_down.b != obj->last_data.key_down.b) && (obj->last_data.key_down.shift == 0) && (obj->last_data.key_down.ctrl == 0)) obj->data.key_single_press_cnt.b++;
-
-    if ((obj->data.key_down.w != obj->last_data.key_down.w) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.w++;
-    if ((obj->data.key_down.s != obj->last_data.key_down.s) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.s++;
-    if ((obj->data.key_down.d != obj->last_data.key_down.d) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.d++;
-    if ((obj->data.key_down.a != obj->last_data.key_down.a) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.a++;
-    if ((obj->data.key_down.q != obj->last_data.key_down.q) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.q++;
-    if ((obj->data.key_down.e != obj->last_data.key_down.e) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.e++;
-    if ((obj->data.key_down.r != obj->last_data.key_down.r) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.r++;
-    if ((obj->data.key_down.f != obj->last_data.key_down.f) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.f++;
-    if ((obj->data.key_down.g != obj->last_data.key_down.g) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.g++;
-    if ((obj->data.key_down.z != obj->last_data.key_down.z) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.z++;
-    if ((obj->data.key_down.x != obj->last_data.key_down.x) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.x++;
-    if ((obj->data.key_down.c != obj->last_data.key_down.c) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.c++;
-    if ((obj->data.key_down.v != obj->last_data.key_down.v) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.v++;
-    if ((obj->data.key_down.b != obj->last_data.key_down.b) && (obj->last_data.key_down.shift == 1)) obj->data.key_shift_press_cnt.b++;
-
-    if ((obj->data.key_down.w != obj->last_data.key_down.w) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.w++;
-    if ((obj->data.key_down.s != obj->last_data.key_down.s) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.s++;
-    if ((obj->data.key_down.d != obj->last_data.key_down.d) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.d++;
-    if ((obj->data.key_down.a != obj->last_data.key_down.a) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.a++;
-    if ((obj->data.key_down.q != obj->last_data.key_down.q) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.q++;
-    if ((obj->data.key_down.e != obj->last_data.key_down.e) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.e++;
-    if ((obj->data.key_down.r != obj->last_data.key_down.r) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.r++;
-    if ((obj->data.key_down.f != obj->last_data.key_down.f) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.f++;
-    if ((obj->data.key_down.g != obj->last_data.key_down.g) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.g++;
-    if ((obj->data.key_down.z != obj->last_data.key_down.z) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.z++;
-    if ((obj->data.key_down.x != obj->last_data.key_down.x) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.x++;
-    if ((obj->data.key_down.c != obj->last_data.key_down.c) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.c++;
-    if ((obj->data.key_down.v != obj->last_data.key_down.v) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.v++;
-    if ((obj->data.key_down.b != obj->last_data.key_down.b) && (obj->last_data.key_down.ctrl == 1)) obj->data.key_ctrl_press_cnt.b++;
+    // 排除ctrl shift一起按
+    if (!(obj->data.key_down.shift && obj->data.key_down.ctrl)) {
+        // 键盘按下次数计数 单按 ctrl+ shift+分开处理 不含shift与ctrl本身
+        if (obj->data.key_down.shift) {
+            if ((obj->data.key_down.w && !obj->last_data.key_down.w)) obj->data.key_shift_press_cnt.w++;
+            if ((obj->data.key_down.s && !obj->last_data.key_down.s)) obj->data.key_shift_press_cnt.s++;
+            if ((obj->data.key_down.d && !obj->last_data.key_down.d)) obj->data.key_shift_press_cnt.d++;
+            if ((obj->data.key_down.a && !obj->last_data.key_down.a)) obj->data.key_shift_press_cnt.a++;
+            if ((obj->data.key_down.q && !obj->last_data.key_down.q)) obj->data.key_shift_press_cnt.q++;
+            if ((obj->data.key_down.e && !obj->last_data.key_down.e)) obj->data.key_shift_press_cnt.e++;
+            if ((obj->data.key_down.r && !obj->last_data.key_down.r)) obj->data.key_shift_press_cnt.r++;
+            if ((obj->data.key_down.f && !obj->last_data.key_down.f)) obj->data.key_shift_press_cnt.f++;
+            if ((obj->data.key_down.g && !obj->last_data.key_down.g)) obj->data.key_shift_press_cnt.g++;
+            if ((obj->data.key_down.z && !obj->last_data.key_down.z)) obj->data.key_shift_press_cnt.z++;
+            if ((obj->data.key_down.x && !obj->last_data.key_down.x)) obj->data.key_shift_press_cnt.x++;
+            if ((obj->data.key_down.c && !obj->last_data.key_down.c)) obj->data.key_shift_press_cnt.c++;
+            if ((obj->data.key_down.v && !obj->last_data.key_down.v)) obj->data.key_shift_press_cnt.v++;
+            if ((obj->data.key_down.b && !obj->last_data.key_down.b)) obj->data.key_shift_press_cnt.b++;
+        } else if (obj->data.key_down.ctrl) {
+            if ((obj->data.key_down.w && !obj->last_data.key_down.w)) obj->data.key_ctrl_press_cnt.w++;
+            if ((obj->data.key_down.s && !obj->last_data.key_down.s)) obj->data.key_ctrl_press_cnt.s++;
+            if ((obj->data.key_down.d && !obj->last_data.key_down.d)) obj->data.key_ctrl_press_cnt.d++;
+            if ((obj->data.key_down.a && !obj->last_data.key_down.a)) obj->data.key_ctrl_press_cnt.a++;
+            if ((obj->data.key_down.q && !obj->last_data.key_down.q)) obj->data.key_ctrl_press_cnt.q++;
+            if ((obj->data.key_down.e && !obj->last_data.key_down.e)) obj->data.key_ctrl_press_cnt.e++;
+            if ((obj->data.key_down.r && !obj->last_data.key_down.r)) obj->data.key_ctrl_press_cnt.r++;
+            if ((obj->data.key_down.f && !obj->last_data.key_down.f)) obj->data.key_ctrl_press_cnt.f++;
+            if ((obj->data.key_down.g && !obj->last_data.key_down.g)) obj->data.key_ctrl_press_cnt.g++;
+            if ((obj->data.key_down.z && !obj->last_data.key_down.z)) obj->data.key_ctrl_press_cnt.z++;
+            if ((obj->data.key_down.x && !obj->last_data.key_down.x)) obj->data.key_ctrl_press_cnt.x++;
+            if ((obj->data.key_down.c && !obj->last_data.key_down.c)) obj->data.key_ctrl_press_cnt.c++;
+            if ((obj->data.key_down.v && !obj->last_data.key_down.v)) obj->data.key_ctrl_press_cnt.v++;
+            if ((obj->data.key_down.b && !obj->last_data.key_down.b)) obj->data.key_ctrl_press_cnt.b++;
+        } else {
+            if ((obj->data.key_down.w && !obj->last_data.key_down.w)) obj->data.key_single_press_cnt.w++;
+            if ((obj->data.key_down.s && !obj->last_data.key_down.s)) obj->data.key_single_press_cnt.s++;
+            if ((obj->data.key_down.d && !obj->last_data.key_down.d)) obj->data.key_single_press_cnt.d++;
+            if ((obj->data.key_down.a && !obj->last_data.key_down.a)) obj->data.key_single_press_cnt.a++;
+            if ((obj->data.key_down.q && !obj->last_data.key_down.q)) obj->data.key_single_press_cnt.q++;
+            if ((obj->data.key_down.e && !obj->last_data.key_down.e)) obj->data.key_single_press_cnt.e++;
+            if ((obj->data.key_down.r && !obj->last_data.key_down.r)) obj->data.key_single_press_cnt.r++;
+            if ((obj->data.key_down.f && !obj->last_data.key_down.f)) obj->data.key_single_press_cnt.f++;
+            if ((obj->data.key_down.g && !obj->last_data.key_down.g)) obj->data.key_single_press_cnt.g++;
+            if ((obj->data.key_down.z && !obj->last_data.key_down.z)) obj->data.key_single_press_cnt.z++;
+            if ((obj->data.key_down.x && !obj->last_data.key_down.x)) obj->data.key_single_press_cnt.x++;
+            if ((obj->data.key_down.c && !obj->last_data.key_down.c)) obj->data.key_single_press_cnt.c++;
+            if ((obj->data.key_down.v && !obj->last_data.key_down.v)) obj->data.key_single_press_cnt.v++;
+            if ((obj->data.key_down.b && !obj->last_data.key_down.b)) obj->data.key_single_press_cnt.b++;
+        }
+    }
 }
