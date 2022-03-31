@@ -134,7 +134,7 @@ void Robot_CMD_Update(Robot* robot) {
             if (robot->remote->data.rc.s1 == 2) {
                 robot->shoot_param.mode = shoot_stop;
                 if (robot->remote->data.rc.ch4 > CHx_BIAS + 400) robot->shoot_param.magazine_lid = magazine_on;
-                if (robot->remote->data.rc.ch4 > CHx_BIAS - 400) robot->shoot_param.magazine_lid = magazine_off;
+                if (robot->remote->data.rc.ch4 < CHx_BIAS - 400) robot->shoot_param.magazine_lid = magazine_off;
             } else {
                 robot->shoot_param.mode = shoot_run;
                 robot->shoot_param.shoot_command = continuous;
