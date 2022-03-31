@@ -68,6 +68,7 @@ typedef struct referee_unpack_tool_t {
 cvector *referee_instances;
 
 void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len);
+uint8_t referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack);
 
 void referee_driver_init() {
     referee_instances = cvector_create(sizeof(Referee *));

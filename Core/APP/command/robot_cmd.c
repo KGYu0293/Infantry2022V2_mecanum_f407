@@ -362,7 +362,7 @@ void Robot_CMD_Update(Robot* robot) {
     robot->chassis_param.power.power_buffer = 0;
     robot->chassis_param.power.power_now = 30;
     robot->chassis_param.power.power_limit = 50;
-    robot->chassis_param.power.if_supercap_on = robot->board_com.gico_data->if_supercap_on;
+    robot->chassis_param.power.if_supercap_on = robot->board_com.goci_data->if_supercap_on;
 
     // 发布变更
     publish_data chassis_cmd;
