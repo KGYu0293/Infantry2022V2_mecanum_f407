@@ -22,6 +22,7 @@
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 void chassis_imu_lost(void *motor) { printf_log("chassis IMU lost!!\n"); }
 void chassis_super_cap_lost(void *motor) { printf_log("super cap lost!!\n"); }
+void Speed_set(Chassis *obj, Chassis_param *param);
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
@@ -95,8 +96,10 @@ Chassis *Chassis_Create() {
     //功率控制参数设置
     obj->if_supercap = 1;
     obj->powcrtl.power_buffer_target = 40;
-    PID_SetConfig(&obj->powcrtl.powerbuffer_pid, 1, 0, 0, 0, 5000);
-    PID_SetConfig(&obj->powcrtl.motorpower_pid, 1, 0, 0, 0, 5000);
+    PID_SetConfig(&obj->powcrtl.powerbuffer_pid.config, 1, 0, 0, 0, 5000);
+    PID_SetConfig(&obj->powcrtl.motorpower_pid.config, 1, 0, 0, 0, 5000);
+    PID_Init(&obj->powcrtl.powerbuffer_pid,&obj->powcrtl.powerbuffer_pid.config);
+    PID_Init(&obj->powcrtl.motorpower_pid,&obj->powcrtl.motorpower_pid.config);
 
     // 定义pub
     obj->chassis_imu_pub = register_pub(chassis_upload_topic);
