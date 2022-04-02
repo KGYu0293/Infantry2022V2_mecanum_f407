@@ -31,17 +31,6 @@ Super_cap_wuli *Super_cap_wuli_Create(super_cap_wuli_config *config) {
     return obj;
 }
 
-void Super_cap_wuli_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len) {
-    for (size_t i = 0; i < super_cap_wuli_instances->cv_len; i++) {
-        Super_cap_wuli *now = *(Super_cap_wuli **)cvector_val_at(super_cap_wuli_instances, i);
-        if (can_id == now->config.bsp_can_index && now->config.super_cap_wuli_rx_id == identifier) {
-            now->monitor->reset(now->monitor);
-            Super_cap_wuli_FeedbackData_Update(now, data);
-            Super_cap_wuli_Getpercent(now);
-        }
-    }
-}
-
 void Super_cap_wuli_Getpercent(Super_cap_wuli *obj) {
     //最好用函数拟合
     //或者多描几个点省算力（bushi
@@ -59,6 +48,17 @@ void Super_cap_wuli_Getpercent(Super_cap_wuli *obj) {
         obj->cap_percent = 95;
     else if (obj->voltage_cap_fdb >= 24.5 && obj->voltage_cap_fdb < 25)
         obj->cap_percent = 100;
+}
+
+void Super_cap_wuli_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len) {
+    for (size_t i = 0; i < super_cap_wuli_instances->cv_len; i++) {
+        Super_cap_wuli *now = *(Super_cap_wuli **)cvector_val_at(super_cap_wuli_instances, i);
+        if (can_id == now->config.bsp_can_index && now->config.super_cap_wuli_rx_id == identifier) {
+            now->monitor->reset(now->monitor);
+            Super_cap_wuli_FeedbackData_Update(now, data);
+            Super_cap_wuli_Getpercent(now);
+        }
+    }
 }
 
 void Super_cap_wuli_FeedbackData_Update(Super_cap_wuli *obj, uint8_t *data) {
