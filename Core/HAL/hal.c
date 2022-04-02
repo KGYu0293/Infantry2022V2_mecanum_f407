@@ -1,6 +1,6 @@
 #include "hal.h"
 #include "BMI088.h"
-#include "crc16.h"
+#include "soft_crc.h"
 #include "can_recv.h"
 #include "can_pc.h"
 #include "can_motor.h"
@@ -14,6 +14,7 @@
 void HAL_Layer_Init(){
     Monitor_Init();
     CRC16_Init();
+    CRC8_Init();
     BMI088_Driver_Init();
     CanRecv_Driver_Init();
     Can_Motor_Driver_Init();

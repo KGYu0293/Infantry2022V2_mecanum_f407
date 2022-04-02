@@ -6,7 +6,7 @@
 #include "monitor.h"
 #include "stdint.h"
 
-#include "crc16.h"
+#include "soft_crc.h"
 
 typedef enum Robot_id_e {
     RED_HERO = 1,

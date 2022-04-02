@@ -1,7 +1,7 @@
 #include "can_send.h"
 
 #include "bsp_can.h"
-#include "crc16.h"
+#include "soft_crc.h"
 #include "bsp_log.h"
 #include "cvector.h"
 

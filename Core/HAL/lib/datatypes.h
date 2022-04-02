@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "crc16.h"
+#include "soft_crc.h"
 #include "stdint.h"
 #pragma pack(1)
 typedef struct _general_data {
