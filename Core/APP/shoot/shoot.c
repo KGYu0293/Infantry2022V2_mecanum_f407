@@ -72,8 +72,8 @@ void Shoot_load_motor_set(Shoot *obj, Shoot_param *param) {
     }
     switch (param->shoot_command) {
         case not_fire:
-            obj->load->config.motor_pid_model = POSITION_LOOP;
-            obj->load->position_pid.ref = 0;
+            obj->load->config.motor_pid_model = SPEED_LOOP;
+            obj->load->speed_pid.ref = 0;
             break;
         case reverse:  // 反转 防卡弹
             obj->load->config.motor_pid_model = SPEED_LOOP;
