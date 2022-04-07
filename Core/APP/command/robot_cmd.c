@@ -24,7 +24,7 @@ Robot* Robot_CMD_Create() {
     obj->board_com.recv = CanRecv_Create(&recv_config);
     obj->board_com.goci_data = malloc(sizeof(board_com_goci_data));
     obj->board_com.gico_data = malloc(sizeof(board_com_gico_data));
-    obj->board_com.goci_data->if_supercap_on = 0;//电容默认关闭
+    obj->board_com.goci_data->if_supercap_on = 0;  //电容默认关闭
 
     // 小电脑通信配置
     canpc_config pc_config;
@@ -147,13 +147,8 @@ void Robot_CMD_Update(Robot* robot) {
         // 键鼠控制模式
         else if (robot->remote->data.imput_mode == RC_MouseKey) {
             // robot_state
-            static enum { chassis_follow_gimbal,
-                          gimbal_follow_chassis,
-                          independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
-            static enum { auto_aim_off,
-                          auto_aim_on,
-                          auto_aim_AtkBuff_small,
-                          auto_aim_AtkBuff_big } auto_aim_mode;
+            static enum { chassis_follow_gimbal, gimbal_follow_chassis, independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
+            static enum { auto_aim_off, auto_aim_on, auto_aim_AtkBuff_small, auto_aim_AtkBuff_big } auto_aim_mode;
 
             // 按一下r:小陀螺
             if (robot->remote->data.key_single_press_cnt.r != robot->remote->last_data.key_single_press_cnt.r) {
@@ -267,9 +262,9 @@ void Robot_CMD_Update(Robot* robot) {
                 robot->shoot_param.magazine_lid = magazine_on;
         }
 
-       /*  //电容为可开关模式则解注释
-        if (robot->remote->data.key_single_press_cnt.c != robot->remote->last_data.key_single_press_cnt.c)
-            robot->board_com.goci_data->if_supercap_on = 1 - robot->board_com.goci_data->if_supercap_on; */
+        /*  //电容为可开关模式则解注释
+         if (robot->remote->data.key_single_press_cnt.c != robot->remote->last_data.key_single_press_cnt.c)
+             robot->board_com.goci_data->if_supercap_on = 1 - robot->board_com.goci_data->if_supercap_on; */
         robot->board_com.goci_data->if_supercap_on = 1;
     }
     // 发布变更

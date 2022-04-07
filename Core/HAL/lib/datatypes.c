@@ -6,7 +6,7 @@ uint8_t CheckVaild(uint8_t* buffer, uint32_t len) {
     if (buffer[0] + 3 != len) return 0;
     uint16_t crc_val;
     memcpy(&crc_val, buffer + len - 2, 2);
-    uint16_t crc_chk = CRC16_Modbus_calc(buffer, len - 2);
+    uint16_t crc_chk = CRC16_Modbus_calc(buffer, len - 2, crc16_default);
     return crc_chk == crc_val;
 }
 void DataToBuffer(general_data* data, uint8_t* buffer) {

@@ -18,7 +18,7 @@ can_send* CanSend_Create(can_send_config* config) {
 }
 void CanSend_Send(can_send* obj, uint8_t* data) {
     memcpy(obj->txbuf + 2, data, obj->config.data_len);
-    uint16_t crc_now = CRC16_Modbus_calc(obj->txbuf + 1, obj->config.data_len + 1);
+    uint16_t crc_now = CRC16_Modbus_calc(obj->txbuf + 1, obj->config.data_len + 1, crc16_default);
     memcpy(obj->txbuf + 2 + obj->config.data_len, &crc_now, 2);
     for (uint32_t idx = 0; idx < obj->buf_len; idx += 8) {
         uint32_t dlc = obj->buf_len - idx >= 8 ? 8 : obj->buf_len - idx;

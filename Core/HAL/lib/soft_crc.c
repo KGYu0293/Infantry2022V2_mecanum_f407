@@ -1,9 +1,9 @@
 #include "soft_crc.h"
 
-uint16_t modbus_tab16[256];
-uint8_t modbus_tab16_init;
-uint8_t modbus_tab8[256];
-uint8_t modbus_tab8_init;
+#include <stdlib.h>
+
+CRC16* crc16_default;
+CRC8* crc8_default;
 
 uint16_t bit_reverse_u16(uint16_t x) {
     uint16_t result = 0;
@@ -23,8 +23,9 @@ uint8_t bit_reverse_u8(uint8_t x) {
     return result;
 }
 
-void CRC16_Init(uint16_t poly) {
-    uint16_t table_poly = bit_reverse_u16(poly);
+CRC16* CRC16_Create(CRC16_config* config) {
+    CRC16* obj = (CRC16*)malloc(sizeof(CRC16));
+    uint16_t table_poly = bit_reverse_u16(config->poly);
     for (uint16_t i = 0; i < 256; ++i) {
         uint16_t crc = 0, c = i;
         for (uint16_t j = 0; j < 8; ++j) {
@@ -34,13 +35,15 @@ void CRC16_Init(uint16_t poly) {
                 crc = crc >> 1;
             c = c >> 1;
         }
-        modbus_tab16[i] = crc;
+        obj->table[i] = crc;
     }
-    modbus_tab16_init = 1;
+    obj->crc_init = config->crc_init;
+    return obj;
 }
 
-void CRC8_Init(uint8_t poly) {
-    uint8_t table_poly = bit_reverse_u8(poly);
+CRC8* CRC8_Create(CRC8_config* config) {
+    CRC8* obj = (CRC8*)malloc(sizeof(CRC8));
+    uint8_t table_poly = bit_reverse_u8(config->poly);
     for (uint8_t i = 0; i < 256; ++i) {
         uint8_t crc = 0, c = i;
         for (uint8_t j = 0; j < 8; ++j) {
@@ -51,19 +54,31 @@ void CRC8_Init(uint8_t poly) {
             }
             c = c >> 1;
         }
-        modbus_tab8[i] = crc;
+        obj->table[i] = crc;
     }
-    modbus_tab8_init = 1;
+    obj->crc_init = config->crc_init;
 }
 
-uint16_t CRC16_Modbus_calc(uint8_t* data, uint32_t num_bytes) {
-    uint16_t crc = CRC_START_MODBUS_16;
-    while (num_bytes--) crc = (crc >> 8) ^ modbus_tab16[(crc ^ *data++) & 0xff];
+void soft_crc_Init() {
+    CRC16_config crc16_default_config;
+    crc16_default_config.crc_init = CRC_START_MODBUS_16;
+    crc16_default_config.poly = CRC16_CCITT;
+    crc16_default = CRC16_Create(&crc16_default_config);
+
+    CRC8_config crc8_default_config;
+    crc8_default_config.crc_init = CRC_START_MODBUS_8;
+    crc8_default_config.poly = CRC8_MAXIM;
+    crc8_default = CRC8_Create(&crc8_default_config);
+}
+
+uint16_t CRC16_Modbus_calc(uint8_t* data, uint32_t num_bytes, CRC16* crc16) {
+    uint16_t crc = crc16->crc_init;
+    while (num_bytes--) crc = (crc >> 8) ^ crc16->table[(crc ^ *data++) & 0xff];
     return crc;
 }
 
-uint8_t CRC8_Modbus_calc(uint8_t* data, uint32_t num_bytes) {
-    uint8_t crc = CRC_START_MODBUS_8;
-    while (num_bytes--) crc = modbus_tab8[(crc ^ *data++)];
+uint8_t CRC8_Modbus_calc(uint8_t* data, uint32_t num_bytes, CRC8* crc8) {
+    uint8_t crc = crc8->crc_init;
+    while (num_bytes--) crc = crc8->table[(crc ^ *data++)];
     return crc;
 }

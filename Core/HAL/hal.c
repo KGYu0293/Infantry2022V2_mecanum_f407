@@ -13,8 +13,7 @@
 
 void HAL_Layer_Init(){
     Monitor_Init();
-    CRC16_Init(CRC16_CCITT);
-    CRC8_Init(CRC8_MAXIM);
+    soft_crc_Init();
     BMI088_Driver_Init();
     CanRecv_Driver_Init();
     Can_Motor_Driver_Init();

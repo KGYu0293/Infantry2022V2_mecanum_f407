@@ -1,7 +1,6 @@
 #include "bsp_uart.h"
 
 #include "cvector.h"
-#include "usart.h"
 
 #define DEVICE_UART_CNT 2
 #define BSP_UART_DMA_BUFF_SIZE 255  // DMA缓冲区大小，一次传输数据不应超过该长度
