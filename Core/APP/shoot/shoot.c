@@ -123,10 +123,10 @@ void Shoot_Update(Shoot *obj) {
             break;
     }
     switch (param->magazine_lid) {
-        case magazine_on:
+        case magazine_open:
             // BSP_PWM_SetCCR();
             break;
-        case magazine_off:
+        case magazine_close:
             // BSP_PWM_SetCCR();
             break;
     }

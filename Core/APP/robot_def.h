@@ -1,5 +1,5 @@
-#ifndef _ROBOT_PARAM_H_
-#define _ROBOT_PARAM_H_
+#ifndef _ROBOT_DEF_H_
+#define _ROBOT_DEF_H_
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
@@ -20,7 +20,12 @@ extern const char* chassis_upload_topic;
 extern const char* gimbal_upload_topic;
 extern const char* shoot_upload_topic;
 
-typedef enum Module_status_e {module_lost, module_working} Module_status;
+#pragma pack(1)
+
+// 对模块是否掉线的定义
+typedef enum Module_status_e { module_lost = 0, module_working } Module_status;
+// 机器人总模式
+typedef enum Robot_mode_e { robot_stop = 0, robot_run } Robot_mode;
 
 // chassis
 // vx vy rotate传入时以offset系（一般为云台系）为基准
@@ -65,10 +70,29 @@ typedef struct Gimbal_upload_data_t {
 typedef struct Shoot_param_t {
     enum { shoot_stop, shoot_run } mode;
     enum { not_fire, reverse, single, Double, trible, continuous } shoot_command;
-    enum { magazine_on, magazine_off } magazine_lid;  // 弹仓盖
-    uint16_t bullet_speed;                            // 弹速
-    float fire_rate;                                  // 射频（发/秒）
-    uint16_t heat_limit_remain;                       // 剩余热量，cooling_limit-cooling_heat
+    enum { magazine_close,magazine_open } magazine_lid;  // 弹仓盖
+    uint16_t bullet_speed;                                // 弹速
+    float fire_rate;                                      // 射频（发/秒）
+    uint16_t heat_limit_remain;                           // 剩余热量，cooling_limit-cooling_heat
 } Shoot_param;
 
+// 板间通信部分
+// gimbal output chassis input 云台->底盘数据包
+typedef struct board_com_goci_data_t {
+    uint8_t if_supercap_on;     // 电容是否开启
+    Robot_mode now_robot_mode;  // 遥控器在云台主控 包含stop模式与云台重要模块掉线
+    Chassis_mode chassis_mode;
+    Chassis_param_speed_target chassis_target;
+} board_com_goci_data;
+// gimbal input chassis output数据包
+typedef struct board_com_gico_data_t {
+    Module_status chassis_board_status;  // 同步底盘是否有重要模块掉线
+    float gyro_yaw;                      // 将底盘主控的imu数据发到云台
+    struct {
+        uint16_t bullet_speed_max;   // 弹速
+        uint16_t heat_limit_remain;  // 剩余热量
+    } shoot_referee_data;
+} board_com_gico_data;
+
+#pragma pack()
 #endif

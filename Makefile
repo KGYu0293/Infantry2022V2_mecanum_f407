@@ -135,7 +135,8 @@ Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/HAL/pub_sub.c \
 Core/APP/app.c \
-Core/APP/command/robot_cmd.c \
+Core/APP/command/chassis_board_cmd.c \
+Core/APP/command/gimbal_board_cmd.c \
 Core/APP/chassis/chassis.c \
 Core/APP/shoot/shoot.c \
 Core/APP/gimbal/gimbal.c \

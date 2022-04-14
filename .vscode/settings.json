@@ -64,13 +64,15 @@
         "gimbal.h": "c",
         "bmi088def.h": "c",
         "robot_cmd.h": "c",
-        "robot_param.h": "c",
+        "robot_def.h": "c",
         "chassis.h": "c",
         "super_cap_wuli.h": "c",
         "bsp_reset.h": "c",
         "can_pc.h": "c",
         "pub_sub.h": "c",
         "referee.h": "c",
-        "bsp_delay.h": "c"
+        "bsp_delay.h": "c",
+        "gimbal_board_cmd.h": "c",
+        "shoot.h": "c"
     }
 }

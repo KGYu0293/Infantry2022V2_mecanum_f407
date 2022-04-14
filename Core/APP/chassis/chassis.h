@@ -17,7 +17,7 @@
 #include "bsp_log.h"
 #include "can_motor.h"
 #include "pub_sub.h"
-#include "robot_param.h"
+#include "robot_def.h"
 #include "stdint.h"
 #include "super_cap_wuli.h"
 

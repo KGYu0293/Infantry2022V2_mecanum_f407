@@ -1,9 +1,15 @@
 #include "app.h"
 
+#include "robot_def.h"
+// 功能模块
 #include "chassis.h"
-#include "robot_cmd.h"
-#include "robot_param.h"
+#include "gimbal.h"
+#include "shoot.h"
+// 控制模块
+#include "chassis_board_cmd.h"
+#include "gimbal_board_cmd.h"
 
+// pub_sub体系的topic实际存放
 const char* chassis_cmd_topic = "cc";
 const char* gimbal_cmd_topic = "gc";
 const char* shoot_cmd_topic = "sc";
@@ -11,67 +17,43 @@ const char* chassis_upload_topic = "cu";
 const char* gimbal_upload_topic = "gu";
 const char* shoot_upload_topic = "su";
 
+
+#ifdef GIMBAL_BOARD
 // 重要模块
-Robot* robot;
-Chassis* chassis;
+gimbal_board_cmd* cmd;
 Gimbal* gimbal;
 Shoot* shoot;
-
-// 共享外设
-buzzer* internal_buzzer;
-
-//此处定义外设的配置文件，也可分开文件配置
-buzzer_config internal_buzzer_config;
-
-void APP_Layer_Init() {
-    // buzzer
-#ifdef CHASSIS_BOARD
-    uint32_t music_id = 1;
-#endif
-#ifdef GIMBAL_BOARD
-    uint32_t music_id = 2;
-#endif
-    internal_buzzer_config.music = musics[music_id];
-    internal_buzzer_config.len = music_lens[music_id];
-    internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
-    internal_buzzer = Buzzer_Create(&internal_buzzer_config);
-
-    robot = Robot_CMD_Create();
-#ifdef CHASSIS_BOARD
-    chassis = Chassis_Create();
-#endif
-#ifdef GIMBAL_BOARD
+void APP_Layer_Init(){
+    cmd=Gimbal_board_CMD_Create();
     gimbal = Gimbal_Create();
     shoot = Shoot_Create();
-#endif
 }
 
-// 打印输出等到ozone的窗口 用于测试项目
-void APP_Log_Loop() {}
-
-#ifdef GIMBAL_BOARD
-void APP_Layer_default_loop() {
-    if (robot->ready) {
-        Buzzer_Update(internal_buzzer);
-    }
-}
-// APP层的函数，机器人命令层中枢，在app.h中声明并直接在rtos.c中执行
 void APP_RobotCmd_Loop() {
-    Robot_CMD_Update(robot);
+    Gimbal_board_CMD_Update(cmd);
     Gimbal_Update(gimbal);
     Shoot_Update(shoot);
 }
 #endif
 
 #ifdef CHASSIS_BOARD
-void APP_Layer_default_loop() {
-    if (chassis->imu->bias_init_success) {
-        Buzzer_Update(internal_buzzer);
-    }
+Chassis* chassis;
+void APP_Layer_Init(){
+    chassis = Chassis_Create();
 }
-// APP层的函数，机器人命令层中枢，在app.h中声明并直接在rtos.c中执行
+
 void APP_RobotCmd_Loop() {
     Robot_CMD_Update(robot);
     Chassis_Update(chassis);
 }
 #endif
+
+// 打印输出等到ozone的窗口 用于测试项目
+void APP_Log_Loop() {}
+
+
+void APP_Layer_default_loop() {
+    // if (chassis->imu->bias_init_success) {
+    //     Buzzer_Update(internal_buzzer);
+    // }
+}

@@ -1,6 +1,5 @@
 #include "referee.h"
 
-#include "bsp_uart.h"
 #include "cvector.h"
 // 待测
 

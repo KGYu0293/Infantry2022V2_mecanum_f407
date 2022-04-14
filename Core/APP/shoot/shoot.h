@@ -2,7 +2,7 @@
 #define _SHOOT_H_
 
 #include "pub_sub.h"
-#include "robot_param.h"
+#include "robot_def.h"
 #include "stdint.h"
 #include "bsp_log.h"
 #include "can_motor.h"

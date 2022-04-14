@@ -1,6 +1,7 @@
 #ifndef _REFEREE_H_
 #define _REFEREE_H_
 
+#include "bsp_uart.h"
 #include "circular_queue.h"
 #include "cvector.h"
 #include "monitor.h"
