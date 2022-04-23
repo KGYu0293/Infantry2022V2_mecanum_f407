@@ -25,7 +25,7 @@ Shoot *Shoot_Create(void) {
     obj->load_delta_pos = 8192 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
 
     //
-    obj->shoot_cmd_suber = register_sub(shoot_cmd_topic, 1);
+    obj->shoot_cmd_suber = register_sub("shoot_cmd_topic", 1);
 
     // 电机初始化
     can_motor_config friction_a_config;

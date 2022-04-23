@@ -52,9 +52,9 @@ Gimbal *Gimbal_Create() {
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub
-    obj->gimbal_cmd_sub = register_sub(gimbal_cmd_topic, 1);
+    obj->gimbal_cmd_sub = register_sub("gimbal_cmd_topic", 1);
     // 定义pub
-    obj->gimbal_upload_pub = register_pub(gimbal_upload_topic);
+    obj->gimbal_upload_pub = register_pub("gimbal_upload_topic");
 
     return obj;
 }

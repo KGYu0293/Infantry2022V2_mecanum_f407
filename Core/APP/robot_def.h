@@ -12,14 +12,6 @@
 // 各部分对外接口统一存放
 // 各部分通过pub_sub方式“沟通”的“通讯协议”
 
-// 声明所有需要pub/sub的话题（定义只能在.c，在这里extern；否则报错重复定义）
-extern const char* chassis_cmd_topic;
-extern const char* gimbal_cmd_topic;
-extern const char* shoot_cmd_topic;
-extern const char* chassis_upload_topic;
-extern const char* gimbal_upload_topic;
-extern const char* shoot_upload_topic;
-
 #pragma pack(1)
 
 // 对模块是否掉线的定义

@@ -39,8 +39,8 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     // obj->referee = referee_Create(&referee_config);
 
     // 定义publisher和subscriber
-    obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
-    obj->chassis_upload_sub = register_sub(chassis_upload_topic, 1);
+    obj->chassis_cmd_puber = register_pub("chassis_cmd_topic");
+    obj->chassis_upload_sub = register_sub("chassis_upload_topic", 1);
     
     // memset 0
     obj->mode = robot_stop;
