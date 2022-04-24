@@ -101,7 +101,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
     if (obj->remote->monitor->count < 1) {
         obj->mode = robot_stop;
     } else {
-        if (obj->remote->data.imput_mode == RC_Stop) {
+        if (obj->remote->data.input_mode == RC_Stop) {
             obj->mode = robot_stop;
         }
     }
@@ -114,11 +114,11 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         // 自瞄关
         pc_send_data.auto_mode_flag = 0;
         // 遥控器控制模式
-        if (obj->remote->data.imput_mode == RC_Remote) {
+        if (obj->remote->data.input_mode == RC_Remote) {
             remote_mode_update(obj);
         }
         // 键鼠控制模式
-        else if (obj->remote->data.imput_mode == RC_MouseKey) {
+        else if (obj->remote->data.input_mode == RC_MouseKey) {
             // robot_state
             static enum { chassis_follow_gimbal, gimbal_follow_chassis, independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
             static enum { auto_aim_off, auto_aim_on, auto_aim_AtkBuff_small, auto_aim_AtkBuff_big } auto_aim_mode;

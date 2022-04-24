@@ -84,7 +84,7 @@
 //     if (robot->remote->monitor->count < 1) {
 //         robot->mode = robot_stop;
 //     } else {
-//         if (robot->remote->data.imput_mode == RC_Stop) {
+//         if (robot->remote->data.input_mode == RC_Stop) {
 //             robot->mode = robot_stop;
 //         }
 //     }
@@ -110,7 +110,7 @@
 //         // 自瞄关
 //         pc_send_data.auto_mode_flag = 0;
 //         // 遥控器控制模式
-//         if (robot->remote->data.imput_mode == RC_Remote) {
+//         if (robot->remote->data.input_mode == RC_Remote) {
 //             // gimbal
 //             robot->gimbal_param.mode = gimbal_run;
 //             robot->gimbal_param.yaw -= 0.04f * ((float)robot->remote->data.rc.ch2 - CHx_BIAS);
@@ -145,7 +145,7 @@
 //         }
 
 //         // 键鼠控制模式
-//         else if (robot->remote->data.imput_mode == RC_MouseKey) {
+//         else if (robot->remote->data.input_mode == RC_MouseKey) {
 //             // robot_state
 //             static enum { chassis_follow_gimbal, gimbal_follow_chassis, independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
 //             static enum { auto_aim_off, auto_aim_on, auto_aim_AtkBuff_small, auto_aim_AtkBuff_big } auto_aim_mode;

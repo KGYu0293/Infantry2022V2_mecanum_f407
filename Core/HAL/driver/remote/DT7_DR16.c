@@ -66,9 +66,9 @@ void dt7_data_solve(dt7Remote *obj) {
     obj->data.rc.s1 = ((obj->primary_data[5] >> 4) & 0x000C) >> 2;
     obj->data.rc.s2 = ((obj->primary_data[5] >> 4) & 0x0003);
     // 定义统一输入模式
-    if (obj->data.rc.s2 == 2) obj->data.imput_mode = RC_Stop;
-    if (obj->data.rc.s2 == 3) obj->data.imput_mode = RC_Remote;
-    if (obj->data.rc.s2 == 1) obj->data.imput_mode = RC_MouseKey;
+    if (obj->data.rc.s2 == 2) obj->data.input_mode = RC_Stop;
+    if (obj->data.rc.s2 == 3) obj->data.input_mode = RC_Remote;
+    if (obj->data.rc.s2 == 1) obj->data.input_mode = RC_MouseKey;
 
     // 鼠标值解算
     obj->data.mouse.x = ((int16_t)obj->primary_data[6]) | ((int16_t)obj->primary_data[7] << 8);

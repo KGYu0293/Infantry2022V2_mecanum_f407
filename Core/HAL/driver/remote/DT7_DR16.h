@@ -155,7 +155,7 @@ typedef struct dt7_rx_data_t {
     dt7_rx_data_key key_single_press_cnt;  // 不含shift与ctrl
     dt7_rx_data_key key_shift_press_cnt;
     dt7_rx_data_key key_ctrl_press_cnt;
-    enum { RC_MouseKey = 1, RC_Stop, RC_Remote } imput_mode;// 统一所有机器人的stop模式对应遥控器拨杆
+    enum { RC_MouseKey = 1, RC_Stop, RC_Remote } input_mode;// 统一所有机器人的stop模式对应遥控器拨杆
 } dt7_rx_data;
 
 typedef struct dt7Remote_t {
