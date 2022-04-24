@@ -24,18 +24,18 @@ typedef enum Robot_mode_e { robot_stop = 0, robot_run } Robot_mode;
 typedef enum Chassis_mode_e {
     chassis_stop = 0,
     chassis_run,               // 底盘云台分离模式
-    chassis_rotate_run,        //小陀螺模式
-    chassis_run_follow_offset  //底盘跟随云台模式
+    chassis_rotate_run,        // 小陀螺模式
+    chassis_run_follow_offset  // 底盘跟随云台模式
 } Chassis_mode;
 
 // 拨弹轮运行模式
 typedef enum Bullet_mode_e {
     bullet_stop = 0,
-    bullet_reverse,    //反转，卡弹处理
-    bullet_single,     //单发
-    bullet_double,     //双发
-    bullet_trible,     //三发
-    bullet_continuous  //连发
+    bullet_reverse,    // 反转，卡弹处理
+    bullet_single,     // 单发
+    bullet_double,     // 双发
+    bullet_trible,     // 三发
+    bullet_continuous  // 连发
 } Bullet_mode;
 
 // 摩擦轮运行模式
@@ -45,21 +45,21 @@ enum Friction_mode {
 };
 //弹仓盖模式
 typedef enum Magazine_mode_e {
-    magazine_close = 0,  //开弹仓
-    magazine_open        //关弹仓
+    magazine_close = 0,  // 开弹仓
+    magazine_open        // 关弹仓
 } Magazine_mode;
 //云台模式
 typedef enum Gimbal_mode_e {
     gimbal_stop = 0,
-    gimbal_run,     //正常云台模式
-    gimbal_middle,  //云台归中，跟随底盘模式
+    gimbal_run,     // 正常云台模式
+    gimbal_middle,  // 云台归中，跟随底盘模式
 } Gimbal_mode;
 //自瞄模式
 enum AutoAim_mode {
-    auto_aim_off = 0,     //关闭自瞄
-    auto_aim_normal,      //正常自瞄
-    auto_aim_buff_small,  //小能量机关
-    auto_aim_buff_big     //大能量机关
+    auto_aim_off = 0,     // 关闭自瞄
+    auto_aim_normal,      // 正常自瞄
+    auto_aim_buff_small,  // 小能量机关
+    auto_aim_buff_big     // 大能量机关
 };
 
 // 机器人模块控制量定义
@@ -127,7 +127,8 @@ typedef struct Gimbal_board_send_t {
     Robot_mode now_robot_mode;                  // 遥控器在云台主控 包含stop模式与云台重要模块掉线
     Chassis_mode chassis_mode;                  // 底盘模式
     Cmd_chassis_speed chassis_target;  // 底盘速度控制
-} gimbal_board_send_data;
+} Gimbal_board_send_data;
+
 // 云台<-底盘数据包
 typedef struct Chassis_board_send_t {
     Module_status chassis_board_status;  // 同步底盘是否有重要模块掉线
@@ -136,7 +137,7 @@ typedef struct Chassis_board_send_t {
         uint16_t bullet_speed_max;   // 弹速
         uint16_t heat_limit_remain;  // 剩余热量
     } shoot_referee_data;
-} chassis_board_send_data;
+} Chassis_board_send_data;
 
 #pragma pack()
 #endif
