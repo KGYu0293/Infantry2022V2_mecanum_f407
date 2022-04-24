@@ -38,12 +38,13 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     // obj->referee = referee_Create(&referee_config);
 
     // 定义publisher和subscriber
-    obj->chassis_cmd_puber = register_pub("chassis_cmd_topic");
-    obj->chassis_upload_sub = register_sub("chassis_upload_topic", 1);
+    obj->chassis_cmd_puber = register_pub("cmd_chassis");
+    obj->chassis_upload_sub = register_sub("upload_chassis", 1);
 
     // memset 0
     obj->mode = robot_stop;
-
+    memset(&(obj->send_data), 0, sizeof(Chassis_board_send_data));
+    memset(&(obj->chassis_control), 0, sizeof(Cmd_chassis));
     return obj;
 }
 
@@ -71,14 +72,14 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
 
     // 底盘控制
     if (obj->mode == robot_stop) {
-        obj->chassis_param.mode = chassis_stop;
+        obj->chassis_control.mode = chassis_stop;
     } else {
-        obj->chassis_param.mode = obj->recv_data->chassis_mode;
-        memcpy(&(obj->chassis_param.target), &(obj->recv_data->chassis_target), sizeof(Cmd_chassis_speed));
+        obj->chassis_control.mode = obj->recv_data->chassis_mode;
+        memcpy(&(obj->chassis_control.target), &(obj->recv_data->chassis_target), sizeof(Cmd_chassis_speed));
     }
-    obj->chassis_param.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
-    obj->chassis_param.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
-    obj->chassis_param.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;
+    obj->chassis_control.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
+    obj->chassis_control.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
+    obj->chassis_control.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;
     // obj->chassis_param.power.power_buffer = 0;
     // obj->chassis_param.power.power_now = 30;
     // obj->chassis_param.power.power_limit = 50;
@@ -86,7 +87,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
 
     // 发布变更
     publish_data chassis_cmd;
-    chassis_cmd.data = (uint8_t*)&obj->chassis_param;
+    chassis_cmd.data = (uint8_t*)&obj->chassis_control;
     chassis_cmd.len = sizeof(Cmd_chassis);
     obj->chassis_cmd_puber->publish(obj->chassis_cmd_puber, chassis_cmd);
 

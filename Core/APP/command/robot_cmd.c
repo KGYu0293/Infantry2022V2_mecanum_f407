@@ -316,9 +316,9 @@
 //     // obj->referee = referee_Create(&referee_config);
 
 //     // 定义publisher和subscriber
-//     obj->chassis_cmd_puber = register_pub(chassis_cmd_topic);
+//     obj->chassis_cmd_puber = register_pub(cmd_chassis);
 
-//     obj->chassis_upload_sub = register_sub(chassis_upload_topic, 1);
+//     obj->chassis_upload_sub = register_sub(upload_chassis, 1);
 //     obj->mode = robot_stop;
 //     return obj;
 // }

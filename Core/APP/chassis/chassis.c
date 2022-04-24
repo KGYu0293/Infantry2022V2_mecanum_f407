@@ -102,9 +102,9 @@ Chassis *Chassis_Create() {
     // PID_Init(&obj->powcrtl.motorpower_pid,&obj->powcrtl.motorpower_pid.config);
 
     // 定义pub
-    obj->chassis_imu_pub = register_pub("chassis_upload_topic");
+    obj->chassis_imu_pub = register_pub("upload_chassis");
     // 定义subscriber
-    obj->chassis_cmd_suber = register_sub("chassis_cmd_topic", 1);
+    obj->chassis_cmd_suber = register_sub("cmd_chassis", 1);
 
     return obj;
 }

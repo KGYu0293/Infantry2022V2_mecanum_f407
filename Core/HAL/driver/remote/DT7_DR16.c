@@ -37,6 +37,8 @@ dt7Remote *dt7_Create(dt7_config *config) {
     obj->config = *config;
     obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     cvector_pushback(dt7_instances, &obj);
+    memset(&(obj->data), 0, sizeof(dt7_rx_data));
+    memset(&(obj->last_data), 0, sizeof(dt7_rx_data));
     return obj;
 }
 
