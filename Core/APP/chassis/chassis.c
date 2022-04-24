@@ -106,6 +106,9 @@ Chassis *Chassis_Create() {
     // 定义subscriber
     obj->chassis_cmd_suber = register_sub("cmd_chassis", 1);
 
+    obj->cmd_data = NULL;
+    obj->upload_data.chassis_status = module_lost;
+    obj->upload_data.chassis_imu = &(obj->imu->data);
     return obj;
 }
 
@@ -139,12 +142,66 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 // 小陀螺情况下的旋转速度控制函数，可以写不同的变速小陀螺
 float auto_rotate_param(void) { return 150; }
 
-//功率控制相关函数包括Power_control、Speed_set、Speed_limit三个函数
-//可用于无舵底盘（步兵、英雄）及哨兵底盘
-//使用时请将Power_control置于三轴速度解算前，Speed_limit置于解算后
-//若为哨兵底盘请将if_supercap初始化为0
-//本函数提供电容可设置充电电流时的电容电流环，没有也不影响使用，请根据后续电容选型编写充电电流相关函数
-//本函数比例参数及pid参数均未测试
+// 将基于offset的速度映射到实际底盘坐标系的方向上
+void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
+    // 功率控制
+    // Power_control(obj, obj->cmd_data);
+
+    float vx = param->target.vx * cos(param->target.offset_angle * DEG2RAD) - param->target.vy * sin(param->target.offset_angle * DEG2RAD);
+    float vy = param->target.vx * sin(param->target.offset_angle * DEG2RAD) + param->target.vy * cos(param->target.offset_angle * DEG2RAD);
+    if (param->mode == chassis_run)
+        mecanum_calculate(obj, vx, vy, param->target.rotate);
+    else if (param->mode == chassis_rotate_run) {
+        float w = auto_rotate_param();
+        mecanum_calculate(obj, vx, vy, w);
+    } else if (param->mode == chassis_run_follow_offset) {
+        float w = 0.05f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
+        mecanum_calculate(obj, vx, vy, w);
+    }
+
+    // 缓启动 斜坡
+
+    // 速度输出限制
+    // Speed_limit(obj);
+}
+
+void Chassis_Update(Chassis *obj) {
+    // 检查imu在线并初始化完成
+    if (obj->imu->monitor->count < 1 || !(obj->imu->bias_init_success)) obj->upload_data.chassis_status = module_lost;
+    else obj->upload_data.chassis_status = module_working;
+    // 发送回传数据指针
+    publish_data chassis_upload;
+    chassis_upload.data = (uint8_t *)&(obj->upload_data);
+    chassis_upload.len = sizeof(Upload_chassis);
+    obj->chassis_imu_pub->publish(obj->chassis_imu_pub, chassis_upload);
+
+    // 获得cmd命令
+    publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
+    if (chassis_data.len == -1) return;  // 未收到指令
+    obj->cmd_data = (Cmd_chassis *)chassis_data.data;
+
+    // 应用得到的param进行控制
+    if (obj->cmd_data->mode == chassis_stop) {
+        obj->lf->enable = MOTOR_STOP;
+        obj->lb->enable = MOTOR_STOP;
+        obj->rf->enable = MOTOR_STOP;
+        obj->rb->enable = MOTOR_STOP;
+    } else {
+        obj->lf->enable = MOTOR_ENABLE;
+        obj->lb->enable = MOTOR_ENABLE;
+        obj->rf->enable = MOTOR_ENABLE;
+        obj->rb->enable = MOTOR_ENABLE;
+        Chassis_calculate(obj, obj->cmd_data);
+    }
+}
+
+/*功率控制相关函数包括Power_control、Speed_set、Speed_limit三个函数
+ *可用于无舵底盘（步兵、英雄）及哨兵底盘
+ *使用时请将Power_control置于三轴速度解算前，Speed_limit置于解算后
+ *若为哨兵底盘请将if_supercap初始化为0
+ *本函数提供电容可设置充电电流时的电容电流环，没有也不影响使用，请根据后续电容选型编写充电电流相关函数
+ *本函数比例参数及pid参数均未测试
+ */
 // void Power_control(Chassis *obj, Chassis_param *param) {
 //     //速度档位设置
 //     Speed_set(obj, param);
@@ -228,59 +285,3 @@ float auto_rotate_param(void) { return 150; }
 //     obj->lb->speed_pid.ref *= scale;
 //     obj->rb->speed_pid.ref *= scale;
 // }
-
-// 将基于offset的速度映射到实际底盘坐标系的方向上
-void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
-    // 功率控制
-    // Power_control(obj, param);
-
-    float vx = param->target.vx * cos(param->target.offset_angle * DEG2RAD) - param->target.vy * sin(param->target.offset_angle * DEG2RAD);
-    float vy = param->target.vx * sin(param->target.offset_angle * DEG2RAD) + param->target.vy * cos(param->target.offset_angle * DEG2RAD);
-    if (param->mode == chassis_run)
-        mecanum_calculate(obj, vx, vy, param->target.rotate);
-    else if (param->mode == chassis_rotate_run) {
-        float w = auto_rotate_param();
-        mecanum_calculate(obj, vx, vy, w);
-    } else if (param->mode == chassis_run_follow_offset) {
-        float w = 0.05f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
-        mecanum_calculate(obj, vx, vy, w);
-    }
-
-    // 缓启动 斜坡
-
-    // 速度输出限制
-    // Speed_limit(obj);
-}
-
-Cmd_chassis *param;
-void Chassis_Update(Chassis *obj) {
-    // 反馈imu信息
-    publish_data chassis_upload;
-    chassis_upload.data = (uint8_t *)&(obj->imu->data);
-    chassis_upload.len = sizeof(imu_data);
-    obj->chassis_imu_pub->publish(obj->chassis_imu_pub, chassis_upload);
-
-    // subscribe并得到param
-    publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
-    if (chassis_data.len == -1) return;  // cmd未发布指令
-    param = (Cmd_chassis *)chassis_data.data;
-
-    // 应用得到的param进行控制
-    switch (param->mode) {
-        case chassis_stop:
-            obj->lf->enable = MOTOR_STOP;
-            obj->lb->enable = MOTOR_STOP;
-            obj->rf->enable = MOTOR_STOP;
-            obj->rb->enable = MOTOR_STOP;
-            break;
-        case chassis_run:
-        case chassis_rotate_run:
-        case chassis_run_follow_offset:
-            obj->lf->enable = MOTOR_ENABLE;
-            obj->lb->enable = MOTOR_ENABLE;
-            obj->rf->enable = MOTOR_ENABLE;
-            obj->rb->enable = MOTOR_ENABLE;
-            Chassis_calculate(obj, param);
-            break;
-    }
-}

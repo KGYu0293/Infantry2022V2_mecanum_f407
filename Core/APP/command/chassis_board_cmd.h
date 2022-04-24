@@ -25,10 +25,11 @@ typedef struct Chassis_board_cmd_t {
     // 外设
     buzzer *internal_buzzer;
     Referee *referee;
-
+    // 与子模块交互
     Publisher *chassis_cmd_puber;
-    Cmd_chassis chassis_control;  // 将要pub的变量定义在结构体中以长期保存(pub的是指针，要放在指针不会销毁的地方)
+    Cmd_chassis chassis_control;  //发送给底盘的控制量
     Subscriber *chassis_upload_sub;
+    Upload_chassis *chassis_upload_data;  //底盘模块回传数据
 
 } chassis_board_cmd;
 

@@ -42,22 +42,39 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     obj->chassis_upload_sub = register_sub("upload_chassis", 1);
 
     // memset 0
-    obj->mode = robot_stop;
     memset(&(obj->send_data), 0, sizeof(Chassis_board_send_data));
     memset(&(obj->chassis_control), 0, sizeof(Cmd_chassis));
+    obj->chassis_upload_data = NULL;
     return obj;
 }
 
 void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     // 初始化为RUN
     obj->mode = robot_run;
+
     // 判断板间通信在线
     if (obj->recv->monitor->count < 1) {
         obj->mode = robot_stop;
     }
 
+    // 接收底盘回传信息，判断云台IMU在线且初始化完成
+    publish_data chassis_upload = obj->chassis_upload_sub->getdata(obj->chassis_upload_sub);
+    if (chassis_upload.len == -1) {
+        obj->send_data.gyro_yaw = 0;
+        obj->mode = robot_stop;
+    } else {
+        // obj->send_data.gyro_yaw = ((imu_data*)chassis_upload_data.data)->gyro[2];
+        obj->chassis_upload_data = chassis_upload.data;
+        obj->send_data.gyro_yaw = obj->chassis_upload_data->chassis_imu->gyro[2];
+
+        // 底盘模块掉线
+        if (obj->chassis_upload_data->chassis_status == module_lost) {
+            obj->mode = robot_stop;
+        }
+    }
+
     // 底盘重要外设丢失
-    if (0) {
+    if (obj->chassis_upload_data == NULL) {
         obj->mode = robot_stop;
         obj->send_data.chassis_board_status = module_lost;
     } else {
@@ -70,34 +87,31 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->mode = robot_run;
     }
 
-    // 底盘控制
+    // 裁判系统掉线处理
+
+    // 底盘控制指令
     if (obj->mode == robot_stop) {
         obj->chassis_control.mode = chassis_stop;
     } else {
         obj->chassis_control.mode = obj->recv_data->chassis_mode;
-        memcpy(&(obj->chassis_control.target), &(obj->recv_data->chassis_target), sizeof(Cmd_chassis_speed));
+        obj->chassis_control.target = obj->recv_data->chassis_target;
+        // memcpy(&(obj->chassis_control.target), &(obj->recv_data->chassis_target), sizeof(Cmd_chassis_speed));
+        obj->chassis_control.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
+        obj->chassis_control.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
+        obj->chassis_control.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;
+        // obj->chassis_param.power.power_buffer = 0;
+        // obj->chassis_param.power.power_now = 30;
+        // obj->chassis_param.power.power_limit = 50;
+        // obj->chassis_param.power.if_supercap_on = obj->recv_data->if_supercap_on;
     }
-    obj->chassis_control.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
-    obj->chassis_control.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
-    obj->chassis_control.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;
-    // obj->chassis_param.power.power_buffer = 0;
-    // obj->chassis_param.power.power_now = 30;
-    // obj->chassis_param.power.power_limit = 50;
-    // obj->chassis_param.power.if_supercap_on = obj->recv_data->if_supercap_on;
 
-    // 发布变更
+    // 发布指令
     publish_data chassis_cmd;
     chassis_cmd.data = (uint8_t*)&obj->chassis_control;
     chassis_cmd.len = sizeof(Cmd_chassis);
     obj->chassis_cmd_puber->publish(obj->chassis_cmd_puber, chassis_cmd);
 
-    // 获取底盘imu数据
-    publish_data chassis_imu_data = obj->chassis_upload_sub->getdata(obj->chassis_upload_sub);
-    if (chassis_imu_data.len == -1)
-        obj->send_data.gyro_yaw = 0;
-    else
-        obj->send_data.gyro_yaw = ((imu_data*)chassis_imu_data.data)->gyro[2];
-    // 发送信息底盘->云台
+    // 板间通信
     // obj->send_data->shoot_referee_data.bullet_speed_max = obj->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
     // obj->send_data->shoot_referee_data.heat_limit_remain =
     //     obj->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - obj->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;

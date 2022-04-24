@@ -7,6 +7,8 @@
 // #define CHASSIS_BOARD
 
 #include "stdint.h"
+#include "stdlib.h"
+#include "imu_data.h"
 
 // 各模块pub_sub的参数结构体
 // 各部分对外接口统一存放
@@ -118,6 +120,8 @@ typedef struct Upload_gimbal_t {
 
 // 底盘模块回传cmd的数据
 typedef struct Upload_chassis_t {
+    Module_status chassis_status;
+    imu_data* chassis_imu;
 } Upload_chassis;
 
 // 板间通信定义

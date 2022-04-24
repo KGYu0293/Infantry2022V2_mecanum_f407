@@ -1,0 +1,18 @@
+#ifndef _IMU_DATA_H_
+#define _IMU_DATA_H_
+
+//此处欧拉角定义为 绕固定参考坐标轴旋转X-Y-Y 也就是 pitch roll yaw
+typedef struct imu_data_t {
+    float accel[3];  // ZYX加速度
+    //按陀螺仪原始角速度定义 pitch roll yaw
+    float gyro[3];        // 角速度 弧度每秒
+    float euler[3];       // 欧拉角 弧度
+    float gyro_deg[3];    //角速度 度每秒
+    float euler_deg[3];   // 欧拉角 角度
+    float euler_8192[3];  // 欧拉角 编码器版 0-8192
+
+    int round;
+    float yaw_8192_real;
+} imu_data;
+
+#endif

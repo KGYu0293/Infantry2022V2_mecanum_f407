@@ -30,8 +30,7 @@ typedef struct Powcrtl_t {
     float power_buffer_target;     //缓冲能量目标值
 } Powcrtl;
 
-// 定义chassis所需的外设，整合成一个结构体
-typedef struct chassis_t {
+typedef struct Chassis_t {
     BMI088_imu *imu;
     // uint8_t if_supercap;  //是否具有超级电容
     // Super_cap_wuli *super_cap;
@@ -45,8 +44,11 @@ typedef struct chassis_t {
     float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
     float offset_y;
 
+    // sub_pub
     Subscriber *chassis_cmd_suber;
     Publisher *chassis_imu_pub;
+    Cmd_chassis *cmd_data;       // 接收到的指令数据
+    Upload_chassis upload_data;  // 回传的数据
 } Chassis;
 
 Chassis *Chassis_Create(void);
