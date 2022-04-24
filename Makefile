@@ -130,10 +130,10 @@ Core/HAL/lib/MadgwickAHRS.c \
 Core/HAL/lib/cvector.c \
 Core/HAL/lib/datatypes.c \
 Core/HAL/lib/circular_queue.c \
-Core/HAL/controller/adrc.c \
-Core/HAL/controller/lqr.c \
-Core/HAL/controller/mrac.c \
-Core/HAL/controller/pid.c\
+Core/HAL/lib/adrc.c \
+Core/HAL/lib/lqr.c \
+Core/HAL/lib/mrac.c \
+Core/HAL/lib/pid.c\
 Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/HAL/pub_sub.c \
@@ -239,7 +239,6 @@ C_INCLUDES += \
 -ICore/HAL/driver/super_cap \
 -ICore/HAL/lib \
 -ICore/HAL/monitor \
--ICore/HAL/controller \
 -ICore/HAL \
 -ICore/APP \
 -ICore/APP/command \
