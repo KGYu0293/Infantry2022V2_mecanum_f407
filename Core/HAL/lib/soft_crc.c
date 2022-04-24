@@ -44,7 +44,7 @@ CRC16* CRC16_Create(CRC16_config* config) {
 CRC8* CRC8_Create(CRC8_config* config) {
     CRC8* obj = (CRC8*)malloc(sizeof(CRC8));
     uint8_t table_poly = bit_reverse_u8(config->poly);
-    for (uint8_t i = 0; i < 256; ++i) {
+    for (uint16_t i = 0; i < 256; ++i) {
         uint8_t crc = 0, c = i;
         for (uint8_t j = 0; j < 8; ++j) {
             if ((crc ^ c) & 0x01) {
