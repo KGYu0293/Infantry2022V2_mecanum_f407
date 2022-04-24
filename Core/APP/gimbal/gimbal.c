@@ -63,7 +63,7 @@ void Gimbal_Update(Gimbal *gimbal) {
     // 取得控制参数
     publish_data gimbal_data = gimbal->gimbal_cmd_sub->getdata(gimbal->gimbal_cmd_sub);
     if (gimbal_data.len == -1) return;  // cmd未工作
-    Gimbal_param *param = (Gimbal_param *)gimbal_data.data;
+    Cmd_gimbal *param = (Cmd_gimbal *)gimbal_data.data;
 
     // 重要外设掉线检测
     if ((gimbal->imu->monitor->count < 1) || !(gimbal->imu->bias_init_success)) {
@@ -80,7 +80,7 @@ void Gimbal_Update(Gimbal *gimbal) {
     gimbal->gimbal_upload_data.gimbal_imu_euler[1] = gimbal->imu->data.euler[1];
     gimbal->gimbal_upload_data.gimbal_imu_euler[2] = gimbal->imu->data.euler[2];
     gimbal_uplode.data = (uint8_t *)&(gimbal->gimbal_upload_data);
-    gimbal_uplode.len = sizeof(Gimbal_uplode_data);
+    gimbal_uplode.len = sizeof(Upload_gimbal);
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_uplode);
 
     // 模块控制

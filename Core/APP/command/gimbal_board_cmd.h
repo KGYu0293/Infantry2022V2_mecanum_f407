@@ -27,9 +27,9 @@ typedef struct Gimbal_board_cmd_t {
     dt7Remote *remote;
 
     Publisher *gimbal_cmd_puber;
-    Gimbal_param gimbal_param;
+    Cmd_gimbal gimbal_param;
     Publisher *shoot_cmd_puber;
-    Shoot_param shoot_param;
+    Cmd_shoot shoot_param;
     Subscriber *gimbal_upload_suber;
 } gimbal_board_cmd;
 

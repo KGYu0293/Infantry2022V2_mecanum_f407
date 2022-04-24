@@ -68,7 +68,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
     // 判断机器人工作模式
     //初始化为RUN
     obj->mode = robot_run;
-    Gimbal_uplode_data* gimbal_upload_data;
+    Upload_gimbal* gimbal_upload_data;
     // 小电脑通信结构体
     canpc_send pc_send_data;
     memset(&pc_send_data, 0, sizeof(pc_send_data));
@@ -83,7 +83,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         obj->send_data.chassis_target.offset_angle = 0;
         obj->mode = robot_stop;
     } else {
-        gimbal_upload_data = (Gimbal_uplode_data*)gimbal_data_fdb.data;
+        gimbal_upload_data = (Upload_gimbal*)gimbal_data_fdb.data;
         pc_send_data.euler[0] = gimbal_upload_data->gimbal_imu_euler[0];
         pc_send_data.euler[1] = gimbal_upload_data->gimbal_imu_euler[1];
         pc_send_data.euler[2] = gimbal_upload_data->gimbal_imu_euler[2];
@@ -229,9 +229,9 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
             // shoot
             // 按C开关弹仓
             if (obj->remote->data.key_single_press_cnt.c % 2)
-                obj->shoot_param.magazine_lid = magazine_close;
+                obj->shoot_param.magazine_mode = magazine_close;
             else
-                obj->shoot_param.magazine_lid = magazine_open;
+                obj->shoot_param.magazine_mode = magazine_open;
         }
 
         /*  //电容为可开关模式则解注释
@@ -242,11 +242,11 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
     // 发布变更
     publish_data gimbal_cmd;
     gimbal_cmd.data = (uint8_t*)&obj->gimbal_param;
-    gimbal_cmd.len = sizeof(Gimbal_param);
+    gimbal_cmd.len = sizeof(Cmd_gimbal);
     obj->gimbal_cmd_puber->publish(obj->gimbal_cmd_puber, gimbal_cmd);
     publish_data shoot_cmd;
     shoot_cmd.data = (uint8_t*)&obj->shoot_param;
-    shoot_cmd.len = sizeof(Shoot_param);
+    shoot_cmd.len = sizeof(Cmd_shoot);
     obj->shoot_cmd_puber->publish(obj->shoot_cmd_puber, shoot_cmd);
 
     // 小电脑通信
@@ -292,11 +292,11 @@ void remote_mode_update(gimbal_board_cmd* obj) {
     obj->shoot_param.mode = shoot_run;
     if (obj->remote->data.rc.s1 == 2) {
         obj->shoot_param.mode = shoot_stop;
-        if (obj->remote->data.rc.ch4 > CHx_BIAS + 400) obj->shoot_param.magazine_lid = magazine_open;
-        if (obj->remote->data.rc.ch4 < CHx_BIAS - 400) obj->shoot_param.magazine_lid = magazine_close;
+        if (obj->remote->data.rc.ch4 > CHx_BIAS + 400) obj->shoot_param.magazine_mode = magazine_open;
+        if (obj->remote->data.rc.ch4 < CHx_BIAS - 400) obj->shoot_param.magazine_mode = magazine_close;
     } else {
         obj->shoot_param.mode = shoot_run;
-        obj->shoot_param.shoot_command = continuous;
+        obj->shoot_param.bullet_mode = bullet_continuous;
         obj->shoot_param.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
         obj->shoot_param.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;
         obj->shoot_param.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;

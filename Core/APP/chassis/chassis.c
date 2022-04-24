@@ -22,7 +22,7 @@
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 void chassis_imu_lost(void *motor) { printf_log("chassis IMU lost!!\n"); }
 void chassis_super_cap_lost(void *motor) { printf_log("super cap lost!!\n"); }
-void Speed_set(Chassis *obj, Chassis_param *param);
+void Speed_set(Chassis *obj, Cmd_chassis *param);
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
@@ -230,7 +230,7 @@ float auto_rotate_param(void) { return 150; }
 // }
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
-void Chassis_calculate(Chassis *obj, Chassis_param *param) {
+void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
     // 功率控制
     // Power_control(obj, param);
 
@@ -252,7 +252,7 @@ void Chassis_calculate(Chassis *obj, Chassis_param *param) {
     // Speed_limit(obj);
 }
 
-Chassis_param *param;
+Cmd_chassis *param;
 void Chassis_Update(Chassis *obj) {
     // 反馈imu信息
     publish_data chassis_upload;
@@ -263,7 +263,7 @@ void Chassis_Update(Chassis *obj) {
     // subscribe并得到param
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
     if (chassis_data.len == -1) return;  // cmd未发布指令
-    param = (Chassis_param *)chassis_data.data;
+    param = (Cmd_chassis *)chassis_data.data;
 
     // 应用得到的param进行控制
     switch (param->mode) {

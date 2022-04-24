@@ -74,7 +74,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->chassis_param.mode = chassis_stop;
     } else {
         obj->chassis_param.mode = obj->recv_data->chassis_mode;
-        memcpy(&(obj->chassis_param.target), &(obj->recv_data->chassis_target), sizeof(Chassis_param_speed_target));
+        memcpy(&(obj->chassis_param.target), &(obj->recv_data->chassis_target), sizeof(Cmd_chassis_speed));
     }
     obj->chassis_param.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
     obj->chassis_param.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
@@ -87,7 +87,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     // 发布变更
     publish_data chassis_cmd;
     chassis_cmd.data = (uint8_t*)&obj->chassis_param;
-    chassis_cmd.len = sizeof(Chassis_param);
+    chassis_cmd.len = sizeof(Cmd_chassis);
     obj->chassis_cmd_puber->publish(obj->chassis_cmd_puber, chassis_cmd);
 
     // 获取底盘imu数据

@@ -66,31 +66,31 @@ Shoot *Shoot_Create(void) {
     return obj;
 };
 
-void Shoot_load_motor_set(Shoot *obj, Shoot_param *param) {
+void Shoot_load_motor_set(Shoot *obj, Cmd_shoot *param) {
     if (param->heat_limit_remain < UNIT_HEAT_17MM) {
-        param->shoot_command = not_fire;
+        param->bullet_mode = bullet_stop;
     }
-    switch (param->shoot_command) {
-        case not_fire:
+    switch (param->bullet_mode) {
+        case bullet_stop:
             obj->load->config.motor_pid_model = SPEED_LOOP;
             obj->load->speed_pid.ref = 0;
             break;
-        case reverse:  // 反转 防卡弹
+        case bullet_reverse:  // 反转 防卡弹
             obj->load->config.motor_pid_model = SPEED_LOOP;
             obj->load->speed_pid.ref = 10 * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
             break;
-        case continuous:
+        case bullet_continuous:
             obj->load->config.motor_pid_model = SPEED_LOOP;
             obj->load->speed_pid.ref = -param->fire_rate * 360 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
             break;
-        case single:
+        case bullet_single:
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - obj->load_delta_pos;
-        case Double:
+        case bullet_double:
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - (2 * obj->load_delta_pos);
             break;
-        case trible:
+        case bullet_trible:
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - (3 * obj->load_delta_pos);
             break;
@@ -101,7 +101,7 @@ void Shoot_Update(Shoot *obj) {
     // sub并得到param
     publish_data data = obj->shoot_cmd_suber->getdata(obj->shoot_cmd_suber);
     if (data.len == -1) return;  // cmd未发布指令
-    Shoot_param *param = (Shoot_param *)data.data;
+    Cmd_shoot *param = (Cmd_shoot *)data.data;
 
     switch (param->mode) {
         case shoot_stop:
@@ -122,7 +122,7 @@ void Shoot_Update(Shoot *obj) {
             Shoot_load_motor_set(obj, param);
             break;
     }
-    switch (param->magazine_lid) {
+    switch (param->magazine_mode) {
         case magazine_open:
             // BSP_PWM_SetCCR();
             break;
