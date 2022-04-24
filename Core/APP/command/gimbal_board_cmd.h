@@ -13,17 +13,14 @@
 #include "can_recv.h"
 #include "can_send.h"
 
-typedef struct board_com_t_ {
-    can_recv *recv;
-    can_send *send;
-    board_com_goci_data *goci_data;
-    board_com_gico_data *gico_data;
-} Board_com_;
-
 typedef struct Gimbal_board_cmd_t {
-    Board_com_ board_com;
     Robot_mode mode;
     uint8_t ready;
+    // 板间通信
+    can_recv *recv;
+    can_send *send;
+    gimbal_board_send_data send_data;
+    chassis_board_send_data *recv_data;
     // 外设
     buzzer *internal_buzzer;
     canpc *pc;

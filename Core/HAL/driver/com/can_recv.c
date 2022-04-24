@@ -20,6 +20,7 @@ can_recv* CanRecv_Create(can_recv_config* config) {
     obj->config = *config;
     obj->data_rx.len = obj->config.data_len;
     obj->data_rx.data = (uint8_t*)malloc(obj->config.data_len);
+    memset(obj->data_rx.data,0,obj->config.data_len);
     obj->buf_len = obj->config.data_len + 5;
     obj->rxbuf = (uint8_t*)malloc(obj->buf_len);
     obj->recv_len = 0;

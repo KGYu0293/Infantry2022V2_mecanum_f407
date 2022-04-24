@@ -33,14 +33,14 @@ typedef struct Powcrtl_t {
 // 定义chassis所需的外设，整合成一个结构体
 typedef struct chassis_t {
     BMI088_imu *imu;
-    uint8_t if_supercap;  //是否具有超级电容
-    Super_cap_wuli *super_cap;
+    // uint8_t if_supercap;  //是否具有超级电容
+    // Super_cap_wuli *super_cap;
     can_motor *lf;
     can_motor *rf;
     can_motor *lb;
     can_motor *rb;  // forward back left right
 
-    Powcrtl powcrtl;
+    // Powcrtl powcrtl;
 
     float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
     float offset_y;

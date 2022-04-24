@@ -62,7 +62,7 @@ typedef struct Gimbal_upload_data_t {
 typedef struct Shoot_param_t {
     enum { shoot_stop, shoot_run } mode;
     enum { not_fire, reverse, single, Double, trible, continuous } shoot_command;
-    enum { magazine_close,magazine_open } magazine_lid;  // 弹仓盖
+    enum { magazine_close, magazine_open } magazine_lid;  // 弹仓盖
     uint16_t bullet_speed;                                // 弹速
     float fire_rate;                                      // 射频（发/秒）
     uint16_t heat_limit_remain;                           // 剩余热量，cooling_limit-cooling_heat
@@ -70,21 +70,21 @@ typedef struct Shoot_param_t {
 
 // 板间通信部分
 // gimbal output chassis input 云台->底盘数据包
-typedef struct board_com_goci_data_t {
-    uint8_t if_supercap_on;     // 电容是否开启
-    Robot_mode now_robot_mode;  // 遥控器在云台主控 包含stop模式与云台重要模块掉线
-    Chassis_mode chassis_mode;
-    Chassis_param_speed_target chassis_target;
-} board_com_goci_data;
+typedef struct gimbal_board_send_t {
+    uint8_t if_supercap_on;                     // 电容是否开启
+    Robot_mode now_robot_mode;                  // 遥控器在云台主控 包含stop模式与云台重要模块掉线
+    Chassis_mode chassis_mode;                  // 底盘模式
+    Chassis_param_speed_target chassis_target;  // 底盘速度控制
+} gimbal_board_send_data;
 // gimbal input chassis output数据包
-typedef struct board_com_gico_data_t {
+typedef struct chassis_board_send_t {
     Module_status chassis_board_status;  // 同步底盘是否有重要模块掉线
     float gyro_yaw;                      // 将底盘主控的imu数据发到云台
     struct {
         uint16_t bullet_speed_max;   // 弹速
         uint16_t heat_limit_remain;  // 剩余热量
     } shoot_referee_data;
-} board_com_gico_data;
+} chassis_board_send_data;
 
 #pragma pack()
 #endif

@@ -1,17 +1,17 @@
 #ifndef _ROBOT_CMD_H_
 #define _ROBOT_CMD_H_
 
-#include "bsp_log.h"
-#include "pub_sub.h"
-#include "robot_def.h"
-#include "stdint.h"
-// 外设
-#include "BMI088.h"
-#include "DT7_DR16.h"
-#include "can_pc.h"
-#include "can_recv.h"
-#include "can_send.h"
-#include "referee.h"
+// #include "bsp_log.h"
+// #include "pub_sub.h"
+// #include "robot_def.h"
+// #include "stdint.h"
+// // 外设
+// #include "BMI088.h"
+// #include "DT7_DR16.h"
+// #include "can_pc.h"
+// #include "can_recv.h"
+// #include "can_send.h"
+// #include "referee.h"
 
 // // 板间通信部分
 // #pragma pack(1)
@@ -53,16 +53,16 @@
 // } Robot;
 #endif
 #ifdef CHASSIS_BOARD
-typedef struct Robot_t {
-    Board_com board_com;
-    robot_mode mode;
+// typedef struct Robot_t {
+//     Board_com board_com;
+//     robot_mode mode;
 
-    Referee *referee;
+//     Referee *referee;
 
-    Publisher *chassis_cmd_puber;
-    Chassis_param chassis_param;  // 将要pub的变量定义在结构体中以长期保存(pub的是指针，要放在指针不会销毁的地方)
-    Subscriber *chassis_upload_sub;
-} Robot;
+//     Publisher *chassis_cmd_puber;
+//     Chassis_param chassis_param;  // 将要pub的变量定义在结构体中以长期保存(pub的是指针，要放在指针不会销毁的地方)
+//     Subscriber *chassis_upload_sub;
+// } Robot;
 #endif
 
 // Robot *Robot_CMD_Create(void);

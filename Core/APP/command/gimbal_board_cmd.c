@@ -23,15 +23,13 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     recv_config.bsp_can_index = 1;
     send_config.can_identifier = 0x004;
     recv_config.can_identifier = 0x003;
-    send_config.data_len = sizeof(board_com_goci_data);
-    recv_config.data_len = sizeof(board_com_gico_data);
+    send_config.data_len = sizeof(gimbal_board_send_data);
+    recv_config.data_len = sizeof(chassis_board_send_data);
     recv_config.notify_func = NULL;
     recv_config.lost_callback = gimbal_core_module_lost;
-    obj->board_com.send = CanSend_Create(&send_config);
-    obj->board_com.recv = CanRecv_Create(&recv_config);
-    obj->board_com.goci_data = malloc(sizeof(board_com_goci_data));
-    obj->board_com.gico_data = malloc(sizeof(board_com_gico_data));
-    obj->board_com.goci_data->if_supercap_on = 0;  //电容默认关闭
+    obj->send = CanSend_Create(&send_config);
+    obj->recv = CanRecv_Create(&recv_config);
+    obj->recv_data = obj->recv->data_rx.data;
 
     // 小电脑通信配置
     canpc_config pc_config;
@@ -61,6 +59,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // memset 0
     obj->mode = robot_stop;
+    obj->send_data.if_supercap_on = 0;  //电容默认关闭
     obj->ready = 0;
     return obj;
 }
@@ -75,13 +74,13 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
     memset(&pc_send_data, 0, sizeof(pc_send_data));
 
     // 板间通信-收
-    if ((obj->board_com.recv->monitor->count < 1)) {
+    if ((obj->recv->monitor->count < 1)) {
         obj->mode = robot_stop;
     }
     // 判断云台IMU是否上线
     publish_data gimbal_data_fdb = obj->gimbal_upload_suber->getdata(obj->gimbal_upload_suber);
     if (gimbal_data_fdb.len == -1) {
-        obj->board_com.goci_data->chassis_target.offset_angle = 0;
+        obj->send_data.chassis_target.offset_angle = 0;
         obj->mode = robot_stop;
     } else {
         gimbal_upload_data = (Gimbal_uplode_data*)gimbal_data_fdb.data;
@@ -110,7 +109,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         stop_mode_update(obj);
     } else if (obj->mode == robot_run) {
         // 获取云台offset
-        obj->board_com.goci_data->chassis_target.offset_angle = get_offset_angle(INIT_FORWARD, gimbal_upload_data->yaw_encorder);
+        obj->send_data.chassis_target.offset_angle = get_offset_angle(INIT_FORWARD, gimbal_upload_data->yaw_encorder);
         // 自瞄关
         pc_send_data.auto_mode_flag = 0;
         // 遥控器控制模式
@@ -125,8 +124,8 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 
             // 按一下r:小陀螺
             if (obj->remote->data.key_single_press_cnt.r != obj->remote->last_data.key_single_press_cnt.r) {
-                if (obj->board_com.goci_data->chassis_mode != chassis_rotate_run) {
-                    obj->board_com.goci_data->chassis_mode = chassis_rotate_run;
+                if (obj->send_data.chassis_mode != chassis_rotate_run) {
+                    obj->send_data.chassis_mode = chassis_rotate_run;
                     chassis_gimbal_follow_mode = independent;
                 } else {
                     chassis_gimbal_follow_mode = chassis_follow_gimbal;
@@ -134,8 +133,8 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
             }
             // x:跟随底盘(飞坡)
             if (obj->remote->data.key_single_press_cnt.x != obj->remote->last_data.key_single_press_cnt.x) {
-                if (obj->board_com.goci_data->chassis_mode != chassis_run) {
-                    obj->board_com.goci_data->chassis_mode = chassis_run;
+                if (obj->send_data.chassis_mode != chassis_run) {
+                    obj->send_data.chassis_mode = chassis_run;
                     chassis_gimbal_follow_mode = gimbal_follow_chassis;
                 } else {
                     chassis_gimbal_follow_mode = chassis_follow_gimbal;
@@ -190,39 +189,39 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 
             // robot_def
             // 平移
-            if (obj->remote->data.key_down.w) obj->board_com.goci_data->chassis_target.vy = 8000;
-            if (obj->remote->data.key_down.s) obj->board_com.goci_data->chassis_target.vy = -8000;
-            if (obj->remote->data.key_down.d) obj->board_com.goci_data->chassis_target.vx = 8000;
-            if (obj->remote->data.key_down.a) obj->board_com.goci_data->chassis_target.vx = -8000;
+            if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 8000;
+            if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -8000;
+            if (obj->remote->data.key_down.d) obj->send_data.chassis_target.vx = 8000;
+            if (obj->remote->data.key_down.a) obj->send_data.chassis_target.vx = -8000;
             // 按住ctrl减速
             if (obj->remote->data.key_down.ctrl) {
-                obj->board_com.goci_data->chassis_target.vx /= 3;
-                obj->board_com.goci_data->chassis_target.vy /= 3;
+                obj->send_data.chassis_target.vx /= 3;
+                obj->send_data.chassis_target.vy /= 3;
             }
             // shift加速
             if (obj->remote->data.key_down.shift) {
-                obj->board_com.goci_data->chassis_target.vx *= 3;
-                obj->board_com.goci_data->chassis_target.vy *= 3;
+                obj->send_data.chassis_target.vx *= 3;
+                obj->send_data.chassis_target.vy *= 3;
             }
             // rotate/gimbal
             switch (chassis_gimbal_follow_mode) {
                 case gimbal_follow_chassis:
-                    obj->board_com.goci_data->chassis_target.rotate -= 0.5f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    if (obj->remote->data.key_down.q) obj->board_com.goci_data->chassis_target.rotate = -90;
-                    if (obj->remote->data.key_down.e) obj->board_com.goci_data->chassis_target.rotate = 90;
-                    obj->board_com.goci_data->chassis_mode = chassis_run;
+                    obj->send_data.chassis_target.rotate -= 0.5f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+                    if (obj->remote->data.key_down.q) obj->send_data.chassis_target.rotate = -90;
+                    if (obj->remote->data.key_down.e) obj->send_data.chassis_target.rotate = 90;
+                    obj->send_data.chassis_mode = chassis_run;
                     obj->gimbal_param.mode = gimbal_middle;
                     break;
                 case chassis_follow_gimbal:
                     obj->gimbal_param.yaw -= 0.5f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
                     if (obj->remote->data.key_down.q) obj->gimbal_param.yaw -= 15;
                     if (obj->remote->data.key_down.e) obj->gimbal_param.yaw += 15;
-                    obj->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
+                    obj->send_data.chassis_mode = chassis_run_follow_offset;
                     break;
                 case independent:
                     obj->gimbal_param.yaw -= 0.5f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    if (obj->remote->data.key_down.q) obj->board_com.goci_data->chassis_target.rotate = -90;
-                    if (obj->remote->data.key_down.e) obj->board_com.goci_data->chassis_target.rotate = 90;
+                    if (obj->remote->data.key_down.q) obj->send_data.chassis_target.rotate = -90;
+                    if (obj->remote->data.key_down.e) obj->send_data.chassis_target.rotate = 90;
                     break;
             }
             // gimbal_auto_aim
@@ -237,8 +236,8 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 
         /*  //电容为可开关模式则解注释
          if (robot->remote->data.key_single_press_cnt.c != robot->remote->last_data.key_single_press_cnt.c)
-             robot->board_com.goci_data->if_supercap_on = 1 - robot->board_com.goci_data->if_supercap_on; */
-        obj->board_com.goci_data->if_supercap_on = 1;
+             robot->send_data.if_supercap_on = 1 - robot->send_data.if_supercap_on; */
+        obj->send_data.if_supercap_on = 1;
     }
     // 发布变更
     publish_data gimbal_cmd;
@@ -255,15 +254,15 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 
     // 板间通信-发
     if (obj->mode == robot_stop)
-        obj->board_com.goci_data->now_robot_mode = robot_stop;
+        obj->send_data.now_robot_mode = robot_stop;
     else
-        obj->board_com.goci_data->now_robot_mode = robot_run;
-    CanSend_Send(obj->board_com.send, (uint8_t*)obj->board_com.goci_data);
+        obj->send_data.now_robot_mode = robot_run;
+    CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));
 }
 
 void stop_mode_update(gimbal_board_cmd* obj) {
-    obj->board_com.goci_data->now_robot_mode = robot_stop;
-    obj->board_com.goci_data->chassis_mode = chassis_stop;
+    obj->send_data.now_robot_mode = robot_stop;
+    obj->send_data.chassis_mode = chassis_stop;
     obj->gimbal_param.mode = gimbal_stop;
     obj->shoot_param.mode = shoot_stop;
 }
@@ -277,16 +276,16 @@ void remote_mode_update(gimbal_board_cmd* obj) {
 
     // chassis
     // 拨杆确定底盘模式与控制量
-    obj->board_com.goci_data->chassis_target.vy = 16.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
-    obj->board_com.goci_data->chassis_target.vx = 16.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
+    obj->send_data.chassis_target.vy = 16.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
+    obj->send_data.chassis_target.vx = 16.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
     if (obj->remote->data.rc.s1 == 1) {
         // 小陀螺模式
-        obj->board_com.goci_data->chassis_mode = chassis_rotate_run;
-        obj->board_com.goci_data->chassis_target.vy *= 0.60f;
-        obj->board_com.goci_data->chassis_target.vx *= 0.60f;
+        obj->send_data.chassis_mode = chassis_rotate_run;
+        obj->send_data.chassis_target.vy *= 0.60f;
+        obj->send_data.chassis_target.vx *= 0.60f;
     } else {
         // 底盘跟随模式
-        obj->board_com.goci_data->chassis_mode = chassis_run_follow_offset;
+        obj->send_data.chassis_mode = chassis_run_follow_offset;
     }
 
     // shoot
@@ -299,8 +298,8 @@ void remote_mode_update(gimbal_board_cmd* obj) {
         obj->shoot_param.mode = shoot_run;
         obj->shoot_param.shoot_command = continuous;
         obj->shoot_param.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
-        obj->shoot_param.heat_limit_remain = obj->board_com.gico_data->shoot_referee_data.heat_limit_remain;
-        obj->shoot_param.bullet_speed = obj->board_com.gico_data->shoot_referee_data.bullet_speed_max;
+        obj->shoot_param.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;
+        obj->shoot_param.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;
     }
 }
 
