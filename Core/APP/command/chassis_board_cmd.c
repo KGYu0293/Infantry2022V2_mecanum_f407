@@ -17,8 +17,8 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     recv_config.bsp_can_index = 1;
     send_config.can_identifier = 0x003;
     recv_config.can_identifier = 0x004;
-    send_config.data_len = sizeof(chassis_board_send_data);
-    recv_config.data_len = sizeof(gimbal_board_send_data);
+    send_config.data_len = sizeof(Chassis_board_send_data);
+    recv_config.data_len = sizeof(Gimbal_board_send_data);
     recv_config.notify_func = NULL;
     recv_config.lost_callback = chassis_core_module_lost;
     obj->send = CanSend_Create(&send_config);

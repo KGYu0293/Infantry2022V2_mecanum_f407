@@ -20,8 +20,8 @@ typedef struct Chassis_board_cmd_t {
     // 板间通信
     can_recv *recv;
     can_send *send;
-    chassis_board_send_data send_data;
-    gimbal_board_send_data *recv_data;
+    Chassis_board_send_data send_data;
+    Gimbal_board_send_data *recv_data;
     // 外设
     buzzer *internal_buzzer;
     Referee *referee;

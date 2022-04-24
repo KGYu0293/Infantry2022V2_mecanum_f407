@@ -19,8 +19,8 @@ typedef struct Gimbal_board_cmd_t {
     // 板间通信
     can_recv *recv;
     can_send *send;
-    gimbal_board_send_data send_data;
-    chassis_board_send_data *recv_data;
+    Gimbal_board_send_data send_data;
+    Chassis_board_send_data *recv_data;
     // 外设
     buzzer *internal_buzzer;
     canpc *pc;
