@@ -95,7 +95,7 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
             // if (len > REFEREE_RX_MAX_SIZE) return;
             for (size_t i = 0; i < len; i++) {
                 // 将数据直接塞进缓冲队列 可能一个包触发两次空闲中断/多个包触发一次，所以不做判断
-                circular_queue_push(now->primary_data, data[i]);
+                circular_queue_push(now->primary_data, &data[i]);
             }
             now->monitor->reset(now->monitor);
         }
@@ -103,12 +103,13 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
 }
 
 void referee_data_solve(Referee *obj) {
-    uint16_t byte_now = 0;
+    uint16_t* byte_now_pt = NULL;
     referee_unpack_tool tool;
 
     // 反复弹出直到缓冲队列长度为0
     while (obj->primary_data->cq_len > 0) {
-        byte_now = circular_queue_pop(obj->primary_data);
+        byte_now_pt = circular_queue_pop(obj->primary_data);
+        uint16_t byte_now = *byte_now_pt;
         switch (tool.step) {
             case s_header_sof:
                 // 包错误判断-固定起始字节
@@ -121,7 +122,8 @@ void referee_data_solve(Referee *obj) {
             case s_header_length:
                 if (obj->primary_data->cq_len >= 2) {
                     tool.rx_pack.header.data_length = byte_now;
-                    byte_now = circular_queue_pop(obj->primary_data);
+                    byte_now_pt = circular_queue_pop(obj->primary_data);
+                    byte_now = *byte_now_pt;
                     tool.rx_pack.header.data_length |= (byte_now << 8);
                     // 包错误判断-长度超范围
                     if (tool.rx_pack.header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
@@ -151,7 +153,8 @@ void referee_data_solve(Referee *obj) {
             case s_cmd_id:
                 if (obj->primary_data->cq_len >= 2) {
                     tool.rx_pack.cmd_id = (byte_now << 8);
-                    byte_now = circular_queue_pop(obj->primary_data);
+                    byte_now_pt = circular_queue_pop(obj->primary_data);
+                    byte_now = *byte_now_pt;
                     tool.rx_pack.cmd_id |= byte_now;
                     tool.step++;
                 }
@@ -159,9 +162,10 @@ void referee_data_solve(Referee *obj) {
                 break;
             case s_data:
                 if (obj->primary_data->cq_len > tool.rx_pack.header.data_length) {
-                    for (size_t i = 0; i++; i < tool.rx_pack.header.data_length) {
+                    for (size_t i = 0; i < tool.rx_pack.header.data_length; i++) {
                         if (first_data_flag != 0) {
-                            byte_now = circular_queue_pop(obj->primary_data);
+                            byte_now_pt = circular_queue_pop(obj->primary_data);
+                            byte_now = *byte_now_pt;
                         }
                         tool.rx_pack.data[i] = byte_now;
                         first_data_flag = 1;

@@ -38,3 +38,7 @@ void HAL_Motor_Calc_Loop(){
 void HAL_Super_cap_wuli_Loop(){
     Super_cap_wuli_Send();
 }
+
+void HAL_Monitor_Loop(){
+    Monitor_Loop();
+}

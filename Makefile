@@ -125,15 +125,15 @@ Core/HAL/driver/super_cap/super_cap_wuli.c \
 Core/HAL/driver/radiotube/radiotube.c \
 Core/HAL/lib/common.c \
 Core/HAL/lib/soft_crc.c \
-Core/HAL/lib/controller/MahonyAHRS.c \
-Core/HAL/lib/controller/MadgwickAHRS.c \
+Core/HAL/lib/MahonyAHRS.c \
+Core/HAL/lib/MadgwickAHRS.c \
 Core/HAL/lib/cvector.c \
 Core/HAL/lib/datatypes.c \
 Core/HAL/lib/circular_queue.c \
-Core/HAL/lib/controller/adrc.c \
-Core/HAL/lib/controller/lqr.c \
-Core/HAL/lib/controller/mrac.c \
-Core/HAL/lib/controller/pid.c\
+Core/HAL/lib/adrc.c \
+Core/HAL/lib/lqr.c \
+Core/HAL/lib/mrac.c \
+Core/HAL/lib/pid.c\
 Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/HAL/pub_sub.c \

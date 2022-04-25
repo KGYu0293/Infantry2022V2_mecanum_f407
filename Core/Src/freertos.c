@@ -269,7 +269,7 @@ void StartMonitorTask(void *argument)
   currentTimeMonitor = xTaskGetTickCount();
   for(;;)
   {
-    Monitor_Loop();
+    HAL_Monitor_Loop();
     vTaskDelayUntil(&currentTimeMonitor, 100);
   }
   /* USER CODE END StartMonitorTask */
