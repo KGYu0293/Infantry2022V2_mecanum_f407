@@ -24,48 +24,49 @@
 #define H_La 568
 #define H_Xi 506
 
-uint16_t music1[8] = {M_Re, M_Mi, M_So, H_Do, 0, M_La, H_Do, H_Do};
+uint16_t music1[] = {M_Re, M_Mi, M_So, H_Do, 0, M_La, H_Do, H_Do};
 
-uint16_t music2[14] = {H_Do, 0, M_So, 0, M_Mi, 0, M_Xi,
-                       M_Xi, M_Xi, M_Xi, M_La, 0, M_Xi, H_Do};
+uint16_t music2[] = {H_Do, 0, M_So, 0, M_Mi, 0, M_Xi,
+                     M_Xi, M_Xi, M_Xi, M_La, 0, M_Xi, H_Do};
 
-uint16_t music3[23] = {L_So, 0, M_Do, 0, 0, M_Mi, M_Re, 0, M_Do, 0, 0, 0,
-                       M_Mi, 0, M_So, 0, 0, M_La, M_Xi, 0, H_Do, H_Do, H_Do};
+uint16_t music3[] = {L_So, 0, M_Do, 0, 0, M_Mi, M_Re, 0, M_Do, 0, 0, 0,
+                     M_Mi, 0, M_So, 0, 0, M_La, M_Xi, 0, H_Do, H_Do, H_Do};
 
-uint16_t music4[63] = {M_Do, 0, M_Do, M_Mi, M_Mi, M_Mi, M_Mi, 0, M_Do,
-                       0, M_Do, M_Mi, M_Mi, M_Mi, M_Mi, 0, M_La, 0,
-                       M_La, 0, M_So, 0, M_La, 0, M_So, M_Do, 0,
-                       M_Mi, M_Mi, 0, 0, H_Do, 0, M_La, M_La, M_So,
-                       0, M_La, 0, 0, M_So, 0, M_Do, M_Re, M_Re,
-                       0, 0, M_Xi, M_Xi, M_Xi, M_Xi, M_Xi, 0, M_Xi,
-                       0, M_So, M_Mi, 0, M_So, M_So, M_So};
+uint16_t music4[] = {M_Do, 0, M_Do, M_Mi, M_Mi, M_Mi, M_Mi, 0, M_Do,
+                     0, M_Do, M_Mi, M_Mi, M_Mi, M_Mi, 0, M_La, 0,
+                     M_La, 0, M_So, 0, M_La, 0, M_So, M_Do, 0,
+                     M_Mi, M_Mi, 0, 0, H_Do, 0, M_La, M_La, M_So,
+                     0, M_La, 0, 0, M_So, 0, M_Do, M_Re, M_Re,
+                     0, 0, M_Xi, M_Xi, M_Xi, M_Xi, M_Xi, 0, M_Xi,
+                     0, M_So, M_Mi, 0, M_So, M_So, M_So};
 
-uint16_t music5[62] = {H_Do, 0, M_Xi, 0, M_So, 0, M_So, 0, M_La,
-                       1145, M_La, 0, M_So, 0, M_So, 0, M_La, 1145,
-                       M_La, 0, M_So, 0, M_So, 0, M_La, 1145, M_La,
-                       0, M_La, 0, M_La, M_La, M_Xi, M_Xi, H_Do, H_Do,
-                       H_Re, H_Re, M_Xi, M_Xi, M_Xi, M_Xi, M_So, M_So, M_So,
-                       M_So, H_Fa, H_Fa, H_Fa, H_Fa, H_Re, H_Re, H_Re, 0,
-                       H_Re, H_Re, 0, H_Re, H_Re, H_Re, H_Mi, H_Mi};
+uint16_t music5[] = {H_Do, 0, M_Xi, 0, M_So, 0, M_So, 0, M_La,
+                     1145, M_La, 0, M_So, 0, M_So, 0, M_La, 1145,
+                     M_La, 0, M_So, 0, M_So, 0, M_La, 1145, M_La,
+                     0, M_La, 0, M_La, M_La, M_Xi, M_Xi, H_Do, H_Do,
+                     H_Re, H_Re, M_Xi, M_Xi, M_Xi, M_Xi, M_So, M_So, M_So,
+                     M_So, H_Fa, H_Fa, H_Fa, H_Fa, H_Re, H_Re, H_Re, 0,
+                     H_Re, H_Re, 0, H_Re, H_Re, H_Re, H_Mi, H_Mi};
 
-uint16_t music6[56] = {
+uint16_t music6[] = {
     H_Do, H_Do, H_Do, 0, H_Do, 0, M_Xi, H_Do, H_Do, 0, H_Re, 0,
     H_Mi, 0, H_Fa, 0, H_Mi, H_Mi, 0, H_Mi, H_Mi, 0, M_Xi, 0,
     M_Xi, M_Xi, M_Xi, 0, 0, M_La, M_La, M_La, 0, M_La, 0, M_So,
     M_La, M_La, 0, H_Fa, 0, H_Mi, 0, H_Re, 0, H_Re, H_Re, 0,
     H_Do, H_Do, 0, H_Re, 0, H_Mi, H_Mi, H_Mi};
 
-uint16_t music_nxt[40] = {M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do,
-                          M_La, M_La, M_La, M_La, M_La, M_La, M_La, M_Fa,
-                          M_Fa, M_Fa, M_Fa, M_Fa, M_Do, M_Do, M_Do, M_Do,
-                          M_Do, M_Do, M_Do, M_Do, H_Do, H_Do, H_Do, H_Do,
-                          H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do};
+uint16_t music_nxt[] = {M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do,
+                        M_La, M_La, M_La, M_La, M_La, M_La, M_La, M_Fa,
+                        M_Fa, M_Fa, M_Fa, M_Fa, M_Do, M_Do, M_Do, M_Do,
+                        M_Do, M_Do, M_Do, M_Do, H_Do, H_Do, H_Do, H_Do,
+                        H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do, H_Do};
 
 uint16_t music_thankyou[] = {M_Do, 0, M_Re, 0, M_Mi, 0, M_So, 0, M_Mi, 0, M_Mi, M_Mi, 0, M_Re, 0, M_Re, M_Do, 0, M_Re, M_Re, 0, M_Do, 0, L_La, 0, M_Do, 0, M_Re, 0, M_Mi, M_Mi, M_Mi, M_Mi, 0,
                              M_Do, 0, L_La, 0, M_Do, M_Do, 0, L_So, 0, L_So, M_Re, 0, M_Do, M_Do, 0, M_Mi, 0, M_Re, 0, M_Re, 0, M_Do, 0, M_Re, M_Re, M_Re, M_Re};
 
 uint16_t* musics[] = {music1, music2, music3, music4, music5, music6};
-uint16_t music_lens[] = {8, 14, 23, 63, 62, 56};
+uint16_t music_lens[] = {sizeof(music1), sizeof(music2), sizeof(music3), sizeof(music4),
+                         sizeof(music5), sizeof(music6), sizeof(music_nxt), sizeof(music_thankyou)};
 buzzer* Buzzer_Create(buzzer_config* config) {
     buzzer* obj = (buzzer*)malloc(sizeof(buzzer));
     Buzzer_Init(obj, config);
