@@ -45,6 +45,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     memset(&(obj->send_data), 0, sizeof(Chassis_board_send_data));
     memset(&(obj->chassis_control), 0, sizeof(Cmd_chassis));
     obj->chassis_upload_data = NULL;
+    obj->robot_ready = 0;
     return obj;
 }
 
@@ -52,6 +53,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     // 初始化为RUN
     obj->mode = robot_run;
 
+    // 底盘板掉线检测与处理
     // 判断板间通信在线
     if (obj->recv->monitor->count < 1) {
         obj->mode = robot_stop;
@@ -80,14 +82,26 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     } else {
         obj->send_data.chassis_board_status = module_working;
     }
+
+    // 裁判系统掉线处理
+
+    // 判断除了云台板stop之外，都已经上线，说明底盘板初始化完成，进入ready状态】
+    if (obj->mode == robot_run) {
+        obj->send_data.chassis_board_status = module_working;
+        if (!obj->robot_ready) {
+            obj->robot_ready = 1;
+            // 播放音乐
+        }
+    } else {
+        obj->send_data.chassis_board_status = module_lost;
+    }
+
     // 主板stop指令
     if (obj->recv_data->now_robot_mode == robot_stop) {
         obj->mode = robot_stop;
     } else {
         obj->mode = robot_run;
     }
-
-    // 裁判系统掉线处理
 
     // 底盘控制指令
     if (obj->mode == robot_stop) {

@@ -30,6 +30,8 @@ typedef struct Chassis_board_cmd_t {
     Cmd_chassis chassis_control;  //发送给底盘的控制量
     Subscriber *chassis_upload_sub;
     Upload_chassis *chassis_upload_data;  //底盘模块回传数据
+    // 标志量
+    uint8_t robot_ready;
 
 } chassis_board_cmd;
 
