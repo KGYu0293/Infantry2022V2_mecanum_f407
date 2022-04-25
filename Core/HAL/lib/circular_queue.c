@@ -26,7 +26,7 @@ void* circular_queue_pop(circular_queue* obj) {
     return head_pointer;
 }
 
-void* circular_queue_front(circular_queue* obj){
+void* circular_queue_front(circular_queue* obj) {
     if (obj->cq_len == 0) return NULL;
     void* head_pointer = obj->cq_pdata + obj->head * obj->cq_size;
     return head_pointer;
