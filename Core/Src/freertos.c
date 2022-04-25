@@ -290,7 +290,7 @@ void StartRobotCMDTask(void *argument)
   currentTimeRobotCMD = xTaskGetTickCount();
   for(;;)
   {
-    APP_RobotCmd_Loop();
+    APP_Loop();
     vTaskDelayUntil(&currentTimeRobotCMD, 2);
   }
   /* USER CODE END StartRobotCMDTask */

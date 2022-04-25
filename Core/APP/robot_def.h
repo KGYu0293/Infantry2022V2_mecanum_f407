@@ -6,9 +6,9 @@
 #define GIMBAL_BOARD
 // #define CHASSIS_BOARD
 
+#include "imu_data.h"
 #include "stdint.h"
 #include "stdlib.h"
-#include "imu_data.h"
 
 // 各模块pub_sub的参数结构体
 // 各部分对外接口统一存放
@@ -97,9 +97,9 @@ typedef struct Cmd_shoot_t {
     enum { shoot_stop, shoot_run } mode;
     Bullet_mode bullet_mode;
     Magazine_mode magazine_mode;  // 弹仓盖
-    uint16_t bullet_speed;       // 弹速
-    float fire_rate;             // 射频（发/秒）
-    uint16_t heat_limit_remain;  // 剩余热量，cooling_limit-cooling_heat
+    uint16_t bullet_speed;        // 弹速
+    float fire_rate;              // 射频（发/秒）
+    uint16_t heat_limit_remain;   // 剩余热量，cooling_limit-cooling_heat
 } Cmd_shoot;
 
 // 对云台的控制量
@@ -113,9 +113,9 @@ typedef struct Cmd_gimbal_t {
 
 // 云台回传cmd的数据
 typedef struct Upload_gimbal_t {
-    Module_status gimbal_module_status;
-    short yaw_encorder;
-    float gimbal_imu_euler[3];
+    Module_status gimbal_status;
+    imu_data* gimbal_imu;
+    short* yaw_encorder;
 } Upload_gimbal;
 
 // 底盘模块回传cmd的数据
@@ -127,9 +127,9 @@ typedef struct Upload_chassis_t {
 // 板间通信定义
 // 云台->底盘数据包
 typedef struct Gimbal_board_send_t {
-    uint8_t if_supercap_on;                     // 电容是否开启
-    Robot_mode now_robot_mode;                  // 遥控器在云台主控 包含stop模式与云台重要模块掉线
-    Chassis_mode chassis_mode;                  // 底盘模式
+    uint8_t if_supercap_on;            // 电容是否开启
+    Robot_mode now_robot_mode;         // 遥控器在云台主控 包含stop模式与云台重要模块掉线
+    Chassis_mode chassis_mode;         // 底盘模式
     Cmd_chassis_speed chassis_target;  // 底盘速度控制
 } Gimbal_board_send_data;
 

@@ -16,6 +16,7 @@ typedef struct Gimbal_t {
     Subscriber* gimbal_cmd_sub;
     Publisher* gimbal_upload_pub;
     Upload_gimbal gimbal_upload_data;
+    Cmd_gimbal* cmd_data;
 
     // 陀螺仪->pid参数
     float* yaw_pos_ref;

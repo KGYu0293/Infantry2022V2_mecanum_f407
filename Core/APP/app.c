@@ -20,7 +20,7 @@ void APP_Layer_Init(){
     shoot = Shoot_Create();
 }
 
-void APP_RobotCmd_Loop() {
+void APP_Loop() {
     Gimbal_board_CMD_Update(cmd);
     Gimbal_Update(gimbal);
     Shoot_Update(shoot);
@@ -33,7 +33,7 @@ void APP_Layer_Init(){
     chassis = Chassis_Create();
 }
 
-void APP_RobotCmd_Loop() {
+void APP_Loop() {
     Robot_CMD_Update(robot);
     Chassis_Update(chassis);
 }

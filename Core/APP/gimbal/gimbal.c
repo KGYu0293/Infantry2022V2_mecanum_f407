@@ -51,10 +51,11 @@ Gimbal *Gimbal_Create() {
     PID_SetConfig(&pitch_config.config_speed, 200, 0.7, 20, 5000, 25000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
-    // 定义sub
-    obj->gimbal_cmd_sub = register_sub("gimbal_cmd_topic", 1);
-    // 定义pub
-    obj->gimbal_upload_pub = register_pub("gimbal_upload_topic");
+    // 定义sub、pub
+    obj->gimbal_cmd_sub = register_sub("cmd_gimbal", 1);
+    obj->gimbal_upload_pub = register_pub("upload_gimbal");
+    memset(&(obj->gimbal_upload_data), 0, sizeof(Upload_gimbal));
+    obj->cmd_data = NULL;
 
     return obj;
 }
@@ -63,28 +64,26 @@ void Gimbal_Update(Gimbal *gimbal) {
     // 取得控制参数
     publish_data gimbal_data = gimbal->gimbal_cmd_sub->getdata(gimbal->gimbal_cmd_sub);
     if (gimbal_data.len == -1) return;  // cmd未工作
-    Cmd_gimbal *param = (Cmd_gimbal *)gimbal_data.data;
+    gimbal->cmd_data = (Cmd_gimbal *)gimbal_data.data;
 
     // 重要外设掉线检测
     if ((gimbal->imu->monitor->count < 1) || !(gimbal->imu->bias_init_success)) {
-        param->mode = gimbal_stop;
-        gimbal->gimbal_upload_data.gimbal_module_status = module_lost;
+        gimbal->cmd_data->mode = gimbal_stop;
+        gimbal->gimbal_upload_data.gimbal_status = module_lost;
     } else {
-        gimbal->gimbal_upload_data.gimbal_module_status = module_working;
+        gimbal->gimbal_upload_data.gimbal_status = module_working;
     }
 
     // 反馈yaw编码器信息以及云台imu是否正常工作
     publish_data gimbal_uplode;
-    gimbal->gimbal_upload_data.yaw_encorder = gimbal->yaw->fdbPosition;
-    gimbal->gimbal_upload_data.gimbal_imu_euler[0] = gimbal->imu->data.euler[0];
-    gimbal->gimbal_upload_data.gimbal_imu_euler[1] = gimbal->imu->data.euler[1];
-    gimbal->gimbal_upload_data.gimbal_imu_euler[2] = gimbal->imu->data.euler[2];
+    gimbal->gimbal_upload_data.yaw_encorder = &(gimbal->yaw->fdbPosition);
+    gimbal->gimbal_upload_data.gimbal_imu = &(gimbal->imu->data);
     gimbal_uplode.data = (uint8_t *)&(gimbal->gimbal_upload_data);
     gimbal_uplode.len = sizeof(Upload_gimbal);
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_uplode);
 
     // 模块控制
-    switch (param->mode) {
+    switch (gimbal->cmd_data->mode) {
         case gimbal_stop:
             gimbal->yaw->enable = MOTOR_STOP;
             gimbal->pitch->enable = MOTOR_STOP;
@@ -98,8 +97,8 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
-            gimbal->yaw->position_pid.ref = param->yaw;
-            gimbal->pitch->position_pid.ref = param->pitch;
+            gimbal->yaw->position_pid.ref = gimbal->cmd_data->yaw;
+            gimbal->pitch->position_pid.ref = gimbal->cmd_data->pitch;
             break;
         // 跟随底盘
         case gimbal_middle:

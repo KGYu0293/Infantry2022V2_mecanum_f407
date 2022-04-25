@@ -35,8 +35,8 @@
 //     obj->pc = CanPC_Create(&pc_config);
 
 //     // 定义publisher和subscriber
-//     obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
-//     obj->gimbal_upload_suber = register_sub(gimbal_upload_topic, 1);
+//     obj->gimbal_cmd_puber = register_pub(cmd_gimbal);
+//     obj->gimbal_upload_suber = register_sub(upload_gimbal, 1);
 //     obj->shoot_cmd_puber = register_pub(cmd_shoot);
 
 //     // 外设初始化

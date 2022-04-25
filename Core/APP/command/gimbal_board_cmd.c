@@ -40,8 +40,8 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     obj->pc = CanPC_Create(&pc_config);
 
     // 定义publisher和subscriber
-    obj->gimbal_cmd_puber = register_pub("gimbal_cmd_topic");
-    obj->gimbal_upload_suber = register_sub("gimbal_upload_topic", 1);
+    obj->gimbal_cmd_puber = register_pub("cmd_gimbal");
+    obj->gimbal_upload_suber = register_sub("upload_gimbal", 1);
     obj->shoot_cmd_puber = register_pub("cmd_shoot");
 
     // 外设初始化
@@ -84,10 +84,10 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         obj->mode = robot_stop;
     } else {
         gimbal_upload_data = (Upload_gimbal*)gimbal_data_fdb.data;
-        pc_send_data.euler[0] = gimbal_upload_data->gimbal_imu_euler[0];
-        pc_send_data.euler[1] = gimbal_upload_data->gimbal_imu_euler[1];
-        pc_send_data.euler[2] = gimbal_upload_data->gimbal_imu_euler[2];
-        if (gimbal_upload_data->gimbal_module_status == module_lost) obj->mode = robot_stop;
+        pc_send_data.euler[0] = gimbal_upload_data->gimbal_imu->euler[0];
+        pc_send_data.euler[1] = gimbal_upload_data->gimbal_imu->euler[1];
+        pc_send_data.euler[2] = gimbal_upload_data->gimbal_imu->euler[2];
+        if (gimbal_upload_data->gimbal_status == module_lost) obj->mode = robot_stop;
     }
 
     // 除了遥控器之外都已经上线
@@ -109,7 +109,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         stop_mode_update(obj);
     } else if (obj->mode == robot_run) {
         // 获取云台offset
-        obj->send_data.chassis_target.offset_angle = get_offset_angle(INIT_FORWARD, gimbal_upload_data->yaw_encorder);
+        obj->send_data.chassis_target.offset_angle = get_offset_angle(INIT_FORWARD, *gimbal_upload_data->yaw_encorder);
         // 自瞄关
         pc_send_data.auto_mode_flag = 0;
         // 遥控器控制模式
