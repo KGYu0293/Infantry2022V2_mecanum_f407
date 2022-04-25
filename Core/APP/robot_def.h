@@ -32,7 +32,7 @@ typedef enum Chassis_mode_e {
 
 // 拨弹轮运行模式
 typedef enum Bullet_mode_e {
-    bullet_stop = 0,
+    bullet_holdon = 0,
     bullet_reverse,    // 反转，卡弹处理
     bullet_single,     // 单发
     bullet_double,     // 双发
@@ -40,29 +40,32 @@ typedef enum Bullet_mode_e {
     bullet_continuous  // 连发
 } Bullet_mode;
 
-// 摩擦轮运行模式
-enum Friction_mode {
-    friction_stop = 0,  // 关闭摩擦轮
-    friction_run,       // 开启摩擦轮
-};
-//弹仓盖模式
+// 发射机构运行模式
+typedef enum Shoot_mode_e {
+    shoot_stop = 0,  // 关闭发射机构
+    shoot_run
+} Shoot_mode;
+
+// 弹仓盖模式
 typedef enum Magazine_mode_e {
     magazine_close = 0,  // 开弹仓
     magazine_open        // 关弹仓
 } Magazine_mode;
-//云台模式
+
+// 云台模式
 typedef enum Gimbal_mode_e {
     gimbal_stop = 0,
     gimbal_run,     // 正常云台模式
     gimbal_middle,  // 云台归中，跟随底盘模式
 } Gimbal_mode;
-//自瞄模式
-enum AutoAim_mode {
+
+// 自瞄模式
+typedef enum AutoAim_mode_e {
     auto_aim_off = 0,     // 关闭自瞄
     auto_aim_normal,      // 正常自瞄
     auto_aim_buff_small,  // 小能量机关
     auto_aim_buff_big     // 大能量机关
-};
+} AutoAim_mode;
 
 // 机器人模块控制量定义
 // 对底盘速度的控制量
@@ -94,12 +97,12 @@ typedef struct Cmd_chassis_t {
 
 // 对发射机构的控制量
 typedef struct Cmd_shoot_t {
-    enum { shoot_stop, shoot_run } mode;
-    Bullet_mode bullet_mode;
-    Magazine_mode magazine_mode;  // 弹仓盖
-    uint16_t bullet_speed;        // 弹速
-    float fire_rate;              // 射频（发/秒）
-    uint16_t heat_limit_remain;   // 剩余热量，cooling_limit-cooling_heat
+    Shoot_mode mode;
+    Bullet_mode bullet_mode;     // 发射模式
+    Magazine_mode mag_mode;      // 弹仓盖
+    uint16_t bullet_speed;       // 弹速
+    float fire_rate;             // 射频（发/秒）
+    uint16_t heat_limit_remain;  // 剩余热量，cooling_limit-cooling_heat
 } Cmd_shoot;
 
 // 对云台的控制量

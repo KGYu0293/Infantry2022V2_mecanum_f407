@@ -69,7 +69,7 @@ Shoot *Shoot_Create(void) {
 
 void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
     if (param->heat_limit_remain < UNIT_HEAT_17MM) {
-        param->bullet_mode = bullet_stop;
+        param->bullet_mode = bullet_holdon;
     }
     // 发射一个弹丸编码器转过的角度
     static int load_delta_pos = 8192 * MOTOR_DECELE_RATIO / NUM_PER_CIRCLE;
@@ -77,7 +77,7 @@ void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
     uint32_t time_now = BSP_sys_time_ms();
     if (time_now < obj->cooldown_start + obj->cooldown_time) return;
     switch (param->bullet_mode) {
-        case bullet_stop:
+        case bullet_holdon:
             obj->load->config.motor_pid_model = SPEED_LOOP;
             obj->load->speed_pid.ref = 0;  // 待在原地
             break;
@@ -150,7 +150,7 @@ void Shoot_Update(Shoot *obj) {
             Shoot_load_Update(obj, obj->cmd_data);
             break;
     }
-    switch (obj->cmd_data->magazine_mode) {
+    switch (obj->cmd_data->mag_mode) {
         case magazine_open:
             // BSP_PWM_SetCCR();
             break;

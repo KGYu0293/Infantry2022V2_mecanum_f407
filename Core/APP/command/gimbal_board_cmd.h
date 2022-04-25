@@ -7,15 +7,17 @@
 #include "stdint.h"
 // 外设
 #include "BMI088.h"
-#include "buzzer.h"
 #include "DT7_DR16.h"
+#include "buzzer.h"
 #include "can_pc.h"
 #include "can_recv.h"
 #include "can_send.h"
 
 typedef struct Gimbal_board_cmd_t {
     Robot_mode mode;
-    uint8_t ready;
+    AutoAim_mode autoaim_mode;
+    // 标志量
+    uint8_t robot_ready;
     // 板间通信
     can_recv *recv;
     can_send *send;
@@ -24,13 +26,16 @@ typedef struct Gimbal_board_cmd_t {
     // 外设
     buzzer *internal_buzzer;
     canpc *pc;
+    canpc_send pc_send_data;
     dt7Remote *remote;
 
-    Publisher *gimbal_cmd_puber;
-    Cmd_gimbal gimbal_param;
     Publisher *shoot_cmd_puber;
-    Cmd_shoot shoot_param;
+    Cmd_shoot shoot_control;
+    Publisher *gimbal_cmd_puber;
+    Cmd_gimbal gimbal_control;
     Subscriber *gimbal_upload_suber;
+    Upload_gimbal *gimbal_upload_data;
+    
 } gimbal_board_cmd;
 
 gimbal_board_cmd *Gimbal_board_CMD_Create(void);
