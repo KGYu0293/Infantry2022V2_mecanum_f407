@@ -78,12 +78,10 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     // 底盘重要外设丢失
     if (obj->chassis_upload_data == NULL) {
         obj->mode = robot_stop;
-        obj->send_data.chassis_board_status = module_lost;
-    } else {
-        obj->send_data.chassis_board_status = module_working;
     }
 
     // 裁判系统掉线处理
+    //
 
     // 判断除了云台板stop之外，都已经上线，说明底盘板初始化完成，进入ready状态】
     if (obj->mode == robot_run) {
@@ -91,6 +89,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         if (!obj->robot_ready) {
             obj->robot_ready = 1;
             // 播放音乐
+            //
         }
     } else {
         obj->send_data.chassis_board_status = module_lost;

@@ -37,7 +37,7 @@
 //     // 定义publisher和subscriber
 //     obj->gimbal_cmd_puber = register_pub(gimbal_cmd_topic);
 //     obj->gimbal_upload_suber = register_sub(gimbal_upload_topic, 1);
-//     obj->shoot_cmd_puber = register_pub(shoot_cmd_topic);
+//     obj->shoot_cmd_puber = register_pub(cmd_shoot);
 
 //     // 外设初始化
 //     dt7_config remote_config;

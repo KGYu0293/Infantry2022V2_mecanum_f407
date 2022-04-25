@@ -167,8 +167,11 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
 
 void Chassis_Update(Chassis *obj) {
     // 检查imu在线并初始化完成
-    if (obj->imu->monitor->count < 1 || !(obj->imu->bias_init_success)) obj->upload_data.chassis_status = module_lost;
-    else obj->upload_data.chassis_status = module_working;
+    if (obj->imu->monitor->count < 1 || !(obj->imu->bias_init_success)) {
+        obj->upload_data.chassis_status = module_lost;
+    } else {
+        obj->upload_data.chassis_status = module_working;
+    }
     // 发送回传数据指针
     publish_data chassis_upload;
     chassis_upload.data = (uint8_t *)&(obj->upload_data);

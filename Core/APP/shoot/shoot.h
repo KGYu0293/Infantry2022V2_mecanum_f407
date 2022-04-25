@@ -12,9 +12,13 @@ typedef struct Shoot_t {
     can_motor *friction_b;
     can_motor *load;
 
-    int load_delta_pos;
+    Cmd_shoot* cmd_data;
 
     Subscriber* shoot_cmd_suber;
+
+    //用于单/双/三发模式
+    uint32_t cooldown_start;  //冷却起始时间点
+    uint32_t cooldown_time;   //冷却时间
 } Shoot;
 
 Shoot *Shoot_Create(void);
