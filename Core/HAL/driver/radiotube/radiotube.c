@@ -2,6 +2,7 @@
 
 #include "bsp_delay.h"
 #include "bsp_gpio.h"
+#include "stdlib.h"
 #include "string.h"
 
 spi_EIO *Spi_EIO_Create(spi_eio_config *config) {
