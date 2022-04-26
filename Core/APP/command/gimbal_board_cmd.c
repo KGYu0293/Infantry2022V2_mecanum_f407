@@ -31,7 +31,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     recv_config.lost_callback = gimbal_core_module_lost;
     obj->send = CanSend_Create(&send_config);
     obj->recv = CanRecv_Create(&recv_config);
-    obj->recv_data = obj->recv->data_rx.data;
+    obj->recv_data = (Chassis_board_send_data*) obj->recv->data_rx.data;
 
     // 小电脑通信配置
     canpc_config pc_config;
