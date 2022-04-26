@@ -14,6 +14,7 @@
 buzzer
 soft_reset
 led_timer
+referee
 
 本车
 chassis斜坡

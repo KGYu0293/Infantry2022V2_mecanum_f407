@@ -241,13 +241,6 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     }
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
 
-    // shoot
-    // c:开关弹仓
-    if (obj->remote->data.key_single_press_cnt.c % 2)
-        obj->shoot_control.mag_mode = magazine_close;
-    else
-        obj->shoot_control.mag_mode = magazine_open;
-
     // 底盘控制参数
     // 平移
     if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 8000;
@@ -299,9 +292,27 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         // 云台跟随底盘模式
     }
 
+    // c:开关弹仓
+    if (obj->remote->data.key_single_press_cnt.c % 2)
+        obj->shoot_control.mag_mode = magazine_close;
+    else
+        obj->shoot_control.mag_mode = magazine_open;
     // 发射机构控制参数
-
-
+    if (obj->remote->data.rc.s1 == 2) {
+        obj->shoot_control.mode = shoot_stop;
+        obj->shoot_control.bullet_mode = bullet_holdon;
+    } else {
+        // 发弹控制，单发，双发, 射频和小电脑控制待完善
+        obj->shoot_control.mode = shoot_run;                                                          // 开发射机构
+        obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
+        obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限
+        obj->shoot_control.fire_rate = 3;                                                             // 固定射频
+        if (obj->remote->data.mouse.press_l) {
+            obj->shoot_control.bullet_mode = bullet_continuous;
+        } else {
+            obj->shoot_control.bullet_mode = bullet_holdon;
+        }
+    }
 
     // // rotate/gimbal
     // switch (chassis_gimbal_follow_mode) {
