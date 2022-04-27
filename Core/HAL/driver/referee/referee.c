@@ -122,6 +122,8 @@ void referee_data_solve(Referee *obj) {
                     // 包提取完成 拷贝数据
                     referee_solve_pack(obj, &(obj->tool.rx_pack));
                 }
+                obj->tool.step = s_header_sof;
+                obj->tool.next_step_wait_len = 1;
                 break;
             }
             default:
