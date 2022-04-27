@@ -132,6 +132,7 @@ void referee_data_solve(Referee *obj) {
             }
             default:
                 obj->tool.step = 0;
+                obj->tool.next_step_wait_len = 1;
                 break;
         }
     }
