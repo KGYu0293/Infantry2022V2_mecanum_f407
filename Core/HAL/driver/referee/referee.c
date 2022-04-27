@@ -55,6 +55,7 @@ void referee_data_solve(Referee *obj) {
                     obj->tool.step++;
                 } else {
                     obj->tool.step = 0;
+                    obj->tool.next_step_wait_len = 1;
                 }
                 obj->tool.next_step_wait_len = 2;
                 break;
@@ -66,10 +67,11 @@ void referee_data_solve(Referee *obj) {
                 // 包错误判断-长度超范围
                 if (obj->tool.rx_pack.header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
                     obj->tool.step = 0;
+                    obj->tool.next_step_wait_len = 1;
                 } else {
                     obj->tool.step++;
+                    obj->tool.next_step_wait_len = 1;
                 }
-                obj->tool.next_step_wait_len = 1;
                 break;
             case s_header_seq:
                 // 没看出来这个数有啥意义 暂时不管
@@ -82,10 +84,11 @@ void referee_data_solve(Referee *obj) {
                 uint8_t crc8_result = CRC8_Modbus_calc(&(obj->tool.rx_pack.header.SOF), sizeof(frame_header) - 1, crc8_default);
                 if (crc8_result == byte_now) {
                     obj->tool.step = 0;
+                    obj->tool.next_step_wait_len = 1;
                 } else {
                     obj->tool.step++;
+                    obj->tool.next_step_wait_len = 2;
                 }
-                obj->tool.next_step_wait_len = 2;
                 break;
             }
             case s_cmd_id:
@@ -116,14 +119,15 @@ void referee_data_solve(Referee *obj) {
                 uint16_t crc16_result =
                     CRC16_Modbus_calc(&(obj->tool.rx_pack.header.SOF), REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length, crc16_default);
                 
-                if (crc16_result) {
-                    obj->tool.step = 0;
+                if (crc16_result != crc16_recv) {
+                    obj->tool.step = s_header_sof;
+                    obj->tool.next_step_wait_len = 1;
                 } else {
                     // 包提取完成 拷贝数据
                     referee_solve_pack(obj, &(obj->tool.rx_pack));
+                    obj->tool.step = s_header_sof;
+                    obj->tool.next_step_wait_len = 1;
                 }
-                obj->tool.step = s_header_sof;
-                obj->tool.next_step_wait_len = 1;
                 break;
             }
             default:
