@@ -64,6 +64,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     memset(&(obj->pc_send_data), 0, sizeof(canpc_send));
     obj->send_data.if_supercap_on = 0;  //电容默认关闭
     obj->robot_ready = 0;
+    obj->autoaim_mode = auto_aim_off;
     return obj;
 }
 
@@ -123,10 +124,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         }
 
         // 板间通信-发
-        if (obj->mode == robot_stop)
-            obj->send_data.now_robot_mode = robot_stop;
-        else
-            obj->send_data.now_robot_mode = robot_run;
+        obj->send_data.now_robot_mode = robot_run;
     }
 
     /*  //电容为可开关模式则解注释
