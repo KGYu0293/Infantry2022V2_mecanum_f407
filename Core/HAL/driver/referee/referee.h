@@ -9,6 +9,46 @@
 
 #include "soft_crc.h"
 
+// 固定起始帧
+#define REFEREE_SOF 0xA5
+// 单个接收数据包最小整包长度
+#define REFEREE_RX_MIN_SIZE 9
+// 单个接收数据包最大整包长度
+#define REFEREE_RX_MAX_SIZE 128
+// 单个接收数据包中各部分长度
+#define REFEREE_PACK_LEN_HEADER 5
+#define REFEREE_PACK_LEN_CMD_ID 2
+#define REFEREE_PACK_LEN_TAIL 2
+#define REFEREE_PACK_LEN_DATA_MAX REFEREE_RX_MAX_SIZE - REFEREE_PACK_LEN_HEADER - REFEREE_PACK_LEN_CMD_ID - REFEREE_PACK_LEN_TAIL
+
+// 接收缓冲队列最大长度
+#define REFEREE_RX_QUENE_MAX_LEN 1024
+
+// cmd_id 命令码ID
+#define GAME_STATE_CMD_ID 0x0001
+#define GAME_RESULT_CMD_ID 0x0002
+#define GAME_ROBOT_HP_CMD_ID 0x0003
+#define DART_STATUS_ID 0x0004
+#define FIELD_EVENTS_CMD_ID 0x0101
+#define SUPPLY_PROJECTILE_ACTION_CMD_ID 0x0102
+#define SUPPLY_PROJECTILE_BOOKING_CMD_ID 0x0103
+#define REFEREE_WARNING_CMD_ID 0x0104
+#define DART_REMAINING_TIME_ID 0x0105
+#define ROBOT_STATE_CMD_ID 0x0201
+#define POWER_HEAT_DATA_CMD_ID 0x0202
+#define ROBOT_POS_CMD_ID 0x0203
+#define BUFF_MUSK_CMD_ID 0x0204
+#define AERIAL_ROBOT_ENERGY_CMD_ID 0x0205
+#define ROBOT_HURT_CMD_ID 0x0206
+#define SHOOT_DATA_CMD_ID 0x0207
+#define BULLET_REMAINING_CMD_ID 0x0208
+#define RFID_STATUS_ID 0x0209
+#define DART_CILENT_CMD_T 0x020A
+#define STUDENT_INTERACTIVE_DATA_CMD_ID 0x0301
+#define ROBOT_INTERACTIVE_DATA_T 0X0302
+#define ROBOT_COMMAND_T 0X0303
+#define CLIENT_MAP_COMMAND_T 0X0305
+
 typedef enum Robot_id_e {
     RED_HERO = 1,
     RED_ENGINEER = 2,
@@ -124,9 +164,9 @@ typedef struct {
     uint16_t shooter_id1_42mm_speed_limit;
 
     uint16_t chassis_power_limit;
-    uint8_t mains_power_gimbal_output : 1;
-    uint8_t mains_power_chassis_output : 1;
-    uint8_t mains_power_shooter_output : 1;
+    uint8_t mains_power_gimbal_output;
+    uint8_t mains_power_chassis_output;
+    uint8_t mains_power_shooter_output;
 } ext_game_robot_state_t;
 // 0x0202
 typedef struct {
@@ -268,6 +308,29 @@ typedef struct referee_rx_data_t {
     ext_client_map_command_t client_map_command;
 } referee_rx_data;
 
+// 收到的裁判系统数据包
+#pragma pack(1)
+typedef struct Frame_header_t {
+    uint8_t SOF;
+    uint16_t data_length;
+    uint8_t seq;
+    uint8_t CRC8;
+} frame_header;
+typedef struct referee_rx_pack_t {
+    frame_header header;
+    uint16_t cmd_id;
+    uint8_t data[REFEREE_RX_MAX_SIZE];
+    uint16_t frame_tail;
+} referee_rx_pack;
+#pragma pack()
+// 解包辅助结构体
+typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length, s_header_seq, s_header_crc8, s_cmd_id, s_data, s_crc16 } referee_unpack_step;
+typedef struct referee_unpack_tool_t {
+    referee_rx_pack rx_pack;
+    referee_unpack_step step;
+    uint16_t next_step_wait_len;
+} referee_unpack_tool;
+
 // 裁判系统外设结构体
 typedef struct Referee_t {
     circular_queue *primary_data;
@@ -275,10 +338,11 @@ typedef struct Referee_t {
 
     referee_config config;
     monitor_item *monitor;
+    referee_unpack_tool tool;
 } Referee;
 
 void referee_driver_init(void);
-
+void referee_loop();
 Referee *referee_Create(referee_config *config);
 
 #endif

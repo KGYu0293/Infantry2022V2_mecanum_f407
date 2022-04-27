@@ -15,7 +15,7 @@ gimbal_board_cmd* cmd;
 Gimbal* gimbal;
 Shoot* shoot;
 void APP_Layer_Init(){
-    cmd=Gimbal_board_CMD_Create();
+    cmd = Gimbal_board_CMD_Create();
     gimbal = Gimbal_Create();
     shoot = Shoot_Create();
 }
@@ -28,13 +28,15 @@ void APP_Loop() {
 #endif
 
 #ifdef CHASSIS_BOARD
+chassis_board_cmd* cmd;
 Chassis* chassis;
 void APP_Layer_Init(){
+    cmd = Chassis_board_CMD_Create();
     chassis = Chassis_Create();
 }
 
 void APP_Loop() {
-    Robot_CMD_Update(robot);
+    Chassis_board_CMD_Update(cmd);
     Chassis_Update(chassis);
 }
 #endif

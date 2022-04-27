@@ -57,6 +57,7 @@ CRC8* CRC8_Create(CRC8_config* config) {
         obj->table[i] = crc;
     }
     obj->crc_init = config->crc_init;
+    return obj;
 }
 
 void soft_crc_Init() {

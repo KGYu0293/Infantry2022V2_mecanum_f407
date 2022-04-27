@@ -35,13 +35,13 @@ BSP_CanTypeDef can_devices[DEVICE_CAN_CNT];  //定义对应数量的can外设，
 void BSP_CAN_Init() {
     can_devices[0].device = &hcan1;
     // can_devices[0].fifo = CAN_RX_FIFO0;
-    can_devices[0].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX0;
+    // can_devices[0].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX0;
     can_devices[0].bank_prefix = 0;
     can_devices[0].call_backs = cvector_create(sizeof(can_rx_callback));  //创建用于储存回调函数的向量组，存储方式为其头指针
 
     can_devices[1].device = &hcan2;
     // can_devices[1].fifo = CAN_RX_FIFO1;
-    can_devices[1].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX1;
+    // can_devices[1].tx_mailbox = (uint32_t *)CAN_TX_MAILBOX1;
     can_devices[1].bank_prefix = 14;
     can_devices[1].call_backs = cvector_create(sizeof(can_rx_callback));
 

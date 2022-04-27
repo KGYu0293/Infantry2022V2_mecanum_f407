@@ -31,7 +31,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     recv_config.lost_callback = gimbal_core_module_lost;
     obj->send = CanSend_Create(&send_config);
     obj->recv = CanRecv_Create(&recv_config);
-    obj->recv_data = obj->recv->data_rx.data;
+    obj->recv_data = (Chassis_board_send_data*) obj->recv->data_rx.data;
 
     // 小电脑通信配置
     canpc_config pc_config;
@@ -91,8 +91,10 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 
     // 除了遥控器之外都已经上线
     if (obj->mode == robot_run) {
+        if(!obj->robot_ready){
+            Buzzer_Start(obj->internal_buzzer);
+        }
         obj->robot_ready = 1;
-        // buzzer
     }
 
     // 遥控器判断
@@ -241,13 +243,6 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     }
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
 
-    // shoot
-    // c:开关弹仓
-    if (obj->remote->data.key_single_press_cnt.c % 2)
-        obj->shoot_control.mag_mode = magazine_close;
-    else
-        obj->shoot_control.mag_mode = magazine_open;
-
     // 底盘控制参数
     // 平移
     if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 8000;
@@ -299,9 +294,27 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         // 云台跟随底盘模式
     }
 
+    // c:开关弹仓
+    if (obj->remote->data.key_single_press_cnt.c % 2)
+        obj->shoot_control.mag_mode = magazine_close;
+    else
+        obj->shoot_control.mag_mode = magazine_open;
     // 发射机构控制参数
-
-
+    if (obj->remote->data.rc.s1 == 2) {
+        obj->shoot_control.mode = shoot_stop;
+        obj->shoot_control.bullet_mode = bullet_holdon;
+    } else {
+        // 发弹控制，单发，双发, 射频和小电脑控制待完善
+        obj->shoot_control.mode = shoot_run;                                                          // 开发射机构
+        obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
+        obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限
+        obj->shoot_control.fire_rate = 3;                                                             // 固定射频
+        if (obj->remote->data.mouse.press_l) {
+            obj->shoot_control.bullet_mode = bullet_continuous;
+        } else {
+            obj->shoot_control.bullet_mode = bullet_holdon;
+        }
+    }
 
     // // rotate/gimbal
     // switch (chassis_gimbal_follow_mode) {

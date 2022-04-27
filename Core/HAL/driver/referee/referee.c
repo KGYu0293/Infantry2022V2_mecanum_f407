@@ -1,69 +1,6 @@
 #include "referee.h"
-
+#include "bsp_log.h"
 #include "cvector.h"
-// 待测
-
-// 固定起始帧
-#define REFEREE_SOF 0xA5
-// 单个接收数据包最小整包长度
-#define REFEREE_RX_MIN_SIZE 9
-// 单个接收数据包最大整包长度
-#define REFEREE_RX_MAX_SIZE 128
-// 单个接收数据包中各部分长度
-#define REFEREE_PACK_LEN_HEADER 5
-#define REFEREE_PACK_LEN_CMD_ID 2
-#define REFEREE_PACK_LEN_TAIL 2
-#define REFEREE_PACK_LEN_DATA_MAX REFEREE_RX_MAX_SIZE - REFEREE_PACK_LEN_HEADER - REFEREE_PACK_LEN_CMD_ID - REFEREE_PACK_LEN_TAIL
-
-// 接收缓冲队列最大长度
-#define REFEREE_RX_QUENE_MAX_LEN 1024
-
-// cmd_id 命令码ID
-#define GAME_STATE_CMD_ID 0x0001
-#define GAME_RESULT_CMD_ID 0x0002
-#define GAME_ROBOT_HP_CMD_ID 0x0003
-#define DART_STATUS_ID 0x0004
-#define FIELD_EVENTS_CMD_ID 0x0101
-#define SUPPLY_PROJECTILE_ACTION_CMD_ID 0x0102
-#define SUPPLY_PROJECTILE_BOOKING_CMD_ID 0x0103
-#define REFEREE_WARNING_CMD_ID 0x0104
-#define DART_REMAINING_TIME_ID 0x0105
-#define ROBOT_STATE_CMD_ID 0x0201
-#define POWER_HEAT_DATA_CMD_ID 0x0202
-#define ROBOT_POS_CMD_ID 0x0203
-#define BUFF_MUSK_CMD_ID 0x0204
-#define AERIAL_ROBOT_ENERGY_CMD_ID 0x0205
-#define ROBOT_HURT_CMD_ID 0x0206
-#define SHOOT_DATA_CMD_ID 0x0207
-#define BULLET_REMAINING_CMD_ID 0x0208
-#define RFID_STATUS_ID 0x0209
-#define DART_CILENT_CMD_T 0x020A
-#define STUDENT_INTERACTIVE_DATA_CMD_ID 0x0301
-#define ROBOT_INTERACTIVE_DATA_T 0X0302
-#define ROBOT_COMMAND_T 0X0303
-#define CLIENT_MAP_COMMAND_T 0X0305
-
-// 收到的裁判系统数据包
-#pragma pack(1)
-typedef struct Frame_header_t {
-    uint8_t SOF;
-    uint16_t data_length;
-    uint8_t seq;
-    uint8_t CRC8;
-} frame_header;
-typedef struct referee_rx_pack_t {
-    frame_header header;
-    uint16_t cmd_id;
-    uint8_t data[REFEREE_RX_MAX_SIZE];
-    uint16_t frame_tail;
-} referee_rx_pack;
-#pragma pack()
-// 解包辅助结构体
-typedef enum referee_unpack_step_e { s_header_sof = 0, s_header_length, s_header_seq, s_header_crc8, s_cmd_id, s_data, s_crc16 } referee_unpack_step;
-typedef struct referee_unpack_tool_t {
-    referee_rx_pack rx_pack;
-    referee_unpack_step step;
-} referee_unpack_tool;
 
 cvector *referee_instances;
 
@@ -84,6 +21,8 @@ Referee *referee_Create(referee_config *config) {
     // 数据接收队列
     obj->primary_data = create_circular_queue(sizeof(uint8_t), REFEREE_RX_QUENE_MAX_LEN);
     memset(&(obj->rx_data), 0, sizeof(referee_rx_data));
+    memset(&(obj->tool), 0, sizeof(referee_unpack_tool));
+    obj->tool.next_step_wait_len = 1;
     return obj;
 }
 
@@ -103,92 +42,101 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
 }
 
 void referee_data_solve(Referee *obj) {
-    uint16_t* byte_now_pt = NULL;
-    referee_unpack_tool tool;
+    uint8_t *byte_now_pt = NULL;
 
     // 反复弹出直到缓冲队列长度为0
-    while (obj->primary_data->cq_len > 0) {
+    while (obj->primary_data->cq_len >= obj->tool.next_step_wait_len) {
         byte_now_pt = circular_queue_pop(obj->primary_data);
-        uint16_t byte_now = *byte_now_pt;
-        switch (tool.step) {
+        uint8_t byte_now = *byte_now_pt;
+        switch (obj->tool.step) {
             case s_header_sof:
                 // 包错误判断-固定起始字节
                 if (byte_now == REFEREE_SOF) {
-                    tool.step++;
+                    obj->tool.step++;
+                    obj->tool.rx_pack.header.SOF = byte_now;
+                    obj->tool.next_step_wait_len = 2;
                 } else {
-                    tool.step = 0;
+                    obj->tool.step = 0;
+                    obj->tool.next_step_wait_len = 1;
                 }
                 break;
             case s_header_length:
-                if (obj->primary_data->cq_len >= 2) {
-                    tool.rx_pack.header.data_length = byte_now;
-                    byte_now_pt = circular_queue_pop(obj->primary_data);
-                    byte_now = *byte_now_pt;
-                    tool.rx_pack.header.data_length |= (byte_now << 8);
-                    // 包错误判断-长度超范围
-                    if (tool.rx_pack.header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
-                        tool.step = 0;
-                    } else {
-                        tool.step++;
-                    }
+                obj->tool.rx_pack.header.data_length = byte_now;
+                byte_now_pt = circular_queue_pop(obj->primary_data);
+                byte_now = *byte_now_pt;
+                obj->tool.rx_pack.header.data_length |= ((uint16_t)byte_now << 8);
+                // 包错误判断-长度超范围
+                if (obj->tool.rx_pack.header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
+                    obj->tool.step = 0;
+                    obj->tool.next_step_wait_len = 1;
                 } else {
-                    tool.step = 0;
+                    obj->tool.step++;
+                    obj->tool.next_step_wait_len = 1;
                 }
                 break;
             case s_header_seq:
                 // 没看出来这个数有啥意义 暂时不管
-                tool.rx_pack.header.seq = byte_now;
-                tool.step++;
+                obj->tool.rx_pack.header.seq = byte_now;
+                obj->tool.step++;
+                obj->tool.next_step_wait_len = 1;
                 break;
             case s_header_crc8: {
-                // 包错误判断-CRC8校验,crc_check=0表示通过
-                int crc8_result = CRC8_Modbus_calc(&(tool.rx_pack.header.SOF), sizeof(frame_header), crc8_default);
-                if (crc8_result) {
-                    tool.step = 0;
+                // 包错误判断-CRC8校验
+                uint8_t crc8_result = CRC8_Modbus_calc(&(obj->tool.rx_pack.header.SOF), sizeof(frame_header) - 1, crc8_default);
+                if (crc8_result == byte_now) {
+                    obj->tool.step++;
+                    obj->tool.next_step_wait_len = 2;
+                    obj->tool.rx_pack.header.CRC8 = byte_now;
+                    // printf_log("crc8:%d\n",obj->tool.buffer_pt);
                 } else {
-                    tool.step++;
+                    obj->tool.step = 0;
+                    obj->tool.next_step_wait_len = 1;
                 }
                 break;
             }
             case s_cmd_id:
-                if (obj->primary_data->cq_len >= 2) {
-                    tool.rx_pack.cmd_id = (byte_now << 8);
-                    byte_now_pt = circular_queue_pop(obj->primary_data);
-                    byte_now = *byte_now_pt;
-                    tool.rx_pack.cmd_id |= byte_now;
-                    tool.step++;
-                }
-                uint8_t first_data_flag = 0;
+                obj->tool.rx_pack.cmd_id = byte_now;
+                byte_now_pt = circular_queue_pop(obj->primary_data);
+                byte_now = *byte_now_pt;
+                obj->tool.rx_pack.cmd_id |= ((uint16_t)byte_now << 8);
+                obj->tool.step++;
+                obj->tool.next_step_wait_len = obj->tool.rx_pack.header.data_length;
                 break;
             case s_data:
-                if (obj->primary_data->cq_len > tool.rx_pack.header.data_length) {
-                    for (size_t i = 0; i < tool.rx_pack.header.data_length; i++) {
-                        if (first_data_flag != 0) {
-                            byte_now_pt = circular_queue_pop(obj->primary_data);
-                            byte_now = *byte_now_pt;
-                        }
-                        tool.rx_pack.data[i] = byte_now;
-                        first_data_flag = 1;
+                for (size_t i = 0; i < obj->tool.rx_pack.header.data_length; i++) {
+                    if (i > 0) {
+                        byte_now_pt = circular_queue_pop(obj->primary_data);
+                        byte_now = *byte_now_pt;
                     }
-                    tool.step++;
-                } else {
-                    tool.step = 0;
+                    obj->tool.rx_pack.data[i] = byte_now;
                 }
+                obj->tool.step++;
+                obj->tool.next_step_wait_len = 2;
                 break;
             case s_crc16: {
+                uint16_t crc16_recv = byte_now;
+                byte_now_pt = circular_queue_pop(obj->primary_data);
+                byte_now = *byte_now_pt;
+                crc16_recv |= ((uint16_t)byte_now << 8);
+                // printf_log("a:%d %d\n",REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length,obj->tool.buffer_pt);
                 // 包错误判断-CRC16校验
-                int crc16_result =
-                    CRC16_Modbus_calc(&(tool.rx_pack.header.SOF), REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + REFEREE_PACK_LEN_TAIL + tool.rx_pack.header.data_length, crc16_default);
-                if (crc16_result) {
-                    tool.step = 0;
+                uint16_t crc16_result =
+                    CRC16_Modbus_calc(&(obj->tool.rx_pack.header.SOF), REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length, crc16_default);
+                
+                if (crc16_result != crc16_recv) {
+                    obj->tool.step = s_header_sof;
+                    obj->tool.next_step_wait_len = 1;
                 } else {
                     // 包提取完成 拷贝数据
-                    referee_solve_pack(obj, &(tool.rx_pack));
+                    referee_solve_pack(obj, &(obj->tool.rx_pack));
+                    obj->tool.step = s_header_sof;
+                    obj->tool.next_step_wait_len = 1;
                 }
                 break;
             }
             default:
-                tool.step = 0;
+                obj->tool.step = 0;
+                obj->tool.next_step_wait_len = 1;
                 break;
         }
     }
@@ -267,5 +215,12 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
             break;
         default:
             break;
+    }
+}
+
+void referee_loop() {
+    for (size_t i = 0; i < referee_instances->cv_len; i++) {
+        Referee *now = *(Referee **)cvector_val_at(referee_instances, i);
+        referee_data_solve(now);
     }
 }

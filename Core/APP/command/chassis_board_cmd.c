@@ -23,7 +23,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     recv_config.lost_callback = chassis_core_module_lost;
     obj->send = CanSend_Create(&send_config);
     obj->recv = CanRecv_Create(&recv_config);
-    obj->recv_data = obj->recv->data_rx.data;
+    obj->recv_data = (Gimbal_board_send_data*) obj->recv->data_rx.data;
 
     buzzer_config internal_buzzer_config;
     uint32_t music_id = 1;
@@ -35,7 +35,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     referee_config referee_config;
     referee_config.bsp_uart_index = UART_REFEREE_PORT;
     referee_config.lost_callback = NULL;
-    // obj->referee = referee_Create(&referee_config);
+    obj->referee = referee_Create(&referee_config);
 
     // 定义publisher和subscriber
     obj->chassis_cmd_puber = register_pub("cmd_chassis");
@@ -66,7 +66,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->mode = robot_stop;
     } else {
         // obj->send_data.gyro_yaw = ((imu_data*)chassis_upload_data.data)->gyro[2];
-        obj->chassis_upload_data = chassis_upload.data;
+        obj->chassis_upload_data = (Upload_chassis*) chassis_upload.data;
         obj->send_data.gyro_yaw = obj->chassis_upload_data->chassis_imu->gyro[2];
 
         // 底盘模块掉线
@@ -89,6 +89,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         if (!obj->robot_ready) {
             obj->robot_ready = 1;
             // 播放音乐
+            Buzzer_Start(obj->internal_buzzer);
             //
         }
     } else {

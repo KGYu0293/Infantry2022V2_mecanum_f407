@@ -1,7 +1,9 @@
 #include "buzzer.h"
 
+#include "cvector.h"
 #include "stdlib.h"
 #include "string.h"
+
 #define L_Do 3822
 #define L_Re 3405
 #define L_Mi 3033
@@ -67,42 +69,57 @@ uint16_t music_thankyou[] = {M_Do, 0, M_Re, 0, M_Mi, 0, M_So, 0, M_Mi, 0, M_Mi, 
 uint16_t* musics[] = {music1, music2, music3, music4, music5, music6};
 uint16_t music_lens[] = {sizeof(music1), sizeof(music2), sizeof(music3), sizeof(music4),
                          sizeof(music5), sizeof(music6), sizeof(music_nxt), sizeof(music_thankyou)};
+
+cvector* buzzer_instances;
 buzzer* Buzzer_Create(buzzer_config* config) {
     buzzer* obj = (buzzer*)malloc(sizeof(buzzer));
-    Buzzer_Init(obj, config);
+    obj->finished = 0;
+    obj->started = 0;
+    obj->count = 0;
+    obj->config = *config;
+    cvector_pushback(buzzer_instances, &obj);
     return obj;
 }
 
-void Buzzer_Init(buzzer* obj, buzzer_config* config) {
-    obj->finished = 0;
-    obj->count = 0;
-    obj->config = *config;
-    // HAL_TIM_PWM_Start(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
-    BSP_PWM_Start(obj->config.bsp_pwm_index);
+void Buzzer_Driver_Init() {
+    buzzer_instances = cvector_create(sizeof(buzzer*));
 }
 
+void Buzzer_Start(buzzer* obj){
+    obj->finished = 0;
+    obj->started = 1;
+    BSP_PWM_Start(obj->config.bsp_pwm_index);
+}
+// void Buzzer_Init(buzzer* obj, buzzer_config* config) {
+
+//     // HAL_TIM_PWM_Start(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
+//     BSP_PWM_Start(obj->config.bsp_pwm_index);
+// }
+
 void Buzzer_Update(buzzer* obj) {
+    if (!obj->started) return;
     if (obj->finished) {
         if (obj->finished == 1) {
             BSP_PWM_Stop(obj->config.bsp_pwm_index);
             obj->finished++;
+            obj->started = 0;
         }
     }
-    //__HAL_TIM_SetAutoreload(obj->BUZZER_PWM_BASE, obj->music[(int)obj->count]);
     BSP_PWM_SetARR(obj->config.bsp_pwm_index, obj->config.music[(int)obj->count]);
     if (obj->config.music[obj->count] != 0) {
-        // __HAL_TIM_SetCompare(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL,
-        //                      obj->music[obj->count] / 2);
         BSP_PWM_SetCCR(obj->config.bsp_pwm_index, obj->config.music[obj->count] / 2);
     } else {
-        // __HAL_TIM_SetCompare(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL,
-        //                      obj->music[obj->count]);
         BSP_PWM_SetCCR(obj->config.bsp_pwm_index, obj->config.music[obj->count]);
     }
     obj->count++;
     if (obj->count == obj->config.len) {
         obj->finished = 1;
-        // HAL_TIM_PWM_Stop(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
-        //  BSP_PWM_Stop(obj->config.bsp_pwm_index);
+    }
+}
+
+void Buzzer_Loop() {
+    for (size_t i = 0; i < buzzer_instances->cv_len; ++i) {
+        buzzer* buzzer_now = *((buzzer**)cvector_val_at(buzzer_instances, i));
+        Buzzer_Update(buzzer_now);
     }
 }

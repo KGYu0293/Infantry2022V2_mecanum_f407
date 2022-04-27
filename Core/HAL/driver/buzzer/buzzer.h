@@ -11,6 +11,7 @@ typedef struct buzzer_config_t{
 typedef struct buzzer_t {
     uint16_t finished;
     uint16_t count;
+    uint16_t started;
     buzzer_config config;
 } buzzer;
 //预定义的一些音乐
@@ -24,7 +25,8 @@ extern uint16_t* musics[];
 extern uint16_t music_lens[];
 // buzzer* ()
 buzzer* Buzzer_Create(buzzer_config* config);
-void Buzzer_Init(buzzer* obj, buzzer_config* config);
-void Buzzer_Update(buzzer* obj);
-
+// void Buzzer_Update(buzzer* obj);
+void Buzzer_Driver_Init();
+void Buzzer_Loop();
+void Buzzer_Start(buzzer* obj);
 #endif
