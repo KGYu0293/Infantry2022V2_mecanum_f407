@@ -15,7 +15,7 @@ gimbal_board_cmd* cmd;
 Gimbal* gimbal;
 Shoot* shoot;
 void APP_Layer_Init(){
-    cmd=Gimbal_board_CMD_Create();
+    cmd = Gimbal_board_CMD_Create();
     gimbal = Gimbal_Create();
     shoot = Shoot_Create();
 }

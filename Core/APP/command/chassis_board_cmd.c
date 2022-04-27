@@ -35,7 +35,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     referee_config referee_config;
     referee_config.bsp_uart_index = UART_REFEREE_PORT;
     referee_config.lost_callback = NULL;
-    // obj->referee = referee_Create(&referee_config);
+    obj->referee = referee_Create(&referee_config);
 
     // 定义publisher和subscriber
     obj->chassis_cmd_puber = register_pub("cmd_chassis");
@@ -89,6 +89,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         if (!obj->robot_ready) {
             obj->robot_ready = 1;
             // 播放音乐
+            Buzzer_Start(obj->internal_buzzer);
             //
         }
     } else {
