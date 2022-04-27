@@ -91,8 +91,10 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 
     // 除了遥控器之外都已经上线
     if (obj->mode == robot_run) {
+        if(!obj->robot_ready){
+            Buzzer_Start(obj->internal_buzzer);
+        }
         obj->robot_ready = 1;
-        Buzzer_Start(obj->internal_buzzer);
     }
 
     // 遥控器判断
