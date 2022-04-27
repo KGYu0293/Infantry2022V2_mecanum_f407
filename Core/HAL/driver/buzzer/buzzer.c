@@ -67,8 +67,8 @@ uint16_t music_thankyou[] = {M_Do, 0, M_Re, 0, M_Mi, 0, M_So, 0, M_Mi, 0, M_Mi, 
                              M_Do, 0, L_La, 0, M_Do, M_Do, 0, L_So, 0, L_So, M_Re, 0, M_Do, M_Do, 0, M_Mi, 0, M_Re, 0, M_Re, 0, M_Do, 0, M_Re, M_Re, M_Re, M_Re};
 
 uint16_t* musics[] = {music1, music2, music3, music4, music5, music6, music_nxt, music_thankyou};
-uint16_t music_lens[] = {sizeof(music1), sizeof(music2), sizeof(music3), sizeof(music4),
-                         sizeof(music5), sizeof(music6), sizeof(music_nxt), sizeof(music_thankyou)};
+uint16_t music_lens[] = {sizeof(music1) / 2, sizeof(music2) / 2, sizeof(music3) / 2, sizeof(music4) / 2,
+                         sizeof(music5) / 2, sizeof(music6) / 2, sizeof(music_nxt) / 2, sizeof(music_thankyou) / 2};
 
 cvector* buzzer_instances;
 buzzer* Buzzer_Create(buzzer_config* config) {
