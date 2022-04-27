@@ -1,5 +1,5 @@
 #include "referee.h"
-
+#include "bsp_log.h"
 #include "cvector.h"
 
 cvector *referee_instances;
@@ -42,28 +42,29 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
 }
 
 void referee_data_solve(Referee *obj) {
-    uint16_t *byte_now_pt = NULL;
+    uint8_t *byte_now_pt = NULL;
 
     // 反复弹出直到缓冲队列长度为0
-    while (obj->primary_data->cq_len > obj->tool.next_step_wait_len) {
+    while (obj->primary_data->cq_len >= obj->tool.next_step_wait_len) {
         byte_now_pt = circular_queue_pop(obj->primary_data);
-        uint16_t byte_now = *byte_now_pt;
+        uint8_t byte_now = *byte_now_pt;
         switch (obj->tool.step) {
             case s_header_sof:
                 // 包错误判断-固定起始字节
                 if (byte_now == REFEREE_SOF) {
                     obj->tool.step++;
+                    obj->tool.rx_pack.header.SOF = byte_now;
+                    obj->tool.next_step_wait_len = 2;
                 } else {
                     obj->tool.step = 0;
                     obj->tool.next_step_wait_len = 1;
                 }
-                obj->tool.next_step_wait_len = 2;
                 break;
             case s_header_length:
                 obj->tool.rx_pack.header.data_length = byte_now;
                 byte_now_pt = circular_queue_pop(obj->primary_data);
                 byte_now = *byte_now_pt;
-                obj->tool.rx_pack.header.data_length |= (byte_now << 8);
+                obj->tool.rx_pack.header.data_length |= ((uint16_t)byte_now << 8);
                 // 包错误判断-长度超范围
                 if (obj->tool.rx_pack.header.data_length > REFEREE_PACK_LEN_DATA_MAX) {
                     obj->tool.step = 0;
@@ -83,19 +84,21 @@ void referee_data_solve(Referee *obj) {
                 // 包错误判断-CRC8校验
                 uint8_t crc8_result = CRC8_Modbus_calc(&(obj->tool.rx_pack.header.SOF), sizeof(frame_header) - 1, crc8_default);
                 if (crc8_result == byte_now) {
-                    obj->tool.step = 0;
-                    obj->tool.next_step_wait_len = 1;
-                } else {
                     obj->tool.step++;
                     obj->tool.next_step_wait_len = 2;
+                    obj->tool.rx_pack.header.CRC8 = byte_now;
+                    // printf_log("crc8:%d\n",obj->tool.buffer_pt);
+                } else {
+                    obj->tool.step = 0;
+                    obj->tool.next_step_wait_len = 1;
                 }
                 break;
             }
             case s_cmd_id:
-                obj->tool.rx_pack.cmd_id = (byte_now << 8);
+                obj->tool.rx_pack.cmd_id = byte_now;
                 byte_now_pt = circular_queue_pop(obj->primary_data);
                 byte_now = *byte_now_pt;
-                obj->tool.rx_pack.cmd_id |= byte_now;
+                obj->tool.rx_pack.cmd_id |= ((uint16_t)byte_now << 8);
                 obj->tool.step++;
                 obj->tool.next_step_wait_len = obj->tool.rx_pack.header.data_length;
                 break;
@@ -114,7 +117,8 @@ void referee_data_solve(Referee *obj) {
                 uint16_t crc16_recv = byte_now;
                 byte_now_pt = circular_queue_pop(obj->primary_data);
                 byte_now = *byte_now_pt;
-                crc16_recv |= (byte_now << 8);
+                crc16_recv |= ((uint16_t)byte_now << 8);
+                // printf_log("a:%d %d\n",REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length,obj->tool.buffer_pt);
                 // 包错误判断-CRC16校验
                 uint16_t crc16_result =
                     CRC16_Modbus_calc(&(obj->tool.rx_pack.header.SOF), REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length, crc16_default);

@@ -164,9 +164,9 @@ typedef struct {
     uint16_t shooter_id1_42mm_speed_limit;
 
     uint16_t chassis_power_limit;
-    uint8_t mains_power_gimbal_output : 1;
-    uint8_t mains_power_chassis_output : 1;
-    uint8_t mains_power_shooter_output : 1;
+    uint8_t mains_power_gimbal_output;
+    uint8_t mains_power_chassis_output;
+    uint8_t mains_power_shooter_output;
 } ext_game_robot_state_t;
 // 0x0202
 typedef struct {
