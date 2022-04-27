@@ -105,7 +105,10 @@ void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len) {
 void referee_data_solve(Referee *obj) {
     uint16_t* byte_now_pt = NULL;
     referee_unpack_tool tool;
-
+    if (obj->primary_data->cq_len < REFEREE_RX_MIN_SIZE){
+        //防止数据量过少丢包
+        return;
+    }
     // 反复弹出直到缓冲队列长度为0
     while (obj->primary_data->cq_len > 0) {
         byte_now_pt = circular_queue_pop(obj->primary_data);
@@ -143,7 +146,7 @@ void referee_data_solve(Referee *obj) {
             case s_header_crc8: {
                 // 包错误判断-CRC8校验,crc_check=0表示通过
                 int crc8_result = CRC8_Modbus_calc(&(tool.rx_pack.header.SOF), sizeof(frame_header), crc8_default);
-                if (crc8_result) {
+                if (crc8_result == byte_now) {
                     tool.step = 0;
                 } else {
                     tool.step++;
@@ -158,17 +161,15 @@ void referee_data_solve(Referee *obj) {
                     tool.rx_pack.cmd_id |= byte_now;
                     tool.step++;
                 }
-                uint8_t first_data_flag = 0;
                 break;
             case s_data:
                 if (obj->primary_data->cq_len > tool.rx_pack.header.data_length) {
                     for (size_t i = 0; i < tool.rx_pack.header.data_length; i++) {
-                        if (first_data_flag != 0) {
+                        if (i > 0) {
                             byte_now_pt = circular_queue_pop(obj->primary_data);
                             byte_now = *byte_now_pt;
                         }
                         tool.rx_pack.data[i] = byte_now;
-                        first_data_flag = 1;
                     }
                     tool.step++;
                 } else {
