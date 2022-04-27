@@ -75,5 +75,6 @@
         "gimbal_board_cmd.h": "c",
         "shoot.h": "c",
         "chassis_board_cmd.h": "c"
-    }
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }
