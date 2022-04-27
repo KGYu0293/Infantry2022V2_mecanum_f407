@@ -100,6 +100,13 @@ const osThreadAttr_t SuperCapTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for RefereeTask */
+osThreadId_t RefereeTaskHandle;
+const osThreadAttr_t RefereeTask_attributes = {
+  .name = "RefereeTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -113,6 +120,7 @@ void StartMotorTask(void *argument);
 void StartMonitorTask(void *argument);
 void StartRobotCMDTask(void *argument);
 void StartCapTask(void *argument);
+void StartRefereeTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -163,6 +171,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of SuperCapTask */
   SuperCapTaskHandle = osThreadNew(StartCapTask, NULL, &SuperCapTask_attributes);
+
+  /* creation of RefereeTask */
+  RefereeTaskHandle = osThreadNew(StartRefereeTask, NULL, &RefereeTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -316,6 +327,27 @@ void StartCapTask(void *argument)
     vTaskDelayUntil(&currentTimeSuperCap, 2);
   }
   /* USER CODE END StartCapTask */
+}
+
+/* USER CODE BEGIN Header_StartRefereeTask */
+/**
+* @brief Function implementing the RefereeTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartRefereeTask */
+void StartRefereeTask(void *argument)
+{
+  /* USER CODE BEGIN StartRefereeTask */
+  portTickType currentTimeReferee;
+  currentTimeReferee = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+    HAL_Referee_Loop();
+    vTaskDelayUntil(&currentTimeReferee, 10);
+  }
+  /* USER CODE END StartRefereeTask */
 }
 
 /* Private application code --------------------------------------------------*/

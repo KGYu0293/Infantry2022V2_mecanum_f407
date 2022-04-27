@@ -48,3 +48,7 @@ void HAL_Monitor_Loop(){
 void HAL_Buzzer_Loop(){
     Buzzer_Loop();
 }
+
+void HAL_Referee_Loop(){
+    referee_loop();
+}

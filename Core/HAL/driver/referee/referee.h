@@ -278,7 +278,7 @@ typedef struct Referee_t {
 } Referee;
 
 void referee_driver_init(void);
-
+void referee_loop();
 Referee *referee_Create(referee_config *config);
 
 #endif
