@@ -90,11 +90,6 @@ void Buzzer_Start(buzzer* obj) {
     obj->started = 1;
     BSP_PWM_Start(obj->config.bsp_pwm_index);
 }
-// void Buzzer_Init(buzzer* obj, buzzer_config* config) {
-
-//     // HAL_TIM_PWM_Start(obj->BUZZER_PWM_BASE, obj->BUZZER_PWM_CHANNEL);
-//     BSP_PWM_Start(obj->config.bsp_pwm_index);
-// }
 
 void Buzzer_Update(buzzer* obj) {
     if (!obj->started) return;
