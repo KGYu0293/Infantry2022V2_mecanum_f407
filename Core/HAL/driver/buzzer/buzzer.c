@@ -66,7 +66,7 @@ uint16_t music_nxt[] = {M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do, M_Do,
 uint16_t music_thankyou[] = {M_Do, 0, M_Re, 0, M_Mi, 0, M_So, 0, M_Mi, 0, M_Mi, M_Mi, 0, M_Re, 0, M_Re, M_Do, 0, M_Re, M_Re, 0, M_Do, 0, L_La, 0, M_Do, 0, M_Re, 0, M_Mi, M_Mi, M_Mi, M_Mi, 0,
                              M_Do, 0, L_La, 0, M_Do, M_Do, 0, L_So, 0, L_So, M_Re, 0, M_Do, M_Do, 0, M_Mi, 0, M_Re, 0, M_Re, 0, M_Do, 0, M_Re, M_Re, M_Re, M_Re};
 
-uint16_t* musics[] = {music1, music2, music3, music4, music5, music6};
+uint16_t* musics[] = {music1, music2, music3, music4, music5, music6, music_nxt, music_thankyou};
 uint16_t music_lens[] = {sizeof(music1), sizeof(music2), sizeof(music3), sizeof(music4),
                          sizeof(music5), sizeof(music6), sizeof(music_nxt), sizeof(music_thankyou)};
 
@@ -85,7 +85,7 @@ void Buzzer_Driver_Init() {
     buzzer_instances = cvector_create(sizeof(buzzer*));
 }
 
-void Buzzer_Start(buzzer* obj){
+void Buzzer_Start(buzzer* obj) {
     obj->finished = 0;
     obj->started = 1;
     BSP_PWM_Start(obj->config.bsp_pwm_index);
@@ -104,6 +104,7 @@ void Buzzer_Update(buzzer* obj) {
             obj->finished++;
             obj->started = 0;
         }
+        return;
     }
     BSP_PWM_SetARR(obj->config.bsp_pwm_index, obj->config.music[(int)obj->count]);
     if (obj->config.music[obj->count] != 0) {
