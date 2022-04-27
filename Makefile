@@ -125,8 +125,8 @@ Core/HAL/driver/super_cap/super_cap_wuli.c \
 Core/HAL/driver/radiotube/radiotube.c \
 Core/HAL/lib/common.c \
 Core/HAL/lib/soft_crc.c \
-Core/HAL/lib/controller/MahonyAHRS.c \
-Core/HAL/lib/controller/MadgwickAHRS.c \
+Core/HAL/lib/MahonyAHRS.c \
+Core/HAL/lib/MadgwickAHRS.c \
 Core/HAL/lib/cvector.c \
 Core/HAL/lib/datatypes.c \
 Core/HAL/lib/circular_queue.c \
