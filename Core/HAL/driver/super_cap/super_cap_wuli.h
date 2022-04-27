@@ -22,8 +22,7 @@ typedef struct super_cap_wuli_t {
     float power_set_fdb;      // 返回的用户设定值 应与设定值相同
     float power_set;          // 用户设定值
 
-    //雾列电容无以下功能
-    uint8_t if_supercap_on;  // 电容是否开启
+    uint8_t if_supercap_on;  // 电容是否开启 //雾列电容无此功能
     float power_current;     // 电容充电电流
     float cap_percent;       // 电容电量剩余百分比，该电容由电压值测得大致百分比
     monitor_item* monitor;

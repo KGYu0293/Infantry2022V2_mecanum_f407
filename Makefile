@@ -116,6 +116,8 @@ Core/HAL/driver/buzzer/buzzer.c \
 Core/HAL/driver/com/can_pc.c \
 Core/HAL/driver/com/can_send.c \
 Core/HAL/driver/com/can_recv.c \
+Core/HAL/driver/com/uart_send.c \
+Core/HAL/driver/com/uart_recv.c \
 Core/HAL/driver/motor/can_motor.c \
 Core/HAL/driver/remote/DT7_DR16.c \
 Core/HAL/driver/referee/referee.c \
