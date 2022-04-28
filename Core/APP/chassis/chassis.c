@@ -2,19 +2,19 @@
 
 #include <math.h>
 
-/* the radius of wheel(mm)，轮子半径 */
+// the radius of wheel(mm)，轮子半径
 #define RADIUS 71  // 71.25
-/* the perimeter of wheel(mm)，轮子周长 */
+// the perimeter of wheel(mm)，轮子周长
 #define PERIMETER 448  // 71.25*2pi
-/* wheel track distance(mm)，轮距 */
+// wheel track distance(mm)，轮距
 #define WHEELTRACK 340
-/* wheelbase distance(mm)，轴距 */
+// wheelbase distance(mm)，轴距
 #define WHEELBASE 340
-/* gimbal is relative to chassis center x axis offset(mm)，云台相对于底盘中心的偏移，往右为正 */
+// gimbal is relative to chassis center x axis offset(mm)，云台相对于底盘中心的偏移，往右为正
 #define ROTATE_X_OFFSET 0
-/* gimbal is relative to chassis center y axis offset(mm)，云台相对于底盘中心的偏移，往前为正 */
+// gimbal is relative to chassis center y axis offset(mm)，云台相对于底盘中心的偏移，往前为正
 #define ROTATE_Y_OFFSET 0
-/* the deceleration ratio of chassis motor，底盘电机减速比 */
+// the deceleration ratio of chassis motor，底盘电机减速比
 #define MOTOR_DECELE_RATIO 19.0f
 
 #define RADIAN_COEF 57.3f  // 180°/pi
@@ -41,12 +41,12 @@ Chassis *Chassis_Create() {
     obj->imu = BMI088_Create(&internal_imu_config);
 
     // 超级电容
-    // super_cap_wuli_config cap_config;
-    // cap_config.bsp_can_index = 0;
-    // cap_config.super_cap_wuli_rx_id = SUPER_CAP_WULI_RX_ID;
-    // cap_config.super_cap_wuli_tx_id = SUPER_CAP_WULI_TX_ID;
-    // cap_config.lost_callback = chassis_super_cap_lost;
-    // obj->super_cap = Super_cap_wuli_Create(&cap_config);
+    super_cap_wuli_config cap_config;
+    cap_config.bsp_can_index = 0;
+    cap_config.super_cap_wuli_rx_id = SUPER_CAP_WULI_RX_ID;
+    cap_config.super_cap_wuli_tx_id = SUPER_CAP_WULI_TX_ID;
+    cap_config.lost_callback = chassis_super_cap_lost;
+    obj->super_cap = Super_cap_wuli_Create(&cap_config);
 
     can_motor_config lf_config;
     can_motor_config rf_config;
@@ -93,14 +93,6 @@ Chassis *Chassis_Create() {
     PID_SetConfig(&rb_config.config_speed, 5, 0, 10, 0, 10000);
     obj->rb = Can_Motor_Create(&rb_config);
 
-    //功率控制参数设置
-    // obj->if_supercap = 1;
-    // obj->powcrtl.power_buffer_target = 40;
-    // PID_SetConfig(&obj->powcrtl.powerbuffer_pid.config, 1, 0, 0, 0, 5000);
-    // PID_SetConfig(&obj->powcrtl.motorpower_pid.config, 1, 0, 0, 0, 5000);
-    // PID_Init(&obj->powcrtl.powerbuffer_pid,&obj->powcrtl.powerbuffer_pid.config);
-    // PID_Init(&obj->powcrtl.motorpower_pid,&obj->powcrtl.motorpower_pid.config);
-
     // 定义pub
     obj->chassis_imu_pub = register_pub("upload_chassis");
     // 定义subscriber
@@ -110,6 +102,26 @@ Chassis *Chassis_Create() {
     obj->upload_data.chassis_status = module_lost;
     obj->upload_data.chassis_imu = &(obj->imu->data);
     return obj;
+}
+
+//对电流环进行限制 功率限制
+void OutputmaxLimit(Chassis *obj) {
+    float output_limit = 0;
+    if (obj->cmd_data->power.if_consume_supercap) {
+        if (obj->super_cap->cap_percent < 30) {
+            output_limit = 1000;
+        } else if (obj->super_cap->cap_percent < 50) {
+            output_limit = 5000;
+        } else {
+            output_limit = 8000;
+        }
+    } else {
+        output_limit = 1000 + 7000 * (obj->cmd_data->power.power_limit - 30) / 90;
+    }
+    obj->lf->speed_pid.config.outputMax = output_limit;
+    obj->rf->speed_pid.config.outputMax = output_limit;
+    obj->lb->speed_pid.config.outputMax = output_limit;
+    obj->rb->speed_pid.config.outputMax = output_limit;
 }
 
 /**
@@ -144,8 +156,8 @@ float auto_rotate_param(void) { return 150; }
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
-    // 功率控制
-    // Power_control(obj, obj->cmd_data);
+    //功率控制
+    OutputmaxLimit(obj);
 
     float vx = param->target.vx * cos(param->target.offset_angle * DEG2RAD) - param->target.vy * sin(param->target.offset_angle * DEG2RAD);
     float vy = param->target.vx * sin(param->target.offset_angle * DEG2RAD) + param->target.vy * cos(param->target.offset_angle * DEG2RAD);
@@ -158,11 +170,6 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
         float w = 0.05f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
         mecanum_calculate(obj, vx, vy, w);
     }
-
-    // 缓启动 斜坡
-
-    // 速度输出限制
-    // Speed_limit(obj);
 }
 
 void Chassis_Update(Chassis *obj) {
@@ -172,6 +179,9 @@ void Chassis_Update(Chassis *obj) {
     } else {
         obj->upload_data.chassis_status = module_working;
     }
+
+    //电容剩余值
+    obj->upload_data.chassis_supercap_percent = obj->super_cap->cap_percent;
     // 发送回传数据指针
     publish_data chassis_upload;
     chassis_upload.data = (uint8_t *)&(obj->upload_data);
@@ -182,6 +192,13 @@ void Chassis_Update(Chassis *obj) {
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
     if (chassis_data.len == -1) return;  // 未收到指令
     obj->cmd_data = (Cmd_chassis *)chassis_data.data;
+
+    //设置电容充电功率，在缓冲功率充足时，多充能
+    if (obj->cmd_data->power.power_buffer > 30) {
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 5;
+    } else {
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit;
+    }
 
     // 应用得到的param进行控制
     if (obj->cmd_data->mode == chassis_stop) {

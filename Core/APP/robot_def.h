@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "imu_data.h"
 #include "stdint.h"
@@ -84,7 +84,7 @@ typedef struct Cmd_chassis_speed_t {
 
 // 对底盘功率的控制量
 typedef struct Cmd_chassis_power_t {
-    uint8_t if_supercap_on;
+    uint8_t if_consume_supercap; //是否消耗电容
     uint8_t power_limit;
     float power_now;
     uint16_t power_buffer;  // 缓冲功率
@@ -126,13 +126,14 @@ typedef struct Upload_gimbal_t {
 // 底盘模块回传cmd的数据
 typedef struct Upload_chassis_t {
     Module_status chassis_status;
+    uint8_t chassis_supercap_percent;
     imu_data* chassis_imu;
 } Upload_chassis;
 
 // 板间通信定义
 // 云台->底盘数据包
 typedef struct Gimbal_board_send_t {
-    uint8_t if_supercap_on;            // 电容是否开启
+    uint8_t if_consume_supercap;            // 是否消耗电容
     Robot_mode now_robot_mode;         // 遥控器在云台主控 包含stop模式与云台重要模块掉线
     Chassis_mode chassis_mode;         // 底盘模式
     Cmd_chassis_speed chassis_target;  // 底盘速度控制
@@ -146,6 +147,7 @@ typedef struct Chassis_board_send_t {
         uint16_t bullet_speed_max;   // 弹速
         uint16_t heat_limit_remain;  // 剩余热量
     } shoot_referee_data;
+    uint8_t chassis_supercap_percent;
 } Chassis_board_send_data;
 
 #pragma pack()

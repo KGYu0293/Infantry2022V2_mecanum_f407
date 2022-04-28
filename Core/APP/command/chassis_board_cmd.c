@@ -25,6 +25,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     obj->recv = CanRecv_Create(&recv_config);
     obj->recv_data = (Gimbal_board_send_data*)obj->recv->data_rx.data;
 
+    //蜂鸣器配置
     buzzer_config internal_buzzer_config;
     uint32_t music_id = 1;
     internal_buzzer_config.music = musics[music_id];
@@ -32,6 +33,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
     obj->internal_buzzer = Buzzer_Create(&internal_buzzer_config);
 
+    //裁判系统
     referee_config referee_config;
     referee_config.bsp_uart_index = UART_REFEREE_PORT;
     referee_config.lost_callback = NULL;
@@ -68,7 +70,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         // obj->send_data.gyro_yaw = ((imu_data*)chassis_upload_data.data)->gyro[2];
         obj->chassis_upload_data = (Upload_chassis*)chassis_upload.data;
         obj->send_data.gyro_yaw = obj->chassis_upload_data->chassis_imu->gyro[2];
-
+        obj->send_data.chassis_supercap_percent = obj->chassis_upload_data->chassis_supercap_percent;
         // 底盘模块掉线
         if (obj->chassis_upload_data->chassis_status == module_lost) {
             obj->mode = robot_stop;
@@ -81,7 +83,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     }
 
     // 裁判系统掉线处理
-    //
+    // 暂无
 
     // 判断除了云台板stop之外，都已经上线，说明底盘板初始化完成，进入ready状态】
     if (obj->mode == robot_run) {
@@ -109,6 +111,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     } else {
         obj->chassis_control.mode = obj->recv_data->chassis_mode;
         obj->chassis_control.target = obj->recv_data->chassis_target;
+        obj->chassis_control.power.if_consume_supercap = obj->recv_data->if_consume_supercap;
         obj->chassis_control.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
         obj->chassis_control.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
         obj->chassis_control.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;
