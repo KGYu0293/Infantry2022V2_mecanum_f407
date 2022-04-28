@@ -77,12 +77,14 @@ typedef struct PROG_t {
     float z3;  // ESO输出信号3
     float y;   //反馈信号
 } PROG_t;
+
 //跟踪微分器的参数
 typedef struct TD_t {
     float r;
     float h;
     float h0;
 } TD_t;
+
 //非线性反馈的参数
 typedef struct NLSEF_t {
     float Kp;
@@ -91,6 +93,7 @@ typedef struct NLSEF_t {
     float alpha2;
     float delta;
 } NLSEF_t;
+
 //扩张观测器的参数
 typedef struct ESO_t {
     float beta1;
@@ -98,6 +101,7 @@ typedef struct ESO_t {
     float beta3;
     float b;
 } ESO_t;
+
 // ADRC总结构体
 typedef struct ADRC_t {
     PROG_t prog;
