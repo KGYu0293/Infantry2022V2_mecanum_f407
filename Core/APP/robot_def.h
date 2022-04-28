@@ -15,7 +15,8 @@
 // 各部分通过pub_sub方式“沟通”的“通讯协议”
 
 #pragma pack(1)
-// 定义模式
+/** 机器人模式定义 **/
+
 // 对模块是否掉线的定义
 typedef enum Module_status_e { module_lost = 0, module_working } Module_status;
 
@@ -67,7 +68,8 @@ typedef enum AutoAim_mode_e {
     auto_aim_buff_big     // 大能量机关
 } AutoAim_mode;
 
-// 机器人模块控制量定义
+/** 机器人模块控制量定义 **/
+
 // 对底盘速度的控制量
 /* vx vy rotate传入时以offset系（一般为云台系）为基准
  * 若无云台或云台跟随底盘，offset_angle设置为0即可
@@ -88,7 +90,7 @@ typedef struct Cmd_chassis_power_t {
     uint16_t power_buffer;  // 缓冲功率
 } Cmd_chassis_power;
 
-// 对底盘模块的控制量
+// 对底盘模块的控制量（总）
 typedef struct Cmd_chassis_t {
     Chassis_mode mode;
     Cmd_chassis_speed target;
