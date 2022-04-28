@@ -27,6 +27,7 @@
  * @param input 输入
  * @retval 输入的符号，正负1或0
  */
+
 float_t fsgn(float input) {
     return (input != 0.0f ? (input < 0.0f ? -1.0f : 1.0f) : 0.0f);
 }
@@ -36,6 +37,7 @@ float_t fsgn(float input) {
  * @param PID结构体
  * @retval None
  */
+
 void PID_Init(struct PID_t* pid, struct PID_config_t* config) {
     pid->config = *config;
 }

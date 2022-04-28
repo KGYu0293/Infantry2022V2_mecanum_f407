@@ -6,7 +6,6 @@
 enum PID_Mode_e { PID_POSITION = 0,
                   PID_DELTA,
                   PID_COMP_POSITION };
-
 struct PID_config_t {
     float KP;
     float KI;
@@ -20,7 +19,6 @@ struct PID_config_t {
     float error_preload;
     enum PID_Mode_e PID_Mode;
 };
-
 struct PID_t {
     struct PID_config_t config;
     float error[3];
