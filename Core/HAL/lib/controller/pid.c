@@ -98,7 +98,7 @@ void PID_Calc(struct PID_t* pid) {
         }
     }
 
-    /* 输出上限 */
+    /*----- 输出上限 -----*/
     if (pid->output > pid->config.outputMax)
         pid->output = pid->config.outputMax;
     if (pid->output < -pid->config.outputMax)
