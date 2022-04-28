@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 
-enum PID_Mode_e { PID_POSITION = 0, PID_DELTA, PID_COMP_POSITION };
-struct PID_config_t{
+enum PID_Mode_e { PID_POSITION = 0,
+                  PID_DELTA,
+                  PID_COMP_POSITION };
+struct PID_config_t {
     float KP;
     float KI;
     float KD;
@@ -26,10 +28,9 @@ struct PID_t {
     float ref;
     float output;
     float error_delta;
-    
 };
 
-void PID_Init(struct PID_t *pid, struct PID_config_t* config);
-void PID_Calc(struct PID_t *pid);
-void PID_SetConfig(struct PID_config_t* obj,float kp, float ki, float kd, float errormax, float outputmax);
+void PID_Init(struct PID_t* pid, struct PID_config_t* config);
+void PID_Calc(struct PID_t* pid);
+void PID_SetConfig(struct PID_config_t* obj, float kp, float ki, float kd, float errormax, float outputmax);
 #endif

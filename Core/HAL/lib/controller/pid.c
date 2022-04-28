@@ -36,7 +36,6 @@ float_t fsgn(float input) {
  * @param PID结构体
  * @retval None
  */
-
 void PID_Init(struct PID_t* pid, struct PID_config_t* config) {
     pid->config = *config;
 }
