@@ -244,6 +244,9 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
 
     // 底盘控制参数
     obj->send_data.if_consume_supercap = 0; //默认关闭电容输出
+    obj->send_data.chassis_target.vx = 0;
+    obj->send_data.chassis_target.vy = 0;
+    obj->send_data.chassis_target.rotate = 0;
     // 平移
     if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 5000;
     if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -5000;
