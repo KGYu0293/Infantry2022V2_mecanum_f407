@@ -109,14 +109,14 @@ void OutputmaxLimit(Chassis *obj) {
     float output_limit = 0;
     if (obj->cmd_data->power.if_consume_supercap) {
         if (obj->super_cap->cap_percent < 30) {
-            output_limit = 1000;
+            output_limit = 2000;
         } else if (obj->super_cap->cap_percent < 50) {
             output_limit = 5000;
         } else {
             output_limit = 8000;
         }
     } else {
-        output_limit = 1000 + 7000 * (obj->cmd_data->power.power_limit - 30) / 90;
+        output_limit = 2000 + 6000 * (obj->cmd_data->power.power_limit - 30) / 90;
     }
     obj->lf->speed_pid.config.outputMax = output_limit;
     obj->rf->speed_pid.config.outputMax = output_limit;

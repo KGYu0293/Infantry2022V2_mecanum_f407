@@ -31,7 +31,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     recv_config.lost_callback = gimbal_core_module_lost;
     obj->send = CanSend_Create(&send_config);
     obj->recv = CanRecv_Create(&recv_config);
-    obj->recv_data = (Chassis_board_send_data*) obj->recv->data_rx.data;
+    obj->recv_data = (Chassis_board_send_data*)obj->recv->data_rx.data;
 
     // 小电脑通信配置
     canpc_config pc_config;
@@ -62,8 +62,12 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     // memset 0
     obj->mode = robot_stop;
     memset(&(obj->pc_send_data), 0, sizeof(canpc_send));
+    memset(&(obj->gimbal_control), 0, sizeof(Cmd_gimbal));
+    memset(&(obj->shoot_control), 0, sizeof(Cmd_shoot));
+    memset(&(obj->send_data), 0, sizeof(Gimbal_board_send_data));
     obj->send_data.if_consume_supercap = 0;  //默认关闭电容输出
     obj->robot_ready = 0;
+    obj->chassis_climb_mode = 0;
     obj->autoaim_mode = auto_aim_off;
     return obj;
 }
@@ -92,7 +96,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 
     // 除了遥控器之外都已经上线
     if (obj->mode == robot_run) {
-        if(!obj->robot_ready){
+        if (!obj->robot_ready) {
             Buzzer_Start(obj->internal_buzzer);
         }
         obj->robot_ready = 1;
@@ -157,7 +161,7 @@ void remote_mode_update(gimbal_board_cmd* obj) {
 
     // 底盘控制参数
     // 拨杆确定底盘模式与控制量
-    obj->send_data.if_consume_supercap = 0; //遥控器模式不消耗超级电容
+    obj->send_data.if_consume_supercap = 0;  //遥控器模式不消耗超级电容
     obj->send_data.chassis_target.vy = 16.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
     obj->send_data.chassis_target.vx = 16.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
     if (obj->remote->data.rc.s1 == 1) {
@@ -216,7 +220,10 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
             mousekey_GimbalChassis_default(obj);
         }
     }
-    // z:飞坡 （）待添加
+    // z:底盘超限模式
+    if (obj->remote->data.key_single_press_cnt.z != obj->remote->last_data.key_single_press_cnt.z) {
+        obj->chassis_climb_mode ^= 1; //反转状态
+    }
 
     // 自瞄模式
     // f:自瞄
@@ -243,7 +250,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
 
     // 底盘控制参数
-    obj->send_data.if_consume_supercap = 0; //默认关闭电容输出
+    obj->send_data.if_consume_supercap = 0; //默认不要消耗电容电量
     obj->send_data.chassis_target.vx = 0;
     obj->send_data.chassis_target.vy = 0;
     obj->send_data.chassis_target.rotate = 0;
@@ -257,8 +264,8 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         obj->send_data.chassis_target.vx /= 2.0;
         obj->send_data.chassis_target.vy /= 2.0;
     }
-    // shift加速
-    if (obj->remote->data.key_down.shift) {
+    // 按住shift加速/飞坡模式加速
+    if (obj->remote->data.key_down.shift || obj->chassis_climb_mode) {
         obj->send_data.chassis_target.vx *= 2.0;
         obj->send_data.chassis_target.vy *= 2.0;
         obj->send_data.if_consume_supercap = 1;

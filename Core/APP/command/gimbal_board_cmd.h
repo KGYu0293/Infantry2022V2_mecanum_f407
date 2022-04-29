@@ -16,8 +16,10 @@
 typedef struct Gimbal_board_cmd_t {
     Robot_mode mode;
     AutoAim_mode autoaim_mode;
-    // 标志量
+    // 机器人启动好标志量
     uint8_t robot_ready;
+    // 底盘爬坡/飞坡模式
+    uint8_t chassis_climb_mode;
     // 板间通信
     can_recv *recv;
     can_send *send;
