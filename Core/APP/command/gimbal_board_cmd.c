@@ -255,10 +255,10 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     obj->send_data.chassis_target.vy = 0;
     obj->send_data.chassis_target.rotate = 0;
     // 平移
-    if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 5000;
-    if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -5000;
-    if (obj->remote->data.key_down.d) obj->send_data.chassis_target.vx = 5000;
-    if (obj->remote->data.key_down.a) obj->send_data.chassis_target.vx = -5000;
+    if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 1500;
+    if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -1500;
+    if (obj->remote->data.key_down.d) obj->send_data.chassis_target.vx = -1500;
+    if (obj->remote->data.key_down.a) obj->send_data.chassis_target.vx = 1500;
     // 按住ctrl减速
     if (obj->remote->data.key_down.ctrl) {
         obj->send_data.chassis_target.vx /= 2.0;
@@ -268,30 +268,34 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     if (obj->remote->data.key_down.shift || obj->chassis_climb_mode) {
         obj->send_data.chassis_target.vx *= 2.0;
         obj->send_data.chassis_target.vy *= 2.0;
+        if(obj->chassis_climb_mode){
+            obj->send_data.chassis_target.vx *= 2.0;
+            obj->send_data.chassis_target.vy *= 2.0;
+        }
         obj->send_data.if_consume_supercap = 1;
     }
 
     // q/e:底盘转向
     if (obj->remote->data.key_down.q) {
         if (obj->send_data.chassis_mode == chassis_run) {
-            obj->send_data.chassis_target.rotate = -90;
+            obj->send_data.chassis_target.rotate = +60;
         } else if (obj->send_data.chassis_mode == chassis_run_follow_offset) {
-            obj->gimbal_control.yaw -= 15;
+            obj->gimbal_control.yaw += 7;
         }
     }
     if (obj->remote->data.key_down.e) {
         if (obj->send_data.chassis_mode == chassis_run) {
-            obj->send_data.chassis_target.rotate = 90;
+            obj->send_data.chassis_target.rotate = -60;
         } else if (obj->send_data.chassis_mode == chassis_run_follow_offset) {
-            obj->gimbal_control.yaw += 15;
+            obj->gimbal_control.yaw -= 7;
         }
     }
 
     // 云台控制参数
     if (obj->gimbal_control.mode == gimbal_run) {
         if (obj->autoaim_mode == auto_aim_off) {
-            obj->gimbal_control.yaw -= 0.5f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-            obj->gimbal_control.pitch -= 0.1f * ((float)obj->remote->data.mouse.y);
+            obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+            obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
         } else {
             // 自瞄开
             // 计算真实yaw值

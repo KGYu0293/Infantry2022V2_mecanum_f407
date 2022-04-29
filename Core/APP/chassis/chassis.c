@@ -167,7 +167,7 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
         float w = auto_rotate_param();
         mecanum_calculate(obj, vx, vy, w);
     } else if (param->mode == chassis_run_follow_offset) {
-        float w = 0.05f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
+        float w = 0.07f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
         mecanum_calculate(obj, vx, vy, w);
     }
 }
@@ -214,94 +214,3 @@ void Chassis_Update(Chassis *obj) {
         Chassis_calculate(obj, obj->cmd_data);
     }
 }
-
-/*功率控制相关函数包括Power_control、Speed_set、Speed_limit三个函数
- *可用于无舵底盘（步兵、英雄）及哨兵底盘
- *使用时请将Power_control置于三轴速度解算前，Speed_limit置于解算后
- *若为哨兵底盘请将if_supercap初始化为0
- *本函数提供电容可设置充电电流时的电容电流环，没有也不影响使用，请根据后续电容选型编写充电电流相关函数
- *本函数比例参数及pid参数均未测试
- */
-// void Power_control(Chassis *obj, Chassis_param *param) {
-//     //速度档位设置
-//     Speed_set(obj, param);
-
-//     if (param->power.if_supercap_on) {
-//         obj->powcrtl.power_limit_set = 200;
-//         obj->super_cap->if_supercap_on = 1;
-//     } else
-//         obj->super_cap->if_supercap_on = 0;
-
-//     param->target.vx *= obj->powcrtl.speed_max[0] / 1000;  //参数待定
-//     param->target.vy *= obj->powcrtl.speed_max[1] / 1000;
-//     param->target.rotate *= obj->powcrtl.speed_max[2] / 1000;
-
-//     //功率环
-//     //若有电容则保留电容充电电流，即正常情况下不使用缓冲能量，拉满所设置的档位，剩余功率用于充电
-//     //若无电容则保持缓冲能量在40左右（默认使用满功率）
-//     //设置pid参数
-//     //加前馈
-//     if (obj->if_supercap) {
-//         //电机实时总功率，其实不是，最好有个电容输出功率检测或者电机功率检测（比如ina226）
-//         float power_motor = param->power.power_now - obj->super_cap->voltage_input_fdb * obj->super_cap->current_input_fdb;
-//         obj->powcrtl.motorpower_pid.ref = obj->powcrtl.power_limit_set;
-//         obj->powcrtl.motorpower_pid.fdb = power_motor;
-//         PID_Calc(&obj->powcrtl.motorpower_pid);
-//         //第一项是前馈
-//         obj->powcrtl.speed_limit = obj->powcrtl.power_limit_set * 10 + obj->powcrtl.motorpower_pid.output / 1000;  //系数待测试
-//     } else {
-//         obj->powcrtl.powerbuffer_pid.ref = obj->powcrtl.power_buffer_target;
-//         obj->powcrtl.powerbuffer_pid.fdb = param->power.power_buffer;
-//         PID_Calc(&obj->powcrtl.powerbuffer_pid);
-//         //第一项是前馈
-//         obj->powcrtl.speed_limit = obj->powcrtl.power_buffer_target * 10 + obj->powcrtl.powerbuffer_pid.output / 1000;
-//     }
-
-//     //电容电流环
-//     //每次高速启动都能白嫖20J能量
-//     //但是雾列的用不了捏
-//     if (obj->if_supercap) {
-//         float power_charge = 0;
-//         obj->powcrtl.powerbuffer_pid.ref = obj->powcrtl.power_buffer_target;
-//         obj->powcrtl.powerbuffer_pid.fdb = param->power.power_buffer;
-//         PID_Calc(&obj->powcrtl.powerbuffer_pid);
-//         power_charge = param->power.power_limit - obj->powcrtl.powerbuffer_pid.output;
-//         if (power_charge < 0) power_charge = 0;
-//         obj->super_cap->power_current = power_charge / obj->super_cap->voltage_input_fdb;
-//     }
-// }
-
-// //速度档位设置，设置对象为解算前的三个速度
-// void Speed_set(Chassis *obj, Chassis_param *param) {
-//     if (obj->super_cap->cap_percent < 30)
-//         obj->powcrtl.power_limit_set = param->power.power_limit - 20;
-//     else if (obj->super_cap->cap_percent < 60 && obj->super_cap->cap_percent >= 30)
-//         obj->powcrtl.power_limit_set = param->power.power_limit - 10;
-//     else if (obj->super_cap->cap_percent < 90 && obj->super_cap->cap_percent >= 60)
-//         obj->powcrtl.power_limit_set = param->power.power_limit;
-//     else if (obj->super_cap->cap_percent >= 90)
-//         obj->powcrtl.power_limit_set = param->power.power_limit + 20;
-
-//     obj->powcrtl.speed_max[0] = obj->powcrtl.power_limit_set * 30 + 2500;
-//     obj->powcrtl.speed_max[1] = obj->powcrtl.power_limit_set * 30 + 2500;
-//     obj->powcrtl.speed_max[2] = obj->powcrtl.power_limit_set * 30 + 2500;
-// }
-
-// //速度输出限制，限制对象为结算后每个轮子的转速
-// void Speed_limit(Chassis *obj) {
-//     float speed_sum = fabs(obj->lf->speed_pid.ref) +
-//                       fabs(obj->rf->speed_pid.ref) +
-//                       fabs(obj->rb->speed_pid.ref) +
-//                       fabs(obj->lb->speed_pid.ref);
-
-//     float scale = 1.0;
-//     if (speed_sum > obj->powcrtl.speed_limit)
-//         scale = obj->powcrtl.speed_limit / speed_sum;
-//     else
-//         scale = 1.0;
-
-//     obj->lf->speed_pid.ref *= scale;
-//     obj->rf->speed_pid.ref *= scale;
-//     obj->lb->speed_pid.ref *= scale;
-//     obj->rb->speed_pid.ref *= scale;
-// }
