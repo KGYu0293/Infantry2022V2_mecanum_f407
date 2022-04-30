@@ -201,9 +201,6 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
         case DART_CILENT_CMD_T:
             memcpy(&obj->rx_data.dart_cilent_cmd, rx_pack->data, sizeof(obj->rx_data.dart_cilent_cmd));
             break;
-        case STUDENT_INTERACTIVE_DATA_CMD_ID:
-            memcpy(&obj->rx_data.robot_interactive_data, rx_pack->data, sizeof(obj->rx_data.robot_interactive_data));
-            break;
         case ROBOT_INTERACTIVE_DATA_T:
             // 自定义控制器 暂无
             break;

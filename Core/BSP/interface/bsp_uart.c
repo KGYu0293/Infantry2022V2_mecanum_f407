@@ -1,14 +1,19 @@
 #include "bsp_uart.h"
 
+#include "circular_queue.h"
 #include "cvector.h"
-
 #define DEVICE_UART_CNT 2
 #define BSP_UART_DMA_BUFF_SIZE 255  // DMA缓冲区大小，一次传输数据不应超过该长度
+
+typedef struct BSP_UART_SendMsg_t {
+    uint8_t *data;
+    uint16_t len;
+} BSP_UART_SendMsg;
 
 typedef struct BSP_UART_Typedef_t {
     UART_HandleTypeDef *port;  //自定义uart编号
     cvector *call_backs;
-
+    circular_queue *send_queue;
     uint8_t rx_buff[BSP_UART_DMA_BUFF_SIZE];  // DMA接收数组，为了存放DMA搬运的串口数据
 } BSP_UART_Typedef;
 
@@ -17,9 +22,11 @@ BSP_UART_Typedef uart_ports[DEVICE_UART_CNT];
 void BSP_UART_Init() {
     uart_ports[0].port = &huart3;
     uart_ports[1].port = &huart6;
-    
+
     for (size_t i = 0; i < DEVICE_UART_CNT; ++i) {
         uart_ports[i].call_backs = cvector_create(sizeof(uart_rx_callback));
+        //队列最大长度为10
+        uart_ports[i].send_queue = create_circular_queue(sizeof(BSP_UART_SendMsg), 10);
         // HAL库的BUG处理，对于DMA需要先DeInit再Init，不然GG
         HAL_DMA_DeInit(uart_ports[i].port->hdmatx);
         HAL_DMA_DeInit(uart_ports[i].port->hdmarx);
@@ -40,7 +47,18 @@ void BSP_UART_RegisterRxCallback(uint8_t uart_index, uart_rx_callback func) { cv
 void BSP_UART_Send_blocking(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit(uart_ports[uart_index].port, data, len, 20); }
 void BSP_UART_Send_IT(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_IT(uart_ports[uart_index].port, data, len); }
 void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_DMA(uart_ports[uart_index].port, data, len); }
-
+void BSP_UART_Send_queue(uint8_t uart_index, uint8_t *data, uint16_t len) {
+    //缓冲队列已满
+    if (uart_ports[uart_index].send_queue->cq_len == uart_ports[uart_index].send_queue->cq_max_len) return;
+    BSP_UART_SendMsg now_msg;
+    now_msg.data = data;
+    now_msg.len = len;
+    circular_queue_push(uart_ports[uart_index].send_queue, &now_msg);
+    //之前队列为空
+    if (uart_ports[uart_index].send_queue->cq_len == 1) {
+        HAL_UART_Transmit_DMA(uart_ports[uart_index].port, now_msg.data, now_msg.len);
+    }
+}
 // 空闲中断
 void BSP_UART_IDLECallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
     //判断是否是空闲中断
@@ -58,6 +76,18 @@ void BSP_UART_IDLECallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
     }
 }
 
+// BSP 串口发送完成中断
+void BSP_UART_TxCpltCallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
+    if (uart_ports[uart_index].send_queue->cq_len > 0) {
+        circular_queue_pop(uart_ports[uart_index].send_queue);
+    }
+    if (uart_ports[uart_index].send_queue->cq_len > 0) {
+        //发送下一个
+        BSP_UART_SendMsg *now_msg = circular_queue_front(uart_ports[uart_index].send_queue);
+        HAL_UART_Transmit_DMA(uart_ports[uart_index].port, now_msg->data, now_msg->len);
+    }
+}
+
 /**
  * @brief 串口空闲中断（中断回调）函数
  * @param 串口号
@@ -71,5 +101,15 @@ void BSP_UART_IRQHandler(UART_HandleTypeDef *huart) {
     }
     if (huart == uart_ports[1].port) {
         BSP_UART_IDLECallback(1, huart);
+    }
+}
+
+//串口发送完成中断
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart == uart_ports[0].port) {
+        BSP_UART_TxCpltCallback(0, huart);
+    }
+    if (huart == uart_ports[1].port) {
+        BSP_UART_TxCpltCallback(1, huart);
     }
 }
