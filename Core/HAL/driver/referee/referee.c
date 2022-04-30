@@ -1,4 +1,5 @@
 #include "referee.h"
+
 #include "bsp_log.h"
 #include "cvector.h"
 
@@ -122,7 +123,7 @@ void referee_data_solve(Referee *obj) {
                 // 包错误判断-CRC16校验
                 uint16_t crc16_result =
                     CRC16_Modbus_calc(&(obj->tool.rx_pack.header.SOF), REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length, crc16_default);
-                
+
                 if (crc16_result != crc16_recv) {
                     obj->tool.step = s_header_sof;
                     obj->tool.next_step_wait_len = 1;
@@ -201,7 +202,12 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
         case DART_CILENT_CMD_T:
             memcpy(&obj->rx_data.dart_cilent_cmd, rx_pack->data, sizeof(obj->rx_data.dart_cilent_cmd));
             break;
-        case ROBOT_INTERACTIVE_DATA_T:
+        case ROBOT_INTERACT_ID:
+            // 机器人间通信接收
+            uint16_t recv_len = rx_pack->header.data_length;
+            memcpy(&obj->rx_data.interactve_data, rx_pack->data, recv_len);
+            break;
+        case ROBOT_EXT_CONTROL_ID:
             // 自定义控制器 暂无
             break;
         case ROBOT_COMMAND_T:
@@ -215,9 +221,13 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
     }
 }
 
-void referee_loop() {
+void referee_recv_loop() {
     for (size_t i = 0; i < referee_instances->cv_len; i++) {
         Referee *now = *(Referee **)cvector_val_at(referee_instances, i);
         referee_data_solve(now);
     }
+}
+
+void referee_send_ext(Referee *obj, ext_robot_interact_frame *frame) {
+    uint16_t send_len = REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + REFEREE_PACK_LEN_TAIL + frame->header.data_length;
 }

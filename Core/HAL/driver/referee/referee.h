@@ -40,6 +40,8 @@ typedef struct referee_rx_data_t {
     ext_dart_cilent_cmd_t dart_cilent_cmd;
     ext_robot_command_t robot_command;
     ext_client_map_command_t client_map_command;
+    //机器人间通信结构体
+    ext_robot_interactive_data interactve_data;
 } referee_rx_data;
 
 // 解包辅助结构体
@@ -67,7 +69,10 @@ typedef struct Referee_t {
 } Referee;
 
 void referee_driver_init(void);
-void referee_loop();
+//裁判系统接收Loop函数
+void referee_recv_loop();
+//发送机器人交互数据，包括自定义数据以及UI信息
+void referee_send_ext(Referee *obj, ext_robot_interact_frame *frame);
 Referee *referee_Create(referee_config *config);
 
 #endif

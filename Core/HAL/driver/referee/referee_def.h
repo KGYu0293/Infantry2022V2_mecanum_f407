@@ -13,8 +13,9 @@
 #define REFEREE_PACK_LEN_HEADER 5
 #define REFEREE_PACK_LEN_CMD_ID 2
 #define REFEREE_PACK_LEN_TAIL 2
-#define REFEREE_PACK_LEN_DATA_MAX REFEREE_RX_MAX_SIZE - REFEREE_PACK_LEN_HEADER - REFEREE_PACK_LEN_CMD_ID - REFEREE_PACK_LEN_TAIL
-
+#define REFEREE_PACK_INTER_DATA_HEADER 6
+#define REFEREE_PACK_LEN_DATA_MAX (REFEREE_RX_MAX_SIZE - REFEREE_PACK_LEN_HEADER - REFEREE_PACK_LEN_CMD_ID - REFEREE_PACK_LEN_TAIL)
+#define REFEREE_PACK_INTER_LEN_DATA_MAX (REFEREE_RX_MAX_SIZE - REFEREE_PACK_LEN_HEADER - REFEREE_PACK_LEN_CMD_ID - REFEREE_PACK_LEN_TAIL - REFEREE_PACK_INTER_DATA_HEADER)
 // 接收缓冲队列最大长度
 #define REFEREE_RX_QUENE_MAX_LEN 1024
 
@@ -38,7 +39,8 @@
 #define BULLET_REMAINING_CMD_ID 0x0208
 #define RFID_STATUS_ID 0x0209
 #define DART_CILENT_CMD_T 0x020A
-#define ROBOT_INTERACTIVE_DATA_T 0X0302
+#define ROBOT_INTERACT_ID 0X301
+#define ROBOT_EXT_CONTROL_ID 0X0302
 #define ROBOT_COMMAND_T 0X0303
 #define CLIENT_MAP_COMMAND_T 0X0305
 
@@ -269,22 +271,27 @@ typedef struct referee_rx_pack_t {
 学生机器人间通信 cmd_id 0x0301，内容ID:0x0200~0x02FF
 */
 //交互数据统一数据包包头
-typedef struct {
+typedef struct ext_student_interactive_header_t {
     uint16_t data_cmd_id;
     uint16_t sender_ID;
     uint16_t receiver_ID;
-} ext_student_interactive_header_data_t;
+} ext_student_interactive_header;
 
 //机器人间通信数据 可按照官方协议自定义
-//以下为示例
+//以下为自定义示例
 /*
 typedef struct {
-    // uint8_t data[112];
+    ext_student_interactive_header header;
     uint8_t sentry_chassis_state;
     uint8_t sentry_gimbal_state;
     uint8_t sentry_fire_state;
 } ext_robot_interactive_data_t;
 */
+//通用机器人间通信接收结构体
+typedef struct ext_robot_interactive_data_t {
+    ext_student_interactive_header header;
+    uint8_t data[REFEREE_PACK_INTER_LEN_DATA_MAX];
+} ext_robot_interactive_data;
 
 // 0x0302 自定义控制器
 // 0x0303 小地图交互数据
@@ -305,11 +312,11 @@ typedef struct {
 } ext_client_map_command_t;
 
 //自定义交互数据发送结构体，机器人间交互以及UI发送都用这个
-typedef struct {
-    frame_header header;                                //总包头
-    ext_student_interactive_header_data_t data_header;  //交互专用数据段包头
-    uint8_t* data;                                      //数据内容
-    uint16_t frame_tail;                                // CRC16校验包尾
+typedef struct ext_robot_interact_frame_t {
+    frame_header header;                         //总包头
+    uint16_t cmd_id;                             //指令
+    ext_student_interactive_header data_header;  //交互专用数据段包头
+    uint8_t data[REFEREE_PACK_MAX_SIZE];         //数据内容 （包含最后两位crc16校验）
 } ext_robot_interact_frame;
 
 // 成对使用，用以代替特有的typedef __packed struct写法

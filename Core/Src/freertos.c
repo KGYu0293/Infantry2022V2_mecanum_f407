@@ -344,7 +344,7 @@ void StartRefereeTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    HAL_Referee_Loop();
+    HAL_Referee_Recv_Loop();
     vTaskDelayUntil(&currentTimeReferee, 10);
   }
   /* USER CODE END StartRefereeTask */

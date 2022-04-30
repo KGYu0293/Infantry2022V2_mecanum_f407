@@ -29,7 +29,7 @@ typedef enum Graphic_type_t {
 } Graphic_type;
 
 //图形数据  字体大小与线宽比例推荐为10：1
-typedef struct {
+typedef struct graphic_data_t {
     uint8_t graphic_name[3];    //图形名字 在删除，修改等操作中，作为客户端的索引
     uint32_t operate_tpye : 3;  //图形操作  0：空操作 1：增加  2：修改  3：删除
     uint32_t graphic_tpye : 3;  //图形类型
@@ -45,33 +45,33 @@ typedef struct {
     uint32_t end_y : 11;        //终点y坐标
 } graphic_data;
 
-typedef struct {
+#pragma pack()
+
+/*
+UI的逻辑是，在上层应用中标记图形元素为modified，HAL层referee_ui对象自动管理并发送
+referee_ui对象只有 管理数据发送/图形创建工具函数 等基础功能
+*/
+typedef struct graphic_element_t {
     graphic_data data;
     char* textdata;
+    uint8_t modified;  //标志位，表示该图形元素待发送，发送完成后自动置位为0
 } graphic_element;
 
-//发送数据包
-typedef struct {
-    uint8_t num;  //表示图片的数量
-    frame_header frameHeader;
-    uint16_t receiverID;
-    uint16_t senderID;
-    uint16_t contentID;
-    graphic_data gd[7];  //单次发送图片最多7个
-    uint8_t Datatype;    // 0表示非字符，1表示字符，2表示删除图层
-    uint16_t cmd_id;
-    uint16_t CRC16;
-    char charData[30];
-} Txpack;
-
-typedef struct {
-    uint8_t bsp_uart_index;
+typedef struct referee_ui_config_t {
+    referee* referee; //referee_ui 依赖referee对象
     uint16_t robot_id;
-} UI_config;
+} referee_ui_config;
 
-typedef struct {
-    cvector* elements;
-    UI_config config;
-} UI;
+typedef struct referee_ui_t {
+    cvector* elements;  //图形元素
+    referee_ui_config config;
+    ext_robot_interact_frame send_frame;
+} referee_ui;
 
-#pragma pack()
+// 10Hz调用该函数
+void Referee_UI_Loop();
+
+void Referee_UI_driver_Init();
+referee_ui* referee_ui_create(referee_ui_config* config);
+// 注册图形元素
+void referee_ui_register_element(referee_ui* obj, graphic_element* element);

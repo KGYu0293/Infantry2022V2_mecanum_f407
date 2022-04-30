@@ -76,7 +76,18 @@
         "shoot.h": "c",
         "chassis_board_cmd.h": "c",
         "imu_data.h": "c",
-        "referee_def.h": "c"
+        "referee_def.h": "c",
+        "cfloat": "c",
+        "climits": "c",
+        "cmath": "c",
+        "concepts": "c",
+        "cstdarg": "c",
+        "cstdio": "c",
+        "cstdlib": "c",
+        "type_traits": "c",
+        "*.tcc": "c",
+        "cstdbool": "c",
+        "cstdint": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

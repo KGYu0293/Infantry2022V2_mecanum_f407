@@ -145,45 +145,6 @@ graphic_data Char(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, ui
     return gd;
 }
 
-UI *UI_Create() {
-    UI *obj = (UI *)malloc(sizeof(UI));
-    memset(obj, 0, sizeof(UI));
-    obj->elements = cvector_create(sizeof(graphic_data));
-    return obj;
-}
-// //添加图片
-// void AddGraphic(UI *ui, graphic_config gc) {
-//     gd.operate_tpye = 1;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-// //修改图片
-// void ChangeGraphic(UI *ui, graphic_config gc) {
-//     gd.operate_tpye = 2;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-// //删除图层
-// void DeleteLayer(UI *ui, uint8_t layer) {
-//     graphic_config gc;
-//     memset(&gc, 0, sizeof(gc));
-//     layer = layer;
-//     status = 2;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-// //删除单个图片
-// void DeleteGraphic(UI *ui, uint8_t id, uint8_t isCharacter) {
-//     graphic_config gc;
-//     memset(&gc, 0, sizeof(gc));
-//     if (isCharacter) {
-//         char temp[30] = "";
-//         gc = Char(id, 0, 0, 0, 0, 0, 0, 0, temp);
-//     } else {
-//         gc = Circle(id, 0, 0, 0, 0, 0, 0);
-//     }
-//     gd.operate_tpye = 3;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-/*************************************************************************************************/
-
 uint16_t Robot_Client_ID(uint16_t robotID) {
     uint16_t receiverID_client = 0;
     switch (robotID) {
@@ -226,6 +187,67 @@ uint16_t Robot_Client_ID(uint16_t robotID) {
     }
     return receiverID_client;
 }
+
+cvector *referee_ui_instances;
+void Referee_UI_driver_Init() {
+    referee_ui_instances = cvector_create(sizeof(referee_ui *));
+}
+
+referee_ui *referee_ui_create(referee_ui_config *config) {
+    referee_ui *obj = (referee_ui *)malloc(sizeof(referee_ui));
+    memset(obj, 0, sizeof(referee_ui));
+    obj->config = *config;
+    obj->elements = cvector_create(sizeof(graphic_data));
+    obj->send_frame.data_header.sender_ID = config->robot_id;
+    obj->send_frame.data_header.receiver_ID = Robot_Client_ID(config->robot_id);
+    obj->send_frame.header.SOF = 0xA5;
+    obj->send_frame.header.seq = 0;
+    cvector_pushback(referee_ui_instances, &obj);
+    return obj;
+}
+
+//空图形数据
+graphic_data empty_data;
+
+void Referee_UI_Loop() {
+    for (size_t i = 0; i < referee_ui_instances->cv_len; ++i) {
+        referee_ui *obj = *((referee_ui **)cvector_val_at(referee_ui_instances, i));
+
+    }
+}
+
+// //添加图片
+// void AddGraphic(UI *ui, graphic_config gc) {
+//     gd.operate_tpye = 1;
+//     circular_queue_push(ui->DataQueue, &gc);
+// }
+// //修改图片
+// void ChangeGraphic(UI *ui, graphic_config gc) {
+//     gd.operate_tpye = 2;
+//     circular_queue_push(ui->DataQueue, &gc);
+// }
+// //删除图层
+// void DeleteLayer(UI *ui, uint8_t layer) {
+//     graphic_config gc;
+//     memset(&gc, 0, sizeof(gc));
+//     layer = layer;
+//     status = 2;
+//     circular_queue_push(ui->DataQueue, &gc);
+// }
+// //删除单个图片
+// void DeleteGraphic(UI *ui, uint8_t id, uint8_t isCharacter) {
+//     graphic_config gc;
+//     memset(&gc, 0, sizeof(gc));
+//     if (isCharacter) {
+//         char temp[30] = "";
+//         gc = Char(id, 0, 0, 0, 0, 0, 0, 0, temp);
+//     } else {
+//         gc = Circle(id, 0, 0, 0, 0, 0, 0);
+//     }
+//     gd.operate_tpye = 3;
+//     circular_queue_push(ui->DataQueue, &gc);
+// }
+/*************************************************************************************************/
 
 //内容ID匹配
 // void contentIDmatching(UI *ui) {

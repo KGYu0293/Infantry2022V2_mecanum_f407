@@ -49,6 +49,6 @@ void HAL_Buzzer_Loop(){
     Buzzer_Loop();
 }
 
-void HAL_Referee_Loop(){
-    referee_loop();
+void HAL_Referee_Recv_Loop(){
+    referee_recv_loop();
 }
