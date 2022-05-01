@@ -11,6 +11,7 @@
 #include "monitor.h"
 #include "pub_sub.h"
 #include "referee.h"
+#include "referee_ui.h"
 
 void HAL_Layer_Init(){
     Monitor_Init();
@@ -51,4 +52,8 @@ void HAL_Buzzer_Loop(){
 
 void HAL_Referee_Recv_Loop(){
     referee_recv_loop();
+}
+
+void HAL_Referee_Send_Loop(){
+    Referee_UI_Loop();
 }

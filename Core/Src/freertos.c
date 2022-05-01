@@ -107,6 +107,13 @@ const osThreadAttr_t RefereeTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for RefereeSendTask */
+osThreadId_t RefereeSendTaskHandle;
+const osThreadAttr_t RefereeSendTask_attributes = {
+  .name = "RefereeSendTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -121,6 +128,7 @@ void StartMonitorTask(void *argument);
 void StartRobotCMDTask(void *argument);
 void StartCapTask(void *argument);
 void StartRefereeTask(void *argument);
+void StartRefereeSendTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -174,6 +182,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of RefereeTask */
   RefereeTaskHandle = osThreadNew(StartRefereeTask, NULL, &RefereeTask_attributes);
+
+  /* creation of RefereeSendTask */
+  RefereeSendTaskHandle = osThreadNew(StartRefereeSendTask, NULL, &RefereeSendTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -348,6 +359,25 @@ void StartRefereeTask(void *argument)
     vTaskDelayUntil(&currentTimeReferee, 10);
   }
   /* USER CODE END StartRefereeTask */
+}
+
+/* USER CODE BEGIN Header_StartRefereeSendTask */
+/**
+* @brief Function implementing the RefereeSendTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartRefereeSendTask */
+void StartRefereeSendTask(void *argument)
+{
+  /* USER CODE BEGIN StartRefereeSendTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    HAL_Referee_Send_Loop();
+    osDelay(50);
+  }
+  /* USER CODE END StartRefereeSendTask */
 }
 
 /* Private application code --------------------------------------------------*/
