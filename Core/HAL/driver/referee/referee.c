@@ -24,6 +24,7 @@ Referee *referee_Create(referee_config *config) {
     memset(&(obj->rx_data), 0, sizeof(referee_rx_data));
     memset(&(obj->tool), 0, sizeof(referee_unpack_tool));
     obj->tool.next_step_wait_len = 1;
+    obj->robot_status_received = 0;
     return obj;
 }
 
@@ -173,6 +174,11 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
             memcpy(&obj->rx_data.dart_remaining_time, rx_pack->data, sizeof(obj->rx_data.dart_remaining_time));
             break;
         case ROBOT_STATE_CMD_ID:
+            //第一次收到时置位为1
+            if (!obj->robot_status_received) {
+                obj->robot_status_received = 1;
+            }
+
             memcpy(&obj->rx_data.game_robot_state, rx_pack->data, sizeof(obj->rx_data.game_robot_state));
             break;
         case POWER_HEAT_DATA_CMD_ID:

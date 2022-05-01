@@ -87,7 +87,9 @@
         "type_traits": "c",
         "*.tcc": "c",
         "cstdbool": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "referee_ui.h": "c",
+        "robot_ui.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

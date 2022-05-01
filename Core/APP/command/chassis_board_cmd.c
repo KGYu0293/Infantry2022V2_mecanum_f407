@@ -38,6 +38,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     referee_config.bsp_uart_index = UART_REFEREE_PORT;
     referee_config.lost_callback = NULL;
     obj->referee = referee_Create(&referee_config);
+    obj->ui = NULL; //初始化为NULL
 
     // 定义publisher和subscriber
     obj->chassis_cmd_puber = register_pub("cmd_chassis");
@@ -82,8 +83,18 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->mode = robot_stop;
     }
 
-    // 裁判系统掉线处理
-    // 暂无
+    // 裁判系统在线
+    if (obj->referee->monitor->count > 0 && obj->referee->robot_status_received > 0){
+        //第一次收到时候，初始化UI
+        if(obj->referee->robot_status_received == 1){
+            robot_ui_config ui_config;
+            ui_config.referee = obj->referee;
+            ui_config.robot_id = obj->referee->rx_data.game_robot_state.robot_id;
+            obj->ui = Create_Robot_UI(&ui_config);
+        }
+    } else {
+        obj->mode = robot_stop;
+    }
 
     // 判断除了云台板stop之外，都已经上线，说明底盘板初始化完成，进入ready状态】
     if (obj->mode == robot_run) {
@@ -130,4 +141,9 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     obj->send_data.shoot_referee_data.bullet_speed_max = 15;
     obj->send_data.shoot_referee_data.heat_limit_remain = 30;
     CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));
+
+    //更新UI信息
+    if(obj->ui != NULL){
+        Robot_UI_update(obj->ui);
+    }
 }

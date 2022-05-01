@@ -13,7 +13,7 @@
 #include "can_recv.h"
 #include "can_send.h"
 #include "referee.h"
-
+#include "robot_ui.h"
 typedef struct Chassis_board_cmd_t {
     // 机器人状态
     Robot_mode mode;
@@ -25,6 +25,7 @@ typedef struct Chassis_board_cmd_t {
     // 外设
     buzzer *internal_buzzer;
     Referee *referee;
+    robot_ui *ui;
     // 与子模块交互
     Publisher *chassis_cmd_puber;
     Cmd_chassis chassis_control;  //发送给底盘的控制量

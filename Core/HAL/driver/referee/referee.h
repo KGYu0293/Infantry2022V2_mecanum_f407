@@ -66,6 +66,7 @@ typedef struct Referee_t {
     referee_config config;
     monitor_item *monitor;
     referee_unpack_tool tool;
+    uint8_t robot_status_received; //收到了机器人状态数据
 } Referee;
 
 void referee_driver_init(void);
