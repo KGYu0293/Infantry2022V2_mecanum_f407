@@ -35,7 +35,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // 小电脑通信配置
     canpc_config pc_config;
-    pc_config.bsp_can_index = 1;
+    pc_config.bsp_can_index = 0;
     pc_config.recv_identifer = 0x001;
     pc_config.send_identifer = 0x002;
     pc_config.lost_callback = pc_lost;

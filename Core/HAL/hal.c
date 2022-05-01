@@ -22,6 +22,7 @@ void HAL_Layer_Init(){
     Can_Motor_Driver_Init();
     dt7_driver_init();
     referee_driver_init();
+    Referee_UI_driver_Init();
     SubPub_Init();
     Super_cap_wuli_Driver_Init();
 }
