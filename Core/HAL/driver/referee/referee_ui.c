@@ -215,14 +215,15 @@ void referee_ui_add_cmd(referee_ui *obj, graphic_cmd *element) {
     }
 }
 
+//30Hz上限，20Hz为好
 void Referee_UI_Loop() {
     for (size_t i = 0; i < referee_ui_instances->cv_len; ++i) {
         referee_ui *obj = *((referee_ui **)cvector_val_at(referee_ui_instances, i));
         uint16_t graphic_num = 0;
         while (obj->elements->cq_len > 0) {
             graphic_cmd *now_cmd = circular_queue_front(obj->elements);
-            //如果是删除命令，特殊处理
-            if (now_cmd->delete_type != 0) {
+            if (now_cmd->delete_type != 0) {  //如果是删除命令，特殊处理
+                //如果之前有已经存入send_frame的图片，那就先发送完图片
                 if (graphic_num > 0) break;
                 obj->send_frame.header.data_length = 6 + 2;
                 obj->send_frame.header.CRC8 = CRC8_Modbus_calc(&obj->send_frame.header.SOF, 4, crc8_default);
@@ -232,8 +233,8 @@ void Referee_UI_Loop() {
                 uint16_t crc16_now = CRC16_Modbus_calc(&obj->send_frame.header.SOF, 7 + obj->send_frame.header.data_length, crc16_default);
                 memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
                 referee_send_ext(obj->config.referee, &obj->send_frame);
-            } else if (now_cmd->data.graphic_tpye == char_t) {
-                //字符特殊处理
+            } else if (now_cmd->data.graphic_tpye == char_t) {  //字符特殊处理
+                //如果之前有已经存入send_frame的图片，那就先发送完图片
                 if (graphic_num > 0) break;
                 obj->send_frame.header.data_length = 6 + 45;
                 obj->send_frame.header.CRC8 = CRC8_Modbus_calc(&obj->send_frame.header.SOF, 4, crc8_default);
