@@ -208,11 +208,12 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
         case DART_CILENT_CMD_T:
             memcpy(&obj->rx_data.dart_cilent_cmd, rx_pack->data, sizeof(obj->rx_data.dart_cilent_cmd));
             break;
-        case ROBOT_INTERACT_ID:
+        case ROBOT_INTERACT_ID:{
             // 机器人间通信接收
             uint16_t recv_len = rx_pack->header.data_length;
             memcpy(&obj->rx_data.interactve_data, rx_pack->data, recv_len);
             break;
+        }
         case ROBOT_EXT_CONTROL_ID:
             // 自定义控制器 暂无
             break;

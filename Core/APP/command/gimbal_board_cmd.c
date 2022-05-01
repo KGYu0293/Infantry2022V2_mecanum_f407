@@ -301,7 +301,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
                 *obj->pc->data_updated = 0;
             }
         } else {
-            static uint16_t target_lost_cnt = 10;
+            static int16_t target_lost_cnt = 10;
             if (*obj->pc->data_updated) {
                 *obj->pc->data_updated = 0;
                 // 自瞄开
