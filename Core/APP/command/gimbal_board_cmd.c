@@ -222,7 +222,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     }
     // z:底盘超限模式
     if (obj->remote->data.key_single_press_cnt.z != obj->remote->last_data.key_single_press_cnt.z) {
-        obj->chassis_climb_mode ^= 1; //反转状态
+        obj->chassis_climb_mode ^= 1;  //反转状态
     }
 
     // 自瞄模式
@@ -250,7 +250,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
 
     // 底盘控制参数
-    obj->send_data.if_consume_supercap = 0; //默认不要消耗电容电量
+    obj->send_data.if_consume_supercap = 0;  //默认不要消耗电容电量
     obj->send_data.chassis_target.vx = 0;
     obj->send_data.chassis_target.vy = 0;
     obj->send_data.chassis_target.rotate = 0;
@@ -268,7 +268,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     if (obj->remote->data.key_down.shift || obj->chassis_climb_mode) {
         obj->send_data.chassis_target.vx *= 2.0;
         obj->send_data.chassis_target.vy *= 2.0;
-        if(obj->chassis_climb_mode){
+        if (obj->chassis_climb_mode) {
             obj->send_data.chassis_target.vx *= 2.0;
             obj->send_data.chassis_target.vy *= 2.0;
         }
@@ -299,11 +299,14 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         } else {
             // 自瞄开
             // 计算真实yaw值
-            float yaw_target = obj->pc->pc_recv_data->yaw * 8192.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 8192.0;
-            if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] > pi) yaw_target -= 8192;
-            if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] < -pi) yaw_target += 8192;
-            obj->gimbal_control.yaw = yaw_target;
-            obj->gimbal_control.pitch = obj->pc->pc_recv_data->roll * 8192.0 / 2 / pi;  // 根据当前情况决定，pitch轴反馈为陀螺仪roll
+            if (obj->pc->data_updated) {
+                obj->pc->data_updated = 0;
+                float yaw_target = obj->pc->pc_recv_data->yaw * 8192.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 8192.0;
+                if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] > pi) yaw_target -= 8192;
+                if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] < -pi) yaw_target += 8192;
+                obj->gimbal_control.yaw = yaw_target;
+                obj->gimbal_control.pitch = obj->pc->pc_recv_data->roll * 8192.0 / 2 / pi;  // 根据当前情况决定，pitch轴反馈为陀螺仪roll
+            }
         }
     } else if (obj->gimbal_control.mode == gimbal_middle) {
         // 云台跟随底盘模式
