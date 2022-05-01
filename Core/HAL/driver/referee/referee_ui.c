@@ -105,9 +105,8 @@ graphic_data Float(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, u
     gd.start_x = start_x;
     gd.start_y = start_y;
     gd.start_angle = fontSize;
-    gd.radius = ((int32_t)(number * 1000)) >> 22;
-    gd.end_x = ((int32_t)(number * 1000)) >> 11;
-    gd.end_y = ((int32_t)(number * 1000));
+    int32_t float_num = number * 1000;
+    memcpy(((uint8_t*)&gd) + 11, &float_num, 4);
     return gd;
 }
 
@@ -124,9 +123,7 @@ graphic_data Int(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uin
     gd.start_angle = fontSize;
     gd.start_x = start_x;
     gd.start_y = start_y;
-    gd.radius = number >> 22;
-    gd.end_x = number >> 11;
-    gd.end_y = number;
+    memcpy(((uint8_t*)&gd) + 11, &number, 4);
     return gd;
 }
 
@@ -145,6 +142,14 @@ graphic_data Char(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, ui
     gd.start_x = start_x;
     gd.start_y = start_y;
     return gd;
+}
+
+void graphic_float_change(graphic_data* graphic, float number){
+    int32_t float_num = number * 1000;
+    memcpy(((uint8_t*)graphic) + 11, &float_num, 4);
+}
+void graphic_int_change(graphic_data* graphic, int number){
+    memcpy(((uint8_t*)graphic) + 11, &number, 4);
 }
 
 uint16_t Robot_Client_ID(uint16_t robotID) {
@@ -215,7 +220,7 @@ void referee_ui_add_cmd(referee_ui *obj, graphic_cmd *element) {
     }
 }
 
-//30Hz上限，20Hz为好
+// 30Hz上限，20Hz为好
 void Referee_UI_Loop() {
     for (size_t i = 0; i < referee_ui_instances->cv_len; ++i) {
         referee_ui *obj = *((referee_ui **)cvector_val_at(referee_ui_instances, i));
@@ -274,181 +279,3 @@ void Referee_UI_Loop() {
         }
     }
 }
-
-// //添加图片
-// void AddGraphic(UI *ui, graphic_config gc) {
-//     gd.operate_tpye = 1;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-// //修改图片
-// void ChangeGraphic(UI *ui, graphic_config gc) {
-//     gd.operate_tpye = 2;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-// //删除图层
-// void DeleteLayer(UI *ui, uint8_t layer) {
-//     graphic_config gc;
-//     memset(&gc, 0, sizeof(gc));
-//     layer = layer;
-//     status = 2;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-// //删除单个图片
-// void DeleteGraphic(UI *ui, uint8_t id, uint8_t isCharacter) {
-//     graphic_config gc;
-//     memset(&gc, 0, sizeof(gc));
-//     if (isCharacter) {
-//         char temp[30] = "";
-//         gc = Char(id, 0, 0, 0, 0, 0, 0, 0, temp);
-//     } else {
-//         gc = Circle(id, 0, 0, 0, 0, 0, 0);
-//     }
-//     gd.operate_tpye = 3;
-//     circular_queue_push(ui->DataQueue, &gc);
-// }
-/*************************************************************************************************/
-
-//内容ID匹配
-// void contentIDmatching(UI *ui) {
-//     if (ui->tp.Datatype == 0) {
-//         switch (ui->tp.num) {
-//             case 1:
-//                 ui->tp.contentID = 0x0101;
-//                 break;
-//             case 2:
-//                 ui->tp.contentID = 0x0102;
-//                 break;
-//             case 5:
-//                 ui->tp.contentID = 0x0103;
-//                 break;
-//             case 7:
-//                 ui->tp.contentID = 0x0104;
-//                 break;
-//             default:
-//                 return;
-//         }
-//     } else if (ui->tp.Datatype == 1)
-//         ui->tp.contentID = 0x0110;
-//     else if (ui->tp.Datatype == 2)
-//         ui->tp.contentID = 0x0100;
-// }
-
-// void GraphicDataPack(UI *ui) {
-//     memset(ui->tx_buff, 0, MAX_SIZE);
-//     //数据帧起始字节(固定)
-//     ui->tp.frameHeader.SOF = 0xA5;
-//     ui->tp.receiverID = IDmatching(ui->tp.senderID);
-//     //包序列处理
-//     if (ui->tp.frameHeader.seq == 0xff)
-//         ui->tp.frameHeader.seq = 0;
-//     else
-//         ui->tp.frameHeader.seq++;
-//     contentIDmatching(ui);
-//     ui->tp.cmd_id = 0x0301;
-//     ui->tx_buff[0] = ui->tp.frameHeader.SOF;
-//     ui->tx_buff[3] = ui->tp.frameHeader.seq;
-//     //非字符数据打包
-//     if (ui->tp.Datatype == 0) {
-//         //确定数据长度
-//         ui->tp.frameHeader.data_length = 2 + 2 + 2 + ui->tp.num * 15;
-//         memcpy(&ui->tx_buff[1], (uint8_t *)&ui->tp.frameHeader.data_length, sizeof(ui->tp.frameHeader.data_length));
-//         ui->tp.frameHeader.CRC8 = CRC8_Modbus_calc(ui->tx_buff, FRAMEHEADER_LEN, crc8_default);
-//         ui->tx_buff[4] = ui->tp.frameHeader.CRC8;
-//         memcpy(&ui->tx_buff[5], (uint8_t *)&ui->tp.cmd_id, 2);
-//         memcpy(&ui->tx_buff[7], (uint8_t *)&ui->tp.contentID, 2);
-//         memcpy(&ui->tx_buff[9], (uint8_t *)&ui->tp.senderID, 2);
-//         memcpy(&ui->tx_buff[11], (uint8_t *)&ui->tp.receiverID, 2);
-//         for (int i = 0; i < ui->tp.num; i++) {
-//             memcpy(&ui->tx_buff[13 + 15 * i], &ui->tp.gd[i], sizeof(graphic_data));
-//         }
-//     }
-//     //字符图片类型打包
-//     else if (ui->tp.Datatype == 1) {
-//         ui->tp.frameHeader.data_length = 51;  // 6+15+30
-//         memcpy(&ui->tx_buff[1], (uint8_t *)&ui->tp.frameHeader.data_length, sizeof(ui->tp.frameHeader.data_length));
-//         ui->tp.frameHeader.CRC8 = CRC8_Modbus_calc(ui->tx_buff, FRAMEHEADER_LEN, crc8_default);
-//         ui->tx_buff[4] = ui->tp.frameHeader.CRC8;
-//         memcpy(&ui->tx_buff[5], (uint8_t *)&ui->tp.cmd_id, 2);
-//         memcpy(&ui->tx_buff[7], (uint8_t *)&ui->tp.contentID, 2);
-//         memcpy(&ui->tx_buff[9], (uint8_t *)&ui->tp.senderID, 2);
-//         memcpy(&ui->tx_buff[11], (uint8_t *)&ui->tp.receiverID, 2);
-//         memcpy(&ui->tx_buff[13], &ui->tp.gd[0], sizeof(graphic_data));
-//         memcpy(&ui->tx_buff[11 + 15], &ui->tp.charData, sizeof(ui->tp.charData));
-//     }
-//     //删除图层命令打包
-//     else if (ui->tp.Datatype == 2) {
-//         ui->tp.frameHeader.data_length = 8;  // 6+1+1
-//         memcpy(&ui->tx_buff[1], (uint8_t *)&ui->tp.frameHeader.data_length, sizeof(ui->tp.frameHeader.data_length));
-//         ui->tp.frameHeader.CRC8 = CRC8_Modbus_calc(ui->tx_buff, FRAMEHEADER_LEN, crc8_default);
-//         ui->tx_buff[4] = ui->tp.frameHeader.CRC8;
-//         memcpy(&ui->tx_buff[5], (uint8_t *)&ui->tp.cmd_id, 2);
-//         memcpy(&ui->tx_buff[7], (uint8_t *)&ui->tp.contentID, 2);
-//         memcpy(&ui->tx_buff[9], (uint8_t *)&ui->tp.senderID, 2);
-//         memcpy(&ui->tx_buff[11], (uint8_t *)&ui->tp.receiverID, 2);
-//         //删除图层,1表示删除图,2表示删除所有
-//         ui->tx_buff[13] = 1;
-//         //图层信息
-//         ui->tx_buff[14] = ui->tp.gd[0].layer;
-//     }
-//     ui->tp.CRC16 = CRC16_Modbus_calc(ui->tx_buff, FRAMEHEADER_LEN + ui->tp.frameHeader.data_length + CMD_LEN + CRC16_LEN, crc16_default);
-//     memcpy(&ui->tx_buff[FRAMEHEADER_LEN + ui->tp.frameHeader.data_length + CMD_LEN - 1], (uint8_t *)&ui->tp.CRC16, CRC16_LEN);
-// }
-
-// int SelectDataLength(int num) {
-//     switch (num) {
-//         case 0:
-//             return -1;
-//         case 1:
-//             return 1;
-//         case 2:
-//             return 2;
-//         case 3:
-//             return 2;
-//         case 4:
-//             return 2;
-//         case 5:
-//             return 5;
-//         case 6:
-//             return 5;
-//         case 7:
-//             return 7;
-//     }
-// }
-
-//放在10Hz循环中
-// void UISendData(UI *ui) {
-//     if (ui->DataQueue->cq_len == 0) return;
-//     int number = 0;
-//     //判断队列前几个图片是什么类型
-//     for (int i = 0; i < ui->DataQueue->cq_len; i++) {
-//         graphic_config *gc = (graphic_config *)(circular_queue_front(ui->DataQueue) + sizeof(graphic_config) * i);
-//         if (gc->status == 1 || gc->status == 2 || i == 7) {
-//             break;
-//         }
-//         number++;
-//     }
-//     //根据图片类型的不同做出判断
-//     if (SelectDataLength(number) != -1) {
-//         ui->tp.num = SelectDataLength(number);
-//         ui->tp.Datatype = 0;
-//         for (int i = 0; i < ui->tp.num; i++) {
-//             graphic_config *gc = (graphic_config *)circular_queue_pop(ui->DataQueue);
-//             ui->tp.gd[i] = gc->gd;
-//         }
-//         GraphicDataPack(ui);
-//     } else {
-//         graphic_config *gc = (graphic_config *)circular_queue_pop(ui->DataQueue);
-//         if (gc->status == 1) {
-//             ui->tp.num = 1;
-//             ui->tp.Datatype = 1;
-//             ui->tp.gd[0] = gc->gd;
-//             GraphicDataPack(ui);
-//         } else if (gc->status == 2) {
-//             ui->tp.num = 1;
-//             ui->tp.Datatype = 2;
-//             ui->tp.gd[0] = gc->gd;
-//             GraphicDataPack(ui);
-//         }
-//     }
-//     BSP_UART_Send_DMA(ui->config.bsp_uart_index, ui->tx_buff, FRAMEHEADER_LEN + ui->tp.frameHeader.data_length + CMD_LEN + CRC16_LEN);
-// }

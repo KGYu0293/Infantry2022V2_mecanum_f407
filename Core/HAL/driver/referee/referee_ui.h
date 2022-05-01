@@ -50,8 +50,8 @@ typedef struct graphic_data_t {
 #pragma pack()
 
 /*
-UI的逻辑是，在上层应用中标记图形元素为modified，HAL层referee_ui对象自动管理并发送
-referee_ui对象只有 管理数据发送/图形创建工具函数 等基础功能
+HAL层referee_ui对象自动管理graphic_cmd并发送
+referee_ui只有 管理数据发送/图形创建工具函数 等基础功能
 */
 typedef struct graphic_cmd_t {
     graphic_data data;
@@ -89,4 +89,6 @@ graphic_data Float(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, u
 graphic_data Int(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t fontSize, uint32_t start_x, uint32_t start_y, int number);
 graphic_data Char(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t fontSize, uint32_t ChLength, uint32_t start_x, uint32_t start_y);
 
+void graphic_float_change(graphic_data* graphic, float number);
+void graphic_int_change(graphic_data* graphic, int number);
 #endif
