@@ -1,4 +1,6 @@
 #include "referee_ui.h"
+
+#include "soft_crc.h"
 #define FRAMEHEADER_LEN 5
 #define CMD_LEN 2
 #define CRC16_LEN 2
@@ -197,22 +199,78 @@ referee_ui *referee_ui_create(referee_ui_config *config) {
     referee_ui *obj = (referee_ui *)malloc(sizeof(referee_ui));
     memset(obj, 0, sizeof(referee_ui));
     obj->config = *config;
-    obj->elements = cvector_create(sizeof(graphic_data));
+    obj->elements = create_circular_queue(sizeof(graphic_cmd), 30);  //最多30个待发送的数据
     obj->send_frame.data_header.sender_ID = config->robot_id;
     obj->send_frame.data_header.receiver_ID = Robot_Client_ID(config->robot_id);
     obj->send_frame.header.SOF = 0xA5;
     obj->send_frame.header.seq = 0;
+    obj->send_frame.cmd_id = 0x301;
     cvector_pushback(referee_ui_instances, &obj);
     return obj;
 }
 
-//空图形数据
-graphic_data empty_data;
+void referee_ui_add_cmd(referee_ui *obj, graphic_cmd *element) {
+    if (obj->elements->cq_len != obj->elements->cq_max_len) {
+        circular_queue_push(obj->elements, element);
+    }
+}
 
 void Referee_UI_Loop() {
     for (size_t i = 0; i < referee_ui_instances->cv_len; ++i) {
         referee_ui *obj = *((referee_ui **)cvector_val_at(referee_ui_instances, i));
-
+        uint16_t graphic_num = 0;
+        while (obj->elements->cq_len > 0) {
+            graphic_cmd *now_cmd = circular_queue_front(obj->elements);
+            //如果是删除命令，特殊处理
+            if (now_cmd->delete_type != 0) {
+                if (graphic_num > 0) break;
+                obj->send_frame.header.data_length = 6 + 2;
+                obj->send_frame.header.CRC8 = CRC8_Modbus_calc(&obj->send_frame.header.SOF, 4, crc8_default);
+                obj->send_frame.data_header.data_cmd_id = 0x0100;
+                obj->send_frame.data[0] = now_cmd->delete_type;
+                obj->send_frame.data[1] = now_cmd->delete_layer;
+                uint16_t crc16_now = CRC16_Modbus_calc(&obj->send_frame.header.SOF, 7 + obj->send_frame.header.data_length, crc16_default);
+                memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
+                referee_send_ext(obj->config.referee, &obj->send_frame);
+            } else if (now_cmd->data.graphic_tpye == char_t) {
+                //字符特殊处理
+                if (graphic_num > 0) break;
+                obj->send_frame.header.data_length = 6 + 45;
+                obj->send_frame.header.CRC8 = CRC8_Modbus_calc(&obj->send_frame.header.SOF, 4, crc8_default);
+                obj->send_frame.data_header.data_cmd_id = 0x0110;
+                memcpy(obj->send_frame.data, &now_cmd->data, sizeof(graphic_data));
+                memcpy(obj->send_frame.data + sizeof(graphic_data), now_cmd->textdata, 30);
+                uint16_t crc16_now = CRC16_Modbus_calc(&obj->send_frame.header.SOF, 7 + obj->send_frame.header.data_length, crc16_default);
+                memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
+                referee_send_ext(obj->config.referee, &obj->send_frame);
+            } else {
+                //凑够7个或者直到为空
+                memcpy(obj->send_frame.data + graphic_num * sizeof(graphic_data), &now_cmd->data, sizeof(graphic_data));
+                ++graphic_num;
+                if (graphic_num == 7) break;
+            }
+        }
+        if (graphic_num > 0) {
+            //没有图片的部分全部设置为0
+            memset(obj->send_frame.data + graphic_num * sizeof(graphic_data), 0, sizeof(graphic_data) * (7 - graphic_num));
+            if (graphic_num > 5) {
+                obj->send_frame.header.data_length = 6 + 105;
+                obj->send_frame.data_header.data_cmd_id = 0x0104;
+            } else if (graphic_num > 2) {
+                obj->send_frame.header.data_length = 6 + 75;
+                obj->send_frame.data_header.data_cmd_id = 0x0103;
+            } else if (graphic_num > 1) {
+                obj->send_frame.header.data_length = 6 + 30;
+                obj->send_frame.data_header.data_cmd_id = 0x0102;
+            } else {
+                obj->send_frame.header.data_length = 6 + 15;
+                obj->send_frame.data_header.data_cmd_id = 0x0101;
+            }
+            obj->send_frame.header.CRC8 = CRC8_Modbus_calc(&obj->send_frame.header.SOF, 4, crc8_default);
+            uint16_t crc16_now = CRC16_Modbus_calc(&obj->send_frame.header.SOF, 7 + obj->send_frame.header.data_length, crc16_default);
+            memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
+            referee_send_ext(obj->config.referee, &obj->send_frame);
+        }
     }
 }
 

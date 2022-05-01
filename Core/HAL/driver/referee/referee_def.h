@@ -289,7 +289,7 @@ typedef struct {
 */
 //通用机器人间通信接收结构体
 typedef struct ext_robot_interactive_data_t {
-    ext_student_interactive_header header;
+    ext_student_interactive_header data_header;
     uint8_t data[REFEREE_PACK_INTER_LEN_DATA_MAX];
 } ext_robot_interactive_data;
 
@@ -313,13 +313,12 @@ typedef struct {
 
 //自定义交互数据发送结构体，机器人间交互以及UI发送都用这个
 typedef struct ext_robot_interact_frame_t {
-    frame_header header;                         //总包头
-    uint16_t cmd_id;                             //指令
-    ext_student_interactive_header data_header;  //交互专用数据段包头
-    uint8_t data[REFEREE_PACK_MAX_SIZE];         //数据内容 （包含最后两位crc16校验）
+    frame_header header;                            //总包头
+    uint16_t cmd_id;                                //指令
+    ext_student_interactive_header data_header;     //交互专用数据段包头
+    uint8_t data[128];  //数据内容 （包含最后两位crc16校验）
 } ext_robot_interact_frame;
 
 // 成对使用，用以代替特有的typedef __packed struct写法
 #pragma pack()
-
 #endif

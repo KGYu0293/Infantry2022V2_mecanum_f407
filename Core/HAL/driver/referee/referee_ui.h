@@ -1,6 +1,8 @@
+#ifndef _REFEREE_UI_H
+#define _REFEREE_UI_H
+#include "circular_queue.h"
 #include "referee.h"
 #include "referee_def.h"
-
 #pragma pack(1)
 
 //颜色
@@ -51,27 +53,40 @@ typedef struct graphic_data_t {
 UI的逻辑是，在上层应用中标记图形元素为modified，HAL层referee_ui对象自动管理并发送
 referee_ui对象只有 管理数据发送/图形创建工具函数 等基础功能
 */
-typedef struct graphic_element_t {
+typedef struct graphic_cmd_t {
     graphic_data data;
-    char* textdata;
-    uint8_t modified;  //标志位，表示该图形元素待发送，发送完成后自动置位为0
-} graphic_element;
+    uint8_t textdata[30];
+    uint8_t delete_type;
+    uint8_t delete_layer;
+} graphic_cmd;
 
 typedef struct referee_ui_config_t {
-    referee* referee; //referee_ui 依赖referee对象
+    Referee* referee;  // referee_ui 依赖referee对象
     uint16_t robot_id;
 } referee_ui_config;
 
 typedef struct referee_ui_t {
-    cvector* elements;  //图形元素
+    circular_queue* elements;  //待发送的图形元素
     referee_ui_config config;
     ext_robot_interact_frame send_frame;
 } referee_ui;
 
-// 10Hz调用该函数
+// 20Hz调用该函数
 void Referee_UI_Loop();
 
 void Referee_UI_driver_Init();
 referee_ui* referee_ui_create(referee_ui_config* config);
-// 注册图形元素
-void referee_ui_register_element(referee_ui* obj, graphic_element* element);
+// 放入图形命令
+void referee_ui_add_cmd(referee_ui* obj, graphic_cmd* element);
+
+// 绘图工具函数
+graphic_data Line(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t start_x, uint32_t start_y, uint32_t end_x, uint32_t end_y);
+graphic_data Rectangle(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t start_x, uint32_t start_y, uint32_t end_x, uint32_t end_y);
+graphic_data Circle(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t x, uint32_t y, uint32_t radius);
+graphic_data Oval(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t x_center, uint32_t y_center, uint32_t x_halfAxis, uint32_t y_halfAxis);
+graphic_data Arc(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t start_angle, uint32_t end_angle, uint32_t x_center, uint32_t y_center, uint32_t x_halfAxis, uint32_t y_halfAxis);
+graphic_data Float(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t fontSize, uint32_t SignificantDigits, uint32_t start_x, uint32_t start_y, float number);
+graphic_data Int(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t fontSize, uint32_t start_x, uint32_t start_y, int number);
+graphic_data Char(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uint32_t fontSize, uint32_t ChLength, uint32_t start_x, uint32_t start_y);
+
+#endif
