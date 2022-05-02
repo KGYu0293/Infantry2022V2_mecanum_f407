@@ -2,7 +2,7 @@
 #include <bsp_time.h>
 #include <referee_ui.h>
 #include <robot_ui.h>
-// 3s刷新一次
+// 2s刷新一次
 #define UI_REFRESH_INTERVAL 2000
 //添加图形元素
 void Robot_UI_AddElements(robot_ui* obj) {
