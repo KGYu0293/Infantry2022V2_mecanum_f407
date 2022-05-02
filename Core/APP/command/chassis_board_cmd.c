@@ -27,7 +27,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
 
     //蜂鸣器配置
     buzzer_config internal_buzzer_config;
-    uint32_t music_id = 1;
+    uint32_t music_id = 7;
     internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
@@ -91,6 +91,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
             ui_config.referee = obj->referee;
             ui_config.robot_id = obj->referee->rx_data.game_robot_state.robot_id;
             obj->ui = Create_Robot_UI(&ui_config);
+            obj->referee->robot_status_received = 2;
         }
     } else {
         obj->mode = robot_stop;

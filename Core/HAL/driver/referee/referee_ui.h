@@ -91,4 +91,13 @@ graphic_data Char(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, ui
 
 void graphic_float_change(graphic_data* graphic, float number);
 void graphic_int_change(graphic_data* graphic, int number);
+// 添加图形命令
+void add_graphic(referee_ui* obj, graphic_data* graphic);
+// 添加字符串命令
+void add_text(referee_ui* obj, graphic_data* graphic, char* s, uint8_t len);
+
+// 修改图形命令
+void modifiy_graphic(referee_ui* obj, graphic_data* graphic);
+// 修改字符串命令
+void modifiy_text(referee_ui* obj, graphic_data* graphic, char* s, uint8_t len);
 #endif

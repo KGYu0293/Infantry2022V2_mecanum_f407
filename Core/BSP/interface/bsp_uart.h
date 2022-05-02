@@ -18,4 +18,5 @@ void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len);
 void BSP_UART_Send_queue(uint8_t uart_index, uint8_t *data, uint16_t len);
 // DMA接收处理
 void BSP_UART_IRQHandler(UART_HandleTypeDef *huart);
+
 #endif

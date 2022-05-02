@@ -144,12 +144,52 @@ graphic_data Char(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, ui
     return gd;
 }
 
-void graphic_float_change(graphic_data* graphic, float number){
+void graphic_float_change(graphic_data* graphic, float number) {
     int32_t float_num = number * 1000;
     memcpy(((uint8_t*)graphic) + 11, &float_num, 4);
 }
-void graphic_int_change(graphic_data* graphic, int number){
+void graphic_int_change(graphic_data* graphic, int number) {
     memcpy(((uint8_t*)graphic) + 11, &number, 4);
+}
+
+// 添加图形命令
+void add_graphic(referee_ui* obj, graphic_data* graphic) {
+    graphic_cmd tmp;
+    tmp.data = *graphic;
+    tmp.delete_type = 0;
+    tmp.data.operate_tpye = 1;  //添加
+    referee_ui_add_cmd(obj, &tmp);
+}
+// 添加字符串命令
+void add_text(referee_ui* obj, graphic_data* graphic, char* s, uint8_t len) {
+    graphic_cmd tmp;
+    tmp.data = *graphic;
+    tmp.delete_type = 0;
+    tmp.data.operate_tpye = 1;  //添加
+    tmp.data.end_angle = len;
+    memset(tmp.textdata, 0, 30);
+    memcpy(tmp.textdata, s, len);
+    referee_ui_add_cmd(obj, &tmp);
+}
+
+// 修改图形命令
+void modifiy_graphic(referee_ui* obj, graphic_data* graphic) {
+    graphic_cmd tmp;
+    tmp.data = *graphic;
+    tmp.delete_type = 0;
+    tmp.data.operate_tpye = 2;  //修改
+    referee_ui_add_cmd(obj, &tmp);
+}
+// 修改字符串命令
+void modifiy_text(referee_ui* obj, graphic_data* graphic, char* s, uint8_t len) {
+    graphic_cmd tmp;
+    tmp.data = *graphic;
+    tmp.delete_type = 0;
+    tmp.data.operate_tpye = 2;  //修改
+    tmp.data.end_angle = len;
+    memset(tmp.textdata, 0, 30);
+    memcpy(tmp.textdata, s, len);
+    referee_ui_add_cmd(obj, &tmp);
 }
 
 uint16_t Robot_Client_ID(uint16_t robotID) {
@@ -195,16 +235,16 @@ uint16_t Robot_Client_ID(uint16_t robotID) {
     return receiverID_client;
 }
 
-cvector *referee_ui_instances;
+cvector* referee_ui_instances;
 void Referee_UI_driver_Init() {
-    referee_ui_instances = cvector_create(sizeof(referee_ui *));
+    referee_ui_instances = cvector_create(sizeof(referee_ui*));
 }
 
-referee_ui *referee_ui_create(referee_ui_config *config) {
-    referee_ui *obj = (referee_ui *)malloc(sizeof(referee_ui));
+referee_ui* referee_ui_create(referee_ui_config* config) {
+    referee_ui* obj = (referee_ui*)malloc(sizeof(referee_ui));
     memset(obj, 0, sizeof(referee_ui));
     obj->config = *config;
-    obj->elements = create_circular_queue(sizeof(graphic_cmd), 30);  //最多30个待发送的数据
+    obj->elements = create_circular_queue(sizeof(graphic_cmd), 60);  //最多60个待发送的数据
     obj->send_frame.data_header.sender_ID = config->robot_id;
     obj->send_frame.data_header.receiver_ID = Robot_Client_ID(config->robot_id);
     obj->send_frame.header.SOF = 0xA5;
@@ -214,19 +254,20 @@ referee_ui *referee_ui_create(referee_ui_config *config) {
     return obj;
 }
 
-void referee_ui_add_cmd(referee_ui *obj, graphic_cmd *element) {
+void referee_ui_add_cmd(referee_ui* obj, graphic_cmd* element) {
     if (obj->elements->cq_len != obj->elements->cq_max_len) {
         circular_queue_push(obj->elements, element);
     }
 }
 
 // 30Hz上限，20Hz为好
+// 测试发现50Hz能较好的解决丢包问题
 void Referee_UI_Loop() {
     for (size_t i = 0; i < referee_ui_instances->cv_len; ++i) {
-        referee_ui *obj = *((referee_ui **)cvector_val_at(referee_ui_instances, i));
+        referee_ui* obj = *((referee_ui**)cvector_val_at(referee_ui_instances, i));
         uint16_t graphic_num = 0;
         while (obj->elements->cq_len > 0) {
-            graphic_cmd *now_cmd = circular_queue_front(obj->elements);
+            graphic_cmd* now_cmd = circular_queue_front(obj->elements);
             if (now_cmd->delete_type != 0) {  //如果是删除命令，特殊处理
                 //如果之前有已经存入send_frame的图片，那就先发送完图片
                 if (graphic_num > 0) break;
@@ -238,6 +279,7 @@ void Referee_UI_Loop() {
                 uint16_t crc16_now = CRC16_Modbus_calc(&obj->send_frame.header.SOF, 7 + obj->send_frame.header.data_length, crc16_default);
                 memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
                 referee_send_ext(obj->config.referee, &obj->send_frame);
+                circular_queue_pop(obj->elements);
             } else if (now_cmd->data.graphic_tpye == char_t) {  //字符特殊处理
                 //如果之前有已经存入send_frame的图片，那就先发送完图片
                 if (graphic_num > 0) break;
@@ -249,9 +291,11 @@ void Referee_UI_Loop() {
                 uint16_t crc16_now = CRC16_Modbus_calc(&obj->send_frame.header.SOF, 7 + obj->send_frame.header.data_length, crc16_default);
                 memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
                 referee_send_ext(obj->config.referee, &obj->send_frame);
+                circular_queue_pop(obj->elements);
             } else {
                 //凑够7个或者直到为空
                 memcpy(obj->send_frame.data + graphic_num * sizeof(graphic_data), &now_cmd->data, sizeof(graphic_data));
+                circular_queue_pop(obj->elements);
                 ++graphic_num;
                 if (graphic_num == 7) break;
             }
