@@ -75,12 +75,12 @@ void Gimbal_Update(Gimbal *gimbal) {
     }
 
     // 反馈yaw编码器信息以及云台imu是否正常工作
-    publish_data gimbal_uplode;
+    publish_data gimbal_upload;
     gimbal->gimbal_upload_data.yaw_encorder = &(gimbal->yaw->fdbPosition);
     gimbal->gimbal_upload_data.gimbal_imu = &(gimbal->imu->data);
-    gimbal_uplode.data = (uint8_t *)&(gimbal->gimbal_upload_data);
-    gimbal_uplode.len = sizeof(Upload_gimbal);
-    gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_uplode);
+    gimbal_upload.data = (uint8_t *)&(gimbal->gimbal_upload_data);
+    gimbal_upload.len = sizeof(Upload_gimbal);
+    gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_upload);
 
     // 模块控制
     switch (gimbal->cmd_data->mode) {
