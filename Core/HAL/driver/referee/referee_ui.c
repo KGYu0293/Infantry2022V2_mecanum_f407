@@ -1,5 +1,4 @@
 #include "referee_ui.h"
-
 #include "soft_crc.h"
 #define FRAMEHEADER_LEN 5
 #define CMD_LEN 2
@@ -260,7 +259,7 @@ void referee_ui_add_cmd(referee_ui* obj, graphic_cmd* element) {
     }
 }
 
-// 30Hz上限，20Hz为好
+// 30Hz上限
 // 测试发现50Hz能较好的解决丢包问题
 void Referee_UI_Loop() {
     for (size_t i = 0; i < referee_ui_instances->cv_len; ++i) {

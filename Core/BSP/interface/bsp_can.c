@@ -15,12 +15,9 @@
  */
 #include "bsp_can.h"
 
+#include "bsp_def.h"
 #include "can.h"
 #include "cvector.h"
-
-#define DEVICE_CAN_CNT 2  //主控共使用（拥有）的can总线数量
-#define ID_MAX 0x07FF
-#define ID_NOTSET 0x800  //未使用过滤器时的填充值
 
 typedef struct BSP_CanTypeDef_t {
     CAN_HandleTypeDef *device;  //自定义总线编号
@@ -66,7 +63,8 @@ void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
     txconf.IDE = CAN_ID_STD;
     txconf.RTR = CAN_RTR_DATA;
     txconf.DLC = len;
-    while(HAL_CAN_GetTxMailboxesFreeLevel(can_devices[can_id].device) == 0);
+    while (HAL_CAN_GetTxMailboxesFreeLevel(can_devices[can_id].device) == 0)
+        ;
     HAL_CAN_AddTxMessage(can_devices[can_id].device, &txconf, data,
                          &can_devices[can_id].tx_mailbox);
 }

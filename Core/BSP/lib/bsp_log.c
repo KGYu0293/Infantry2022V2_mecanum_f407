@@ -2,8 +2,8 @@
 
 #include "SEGGER_RTT.h"
 #include "SEGGER_RTT_Conf.h"
+#include "bsp_def.h"
 #include "stdio.h"
-#define BUFFER_INDEX 0
 
 void BSP_Log_Init() { SEGGER_RTT_Init(); }
 

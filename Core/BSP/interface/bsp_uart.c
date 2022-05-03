@@ -1,33 +1,23 @@
 #include "bsp_uart.h"
 
-#include "bsp_log.h"
-#include "circular_queue.h"
+#include "bsp_def.h"
 #include "cvector.h"
-#define DEVICE_UART_CNT 2
-#define BSP_UART_DMA_BUFF_SIZE 255  // DMA缓冲区大小，一次传输数据不应超过该长度
-
-typedef struct BSP_UART_SendMsg_t {
-    uint8_t *data;
-    uint16_t len;
-} BSP_UART_SendMsg;
 
 typedef struct BSP_UART_Typedef_t {
     UART_HandleTypeDef *port;  //自定义uart编号
     cvector *call_backs;
-    circular_queue *send_queue;
+
     uint8_t rx_buff[BSP_UART_DMA_BUFF_SIZE];  // DMA接收数组，为了存放DMA搬运的串口数据
 } BSP_UART_Typedef;
 
 BSP_UART_Typedef uart_ports[DEVICE_UART_CNT];
 
 void BSP_UART_Init() {
-    uart_ports[0].port = &huart3;
-    uart_ports[1].port = &huart6;
+    uart_ports[0].port = UART_0_PORT;
+    uart_ports[1].port = UART_1_PORT;
 
     for (size_t i = 0; i < DEVICE_UART_CNT; ++i) {
         uart_ports[i].call_backs = cvector_create(sizeof(uart_rx_callback));
-        //队列最大长度为10
-        uart_ports[i].send_queue = create_circular_queue(sizeof(BSP_UART_SendMsg), 10);
         // HAL库的BUG处理，对于DMA需要先DeInit再Init，不然GG
         HAL_DMA_DeInit(uart_ports[i].port->hdmatx);
         HAL_DMA_DeInit(uart_ports[i].port->hdmarx);
@@ -36,8 +26,6 @@ void BSP_UART_Init() {
         HAL_UART_DMAStop(uart_ports[i].port);
         //使能串口空闲中断
         __HAL_UART_ENABLE_IT(uart_ports[i].port, UART_IT_IDLE);  //使能串口空闲中断
-        //使能串口传输完成中断
-        __HAL_UART_ENABLE_IT(uart_ports[i].port, UART_IT_TC);  //使能串口传输完成中断
         //开启DMA接收
         HAL_UART_Receive_DMA(uart_ports[i].port, uart_ports[i].rx_buff, BSP_UART_DMA_BUFF_SIZE);
     }
@@ -50,6 +38,7 @@ void BSP_UART_RegisterRxCallback(uint8_t uart_index, uart_rx_callback func) { cv
 void BSP_UART_Send_blocking(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit(uart_ports[uart_index].port, data, len, 20); }
 void BSP_UART_Send_IT(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_IT(uart_ports[uart_index].port, data, len); }
 void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len) { HAL_UART_Transmit_DMA(uart_ports[uart_index].port, data, len); }
+
 // 空闲中断
 void BSP_UART_IDLECallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
     //判断是否是空闲中断

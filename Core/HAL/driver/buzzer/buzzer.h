@@ -1,7 +1,7 @@
 #ifndef _BUZZER_H
 #define _BUZZER_H
-#include "bsp_pwm.h"
-
+#include "stdint.h"
+#include "stdlib.h"
 typedef struct buzzer_config_t{
     uint16_t* music;
     uint16_t len;

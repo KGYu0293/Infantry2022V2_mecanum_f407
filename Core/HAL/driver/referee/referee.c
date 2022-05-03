@@ -1,6 +1,6 @@
 #include "referee.h"
 
-#include "bsp_log.h"
+#include "bsp.h"
 #include "cvector.h"
 
 cvector *referee_instances;

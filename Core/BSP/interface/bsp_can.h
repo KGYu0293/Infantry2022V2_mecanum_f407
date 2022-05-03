@@ -1,7 +1,6 @@
 #ifndef _BSP_CAN_H
 #define _BSP_CAN_H
 #include "stdint.h"
-#define FILTER_MAX_CNT (4 * 14)
 
 typedef void (*can_rx_callback)(uint8_t can_id, uint32_t identifier, uint8_t* data,
                                 uint32_t len);

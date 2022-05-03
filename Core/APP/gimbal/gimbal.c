@@ -1,5 +1,5 @@
 #include "gimbal.h"
-
+#include "bsp.h"
 // 云台水平并朝向底盘正前方时云台和底盘的编码器值
 #define PITCH_MOTOR_ENCORDER_BIAS 841
 #define YAW_MOTOR_ENCORDER_BIAS 3153

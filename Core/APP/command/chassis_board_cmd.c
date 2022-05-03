@@ -1,4 +1,5 @@
 #include "chassis_board_cmd.h"
+#include "bsp.h"
 
 // monitor处理函数
 void chassis_core_module_lost(void* obj) {

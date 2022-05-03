@@ -1,5 +1,5 @@
 #include "gimbal_board_cmd.h"
-
+#include "bsp.h"
 #define INIT_FORWARD 3152  // 云台朝向底盘正前时云台yaw编码器值
 // monitor处理函数
 void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!robot stopped for security.\n"); }
