@@ -67,6 +67,8 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     }
     PID_Init(&obj->speed_pid, &obj->config.config_speed);
     PID_Init(&obj->position_pid, &obj->config.config_position);
+    ADRC_Init(&obj->adrc_speed, &obj->config.adrc_config_speed);
+    ADRC_Init(&obj->adrc_position, &obj->config.adrc_config_position);
     obj->monitor = Monitor_Register(obj->config.lost_callback, 5, obj);
 
     obj->enable = MOTOR_STOP;
@@ -128,12 +130,16 @@ void Can_Motor_Calc_Send() {
                 if (obj->config.motor_pid_model == POSITION_LOOP) {
                     if (obj->config.position_fdb_model == OTHER_FDB) {
                         obj->position_pid.fdb = *obj->config.position_pid_fdb;
+                        obj->adrc_position.prog.fdb = *obj->config.position_pid_fdb;
                     }
                     if (obj->config.position_fdb_model == MOTOR_FDB) {
                         obj->position_pid.fdb = obj->real_position;
+                        obj->adrc_position.prog.fdb = obj->real_position;
                     }
                     PID_Calc(&obj->position_pid);
+                    ADRCFunction(&obj->adrc_position);
                     obj->speed_pid.ref = obj->position_pid.output;
+                    obj->adrc_speed.prog.ref = obj->adrc_position.prog.output;
                 }
                 if (obj->config.motor_pid_model >= SPEED_LOOP) {
                     if (obj->config.speed_fdb_model == OTHER_FDB) {
@@ -143,7 +149,9 @@ void Can_Motor_Calc_Send() {
                         obj->speed_pid.fdb = obj->velocity;
                     }
                     PID_Calc(&obj->speed_pid);
-                    obj->current_output = obj->speed_pid.output;
+                    ADRCFunction(&obj->adrc_speed);
+                    // obj->current_output = obj->speed_pid.output;
+                    obj->current_output = obj->adrc_speed.prog.output;
                 }
                 buf[id] = obj->current_output;
                 if (obj->config.output_model == MOTOR_OUTPUT_REVERSE) buf[id] *= -1;
@@ -153,7 +161,7 @@ void Can_Motor_Calc_Send() {
             }
             // 如果此标识符(identifier)对应的四个电机里至少有一个被注册，就发送这个标识符的报文，如果全部没有被注册，则这个标识符无需发送
             if (identifier_send) {
-                Can_Motor_Send(can_index, identifiers[identifier], buf[0], buf[1], buf[2], buf[3]);
+                // Can_Motor_Send(can_index, identifiers[identifier], buf[0], buf[1], buf[2], buf[3]);
             }
         }
     }

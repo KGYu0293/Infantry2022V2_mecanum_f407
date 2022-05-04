@@ -3,14 +3,27 @@
  * @brief          : ADRC算法实现
  * @Author         : 李鸣航
  * @Date           : 2022-04-09 14:48
- * @LastEditTime   : 2022-04-28 17:36
+ * @LastEditTime   : 2022-05-04 11:04
  * @Note           : 使用该算法之前请务必阅读说明文档，禁止随意调参
  * @Copyright(c)   : 哈尔滨工业大学（深圳）南工骁鹰机器人队版权所有 Critical HIT copyrighted
  */
 
 #include "adrc.h"
 
+#include <string.h>
+
 #include "math.h"
+
+/**
+ * @brief      :浮点数限幅函数
+ * @attention  :无
+ * @param {float} amt 要比较的值
+ * @param {float} low 下限
+ * @param {float} high 上限
+ */
+float ConstrainFloat(float amt, float low, float high) {
+    return ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)));
+}
 
 /**
  * @brief      :符号函数，x大于0时返回1，x小于0时返回-1，x等于0时返回0
@@ -21,12 +34,22 @@
  * @param {float} x 需要判断的变量
  */
 int sgn(float x) {
-    if (x > 0)
+    if (x > 1E-6)
         return 1;
-    else if (x < 0)
+    else if (x < 1E-6)
         return -1;
     else
         return 0;
+}
+
+/**
+ * @brief      :二维符号函数
+ * @attention  :无
+ * @param {float} x 输入1
+ * @param {float} d 输入2
+ */
+int fsg(float x, float d) {
+    return ((sgn(x + d) - sgn(x - d)) / 2);
 }
 
 /**
@@ -59,27 +82,20 @@ float fal(float e, float a, float delta) {
  *  2. r为速度因子，决定跟踪速度，r越大，快速性越好，但大的r容易引起超调和振荡
  *  3. h为滤波因子，h越大，静态误差越小，刚开始带来的“超调”越小，初始的误差越小；但会导致上升过慢，快速性不好，一般取步长的2倍
  * @return  {float} 输出跟踪的微分信号
- * @param {float} x1 误差输入信号
+ * @param {float} x1_delta 误差输入信号
  * @param {float} x2 误差的微分信号
  * @param {float} r 速度因子
- * @param {float} h 滤波因子
+ * @param {float} h0 滤波因子
  */
-float fst(float x1, float x2, float r, float h) {
-    float d, d0, y, a0, a;
-    d = r * h;
-    d0 = d * h;
-    y = x1 + h * x2;
-    a0 = sqrt(d * d + 8 * r * fabs(y));
-    if (fabs(y) > d0) {
-        a = x2 + 0.5 * (a0 - d);
-    } else {
-        a = x2 + y / h;
-    }
-    if (fabs(a) <= d) {
-        return (-r * a / d);
-    } else {
-        return (-r * sgn(a));
-    }
+float fst(float x1_delta, float x2, float r, float h0) {
+    float d, y, a0, a, a1, a2, a3;
+    d = r * h0 * h0;
+    a0 = h0 * x2;
+    y = x1_delta + a0;
+    a1 = sqrt(d * (d + 8 * fabs(y)));
+    a2 = a0 + sgn(y) * (a1 - d) / 2;
+    a = (a0 + y) * fsg(y, d) + a2 * (1 - fsg(y, d));
+    return (-r * (a / d) * fsg(a, d) - r * sgn(a) * (1 - fsg(a, d)));
 }
 
 /**
@@ -92,8 +108,10 @@ void TDFunction(ADRC_t* adrc_data) {
     float last_v1, last_v2;
     last_v1 = adrc_data->prog.v1;
     last_v2 = adrc_data->prog.v2;
-    adrc_data->prog.v1 = last_v1 + adrc_data->td.h * last_v2;
-    adrc_data->prog.v2 = last_v2 + adrc_data->td.h * fst(last_v1 - adrc_data->prog.v0, last_v2, adrc_data->td.r, adrc_data->td.h0);
+    adrc_data->prog.v1 = last_v1 + adrc_data->adrc_config.td.h * last_v2;
+    adrc_data->prog.v2 = last_v2 + adrc_data->adrc_config.td.h *
+                                       fst(last_v1 - adrc_data->prog.ref, last_v2,
+                                           adrc_data->adrc_config.td.r, adrc_data->adrc_config.td.h0);
 }
 /**
  * @brief      : 非线性反馈
@@ -102,8 +120,10 @@ void TDFunction(ADRC_t* adrc_data) {
  * @param {ADRC_t*} adrc_data adrc数据结构体
  */
 void NLSEFFunction(ADRC_t* adrc_data) {
-    adrc_data->prog.u0 = adrc_data->nlsef.Kp * fal(adrc_data->prog.e1, adrc_data->nlsef.alpha1, adrc_data->nlsef.delta) +
-                         adrc_data->nlsef.Kd * fal(adrc_data->prog.e2, adrc_data->nlsef.alpha2, adrc_data->nlsef.delta);
+    adrc_data->prog.u0 = adrc_data->adrc_config.nlsef.Kp *
+                             fal(adrc_data->prog.e1, adrc_data->adrc_config.nlsef.alpha1, adrc_data->adrc_config.nlsef.delta) +
+                         adrc_data->adrc_config.nlsef.Kd *
+                             fal(adrc_data->prog.e2, adrc_data->adrc_config.nlsef.alpha2, adrc_data->adrc_config.nlsef.delta);
 }
 
 /**
@@ -117,23 +137,14 @@ void ESOFunction(ADRC_t* adrc_data) {
     last_z1 = adrc_data->prog.z1;
     last_z2 = adrc_data->prog.z2;
     last_z3 = adrc_data->prog.z3;
-    epsilon = last_z1 - adrc_data->prog.y;
-    adrc_data->prog.z1 = last_z1 + adrc_data->td.h * (last_z2 - adrc_data->nlsef.Kp * epsilon);
-    adrc_data->prog.z2 = last_z2 + adrc_data->td.h * (last_z3 - adrc_data->nlsef.Kd * fal(epsilon, adrc_data->nlsef.alpha1, adrc_data->nlsef.delta) + adrc_data->eso.b * adrc_data->prog.u);
-    adrc_data->prog.z3 = last_z3 - adrc_data->td.h * adrc_data->eso.beta3 * fal(epsilon, adrc_data->nlsef.alpha2, adrc_data->nlsef.delta);
-}
-
-/**
- * @brief      : 输入函数
- * @attention  : 无
- * @return  {*}
- * @param {ADRC_t*} adrc_data adrc数据结构体
- * @param {float} v0 预期输入信号
- * @param {float} y 反馈信号
- */
-void GETEXINFO(ADRC_t* adrc_data, float v0, float y) {
-    adrc_data->prog.v0 = v0;
-    adrc_data->prog.y = y;
+    epsilon = last_z1 - adrc_data->prog.fdb;
+    adrc_data->prog.z1 = last_z1 + adrc_data->adrc_config.td.h *
+                                       (last_z2 - adrc_data->adrc_config.nlsef.Kp * epsilon);
+    adrc_data->prog.z2 = last_z2 + adrc_data->adrc_config.td.h *
+                                       (last_z3 - adrc_data->adrc_config.nlsef.Kd * fal(epsilon, adrc_data->adrc_config.nlsef.alpha1, adrc_data->adrc_config.nlsef.delta) +
+                                        adrc_data->adrc_config.eso.b * adrc_data->prog.output);
+    adrc_data->prog.z3 = last_z3 - adrc_data->adrc_config.td.h *
+                                       adrc_data->adrc_config.eso.beta3 * fal(epsilon, adrc_data->adrc_config.nlsef.alpha2, adrc_data->adrc_config.nlsef.delta);
 }
 
 /**
@@ -141,38 +152,46 @@ void GETEXINFO(ADRC_t* adrc_data, float v0, float y) {
  * @attention  : 无
  * @return  {*}
  * @param {ADRC_t*} adrc_data adrc数据结构体
- * @param {float} v0 预期输入信号
- * @param {float} y 反馈信号
  */
-void ADRCFunction(ADRC_t* adrc_data, float v0, float y) {
-    GETEXINFO(adrc_data, v0, y);
+void ADRCFunction(ADRC_t* adrc_data) {
     TDFunction(adrc_data);
     adrc_data->prog.e1 = adrc_data->prog.v1 - adrc_data->prog.z1;
     adrc_data->prog.e2 = adrc_data->prog.v2 - adrc_data->prog.z2;
     NLSEFFunction(adrc_data);
-    adrc_data->prog.u = adrc_data->prog.u0 - adrc_data->prog.z3 / adrc_data->eso.b;
+    adrc_data->prog.output = adrc_data->prog.u0 - adrc_data->prog.z3 / adrc_data->adrc_config.eso.b;
     ESOFunction(adrc_data);
 }
 
 /**
- * @brief      : ADRC结构体初始化
+ * @brief      : ADRC结构体配置初始化
  * @attention  : 调参说明在adrc.h中，切勿自行更改参数
  * @return  {*}
  */
-void ADRCInit(ADRC_t* adrc_data,
-              float r, float h, float h0,
-              float Kp, float Kd, float alpha1, float alpha2, float delta,
-              float beta1, float beta2, float beta3, float b) {
-    adrc_data->td.r = r;
-    adrc_data->td.h = h;
-    adrc_data->td.h0 = h0;
-    adrc_data->nlsef.Kp = Kp;
-    adrc_data->nlsef.Kd = Kd;
-    adrc_data->nlsef.alpha1 = alpha1;
-    adrc_data->nlsef.alpha2 = alpha2;
-    adrc_data->nlsef.delta = delta;
-    adrc_data->eso.beta1 = beta1;
-    adrc_data->eso.beta2 = beta2;
-    adrc_data->eso.beta3 = beta3;
-    adrc_data->eso.b = b;
+void ADRC_SetConfig(ADRC_Config_t* adrc_config,
+                    float r, float h, float h0,
+                    float Kp, float Kd, float alpha1, float alpha2, float delta,
+                    float beta1, float beta2, float beta3, float b) {
+    adrc_config->td.r = r;
+    adrc_config->td.h = h;
+    adrc_config->td.h0 = h0;
+    adrc_config->nlsef.Kp = Kp;
+    adrc_config->nlsef.Kd = Kd;
+    adrc_config->nlsef.alpha1 = alpha1;
+    adrc_config->nlsef.alpha2 = alpha2;
+    adrc_config->nlsef.delta = delta;
+    adrc_config->eso.beta1 = beta1;
+    adrc_config->eso.beta2 = beta2;
+    adrc_config->eso.beta3 = beta3;
+    adrc_config->eso.b = b;
+}
+
+/**
+ * @brief      :ADRC结构体初始化
+ * @attention  :无
+ * @param {ADRC_t*} adrc_data
+ * @param {ADRC_Config_t*} adrc_config
+ */
+void ADRC_Init(ADRC_t* adrc_data, ADRC_Config_t* adrc_config) {
+    adrc_data->adrc_config = *adrc_config;
+    memset(&adrc_data->prog, 0, sizeof(adrc_data->prog));
 }

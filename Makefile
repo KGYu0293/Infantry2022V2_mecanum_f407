@@ -134,6 +134,7 @@ Core/HAL/lib/cvector.c \
 Core/HAL/lib/datatypes.c \
 Core/HAL/lib/circular_queue.c \
 Core/HAL/lib/controller/adrc.c \
+Core/HAL/lib/controller/test_adrc.c \
 Core/HAL/lib/controller/lqr.c \
 Core/HAL/lib/controller/mrac.c \
 Core/HAL/lib/controller/pid.c\
