@@ -63,7 +63,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->mode = robot_stop;
     }
 
-    // 接收底盘回传信息，判断云台IMU在线且初始化完成
+    // 接收底盘回传信息，判断底盘IMU在线且初始化完成
     publish_data chassis_upload = obj->chassis_upload_sub->getdata(obj->chassis_upload_sub);
     if (chassis_upload.len == -1) {
         obj->send_data.gyro_yaw = 0;
