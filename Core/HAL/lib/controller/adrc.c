@@ -3,7 +3,7 @@
  * @brief          : ADRC算法实现
  * @Author         : 李鸣航
  * @Date           : 2022-04-09 14:48
- * @LastEditTime   : 2022-05-04 11:04
+    * @LastEditTime   : 2022-05-04 20:56
  * @Note           : 使用该算法之前请务必阅读说明文档，禁止随意调参
  * @Copyright(c)   : 哈尔滨工业大学（深圳）南工骁鹰机器人队版权所有 Critical HIT copyrighted
  */
@@ -67,11 +67,9 @@ int fsg(float x, float d) {
  * @param {float} delta 滤波因子
  */
 float fal(float e, float a, float delta) {
-    if (fabs(e) <= delta) {
-        return (e / pow(delta, 1 - a));
-    } else {
-        return (sgn(e) * pow(fabs(e), a));
-    }
+    int s = 0;
+    s = (sgn(e + delta) - sgn(e - delta)) / 2;
+    return (e * s / (powf(delta, 1 - a)) + powf(fabs(e), a) * sgn(e) * (1 - s));
 }
 
 /**
@@ -120,6 +118,7 @@ void TDFunction(ADRC_t* adrc_data) {
  * @param {ADRC_t*} adrc_data adrc数据结构体
  */
 void NLSEFFunction(ADRC_t* adrc_data) {
+    adrc_data->prog.e2 = ConstrainFloat(adrc_data->prog.e2, -3000, 3000);
     adrc_data->prog.u0 = adrc_data->adrc_config.nlsef.Kp *
                              fal(adrc_data->prog.e1, adrc_data->adrc_config.nlsef.alpha1, adrc_data->adrc_config.nlsef.delta) +
                          adrc_data->adrc_config.nlsef.Kd *
@@ -128,23 +127,24 @@ void NLSEFFunction(ADRC_t* adrc_data) {
 
 /**
  * @brief      : 扩张观测器
- * @attention  : 无
+ * @attention  : 实际测试中，低成本硬件很容易导致z3发散，所以要对z3进行限幅！！！！！！
  * @return  {*}
  * @param {ADRC_t*} adrc_data adrc数据结构体
  */
 void ESOFunction(ADRC_t* adrc_data) {
-    float epsilon, last_z1, last_z2, last_z3;
+    float error, last_z1, last_z2, last_z3;
     last_z1 = adrc_data->prog.z1;
     last_z2 = adrc_data->prog.z2;
     last_z3 = adrc_data->prog.z3;
-    epsilon = last_z1 - adrc_data->prog.fdb;
+    error = last_z1 - adrc_data->prog.fdb;
     adrc_data->prog.z1 = last_z1 + adrc_data->adrc_config.td.h *
-                                       (last_z2 - adrc_data->adrc_config.nlsef.Kp * epsilon);
+                                       (last_z2 - adrc_data->adrc_config.eso.beta1 * error);
     adrc_data->prog.z2 = last_z2 + adrc_data->adrc_config.td.h *
-                                       (last_z3 - adrc_data->adrc_config.nlsef.Kd * fal(epsilon, adrc_data->adrc_config.nlsef.alpha1, adrc_data->adrc_config.nlsef.delta) +
+                                       (last_z3 - adrc_data->adrc_config.eso.beta2 * fal(error, adrc_data->adrc_config.nlsef.alpha1, adrc_data->adrc_config.nlsef.delta) +
                                         adrc_data->adrc_config.eso.b * adrc_data->prog.output);
-    adrc_data->prog.z3 = last_z3 - adrc_data->adrc_config.td.h *
-                                       adrc_data->adrc_config.eso.beta3 * fal(epsilon, adrc_data->adrc_config.nlsef.alpha2, adrc_data->adrc_config.nlsef.delta);
+    adrc_data->prog.z3 = last_z3 + adrc_data->adrc_config.td.h *
+                                       (-adrc_data->adrc_config.eso.beta3 * fal(error, adrc_data->adrc_config.nlsef.alpha2, adrc_data->adrc_config.nlsef.delta));
+    adrc_data->prog.z3 = ConstrainFloat(adrc_data->prog.z3, -200, 200);
 }
 
 /**
@@ -155,11 +155,11 @@ void ESOFunction(ADRC_t* adrc_data) {
  */
 void ADRCFunction(ADRC_t* adrc_data) {
     TDFunction(adrc_data);
+    ESOFunction(adrc_data);
     adrc_data->prog.e1 = adrc_data->prog.v1 - adrc_data->prog.z1;
     adrc_data->prog.e2 = adrc_data->prog.v2 - adrc_data->prog.z2;
     NLSEFFunction(adrc_data);
     adrc_data->prog.output = adrc_data->prog.u0 - adrc_data->prog.z3 / adrc_data->adrc_config.eso.b;
-    ESOFunction(adrc_data);
 }
 
 /**

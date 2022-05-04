@@ -150,8 +150,8 @@ void Can_Motor_Calc_Send() {
                     }
                     PID_Calc(&obj->speed_pid);
                     ADRCFunction(&obj->adrc_speed);
-                    // obj->current_output = obj->speed_pid.output;
-                    obj->current_output = obj->adrc_speed.prog.output;
+                    obj->current_output = obj->speed_pid.output;
+                    // obj->current_output = obj->adrc_speed.prog.output;
                 }
                 buf[id] = obj->current_output;
                 if (obj->config.output_model == MOTOR_OUTPUT_REVERSE) buf[id] *= -1;
@@ -161,7 +161,7 @@ void Can_Motor_Calc_Send() {
             }
             // 如果此标识符(identifier)对应的四个电机里至少有一个被注册，就发送这个标识符的报文，如果全部没有被注册，则这个标识符无需发送
             if (identifier_send) {
-                // Can_Motor_Send(can_index, identifiers[identifier], buf[0], buf[1], buf[2], buf[3]);
+                Can_Motor_Send(can_index, identifiers[identifier], buf[0], buf[1], buf[2], buf[3]);
             }
         }
     }

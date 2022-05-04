@@ -1,0 +1,17 @@
+
+OpenDocument="startup_stm32f407xx.s", FilePath="G:/RM-code/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=51
+OpenDocument="adrc.c", FilePath="G:/RM-code/Infantry2022V1_mecanum_F407/Core/HAL/lib/controller/adrc.c", Line=15
+OpenDocument="main.c", FilePath="G:/RM-code/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=72
+OpenDocument="robot_def.h", FilePath="G:/RM-code/Infantry2022V1_mecanum_F407/Core/APP/robot_def.h", Line=0
+OpenDocument="can_motor.c", FilePath="G:/RM-code/Infantry2022V1_mecanum_F407/Core/HAL/driver/motor/can_motor.c", Line=12
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=397, h=705, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Memory 1", DockArea=BOTTOM, x=1, y=0, w=781, h=279, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, EditorAddress=0x20005244
+OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=798, h=705, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=1138, h=279, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;1155]
+TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[213;272;100;213]
+TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[26;26;26;26]
+WatchedExpression="chassis", RefreshRate=5, Window=Watched Data 1

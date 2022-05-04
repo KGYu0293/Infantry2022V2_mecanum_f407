@@ -64,7 +64,7 @@ Chassis *Chassis_Create() {
     PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&lf_config.config_speed, 5, 0, 10, 0, 10000);
     ADRC_SetConfig(&lf_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    ADRC_SetConfig(&lf_config.adrc_config_speed, 100, 0.01, 0.02, 5, 10, 0.5, 0.25, 0.01, 30, 300, 1000, 5);
+    ADRC_SetConfig(&lf_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->lf = Can_Motor_Create(&lf_config);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
@@ -76,7 +76,7 @@ Chassis *Chassis_Create() {
     PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&rf_config.config_speed, 5, 0, 10, 0, 10000);
     ADRC_SetConfig(&rf_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    ADRC_SetConfig(&rf_config.adrc_config_speed, 100, 0.01, 0.02, 5, 10, 0.5, 0.25, 0.01, 30, 300, 1000, 5);
+    ADRC_SetConfig(&rf_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->rf = Can_Motor_Create(&rf_config);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
@@ -88,7 +88,7 @@ Chassis *Chassis_Create() {
     PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&lb_config.config_speed, 5, 0, 10, 0, 10000);
     ADRC_SetConfig(&lb_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    ADRC_SetConfig(&lb_config.adrc_config_speed, 300000, 0.001, 0.002, 1, 0, 0.5, 0.25, 0.01, 0, 0, 0, 0);
+    ADRC_SetConfig(&lb_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->lb = Can_Motor_Create(&lb_config);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
@@ -100,7 +100,7 @@ Chassis *Chassis_Create() {
     PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&rb_config.config_speed, 5, 0, 10, 0, 10000);
     ADRC_SetConfig(&rb_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    ADRC_SetConfig(&rb_config.adrc_config_speed, 100, 0.01, 1, 5, 10, 0.5, 0.25, 0.01, 30, 300, 1000, 5);
+    ADRC_SetConfig(&rb_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->rb = Can_Motor_Create(&rb_config);
 
     // 定义pub
