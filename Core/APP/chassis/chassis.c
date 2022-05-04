@@ -1,6 +1,8 @@
 #include "chassis.h"
-#include "bsp.h"
+
 #include <math.h>
+
+#include "bsp.h"
 
 // the radius of wheel(mm)，轮子半径
 #define RADIUS 71  // 71.25
@@ -61,6 +63,8 @@ Chassis *Chassis_Create() {
     lf_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&lf_config.config_speed, 5, 0, 10, 0, 10000);
+    ADRC_SetConfig(&lf_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&lf_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->lf = Can_Motor_Create(&lf_config);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
@@ -71,6 +75,8 @@ Chassis *Chassis_Create() {
     rf_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&rf_config.config_speed, 5, 0, 10, 0, 10000);
+    ADRC_SetConfig(&rf_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&rf_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->rf = Can_Motor_Create(&rf_config);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
@@ -81,6 +87,8 @@ Chassis *Chassis_Create() {
     lb_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&lb_config.config_speed, 5, 0, 10, 0, 10000);
+    ADRC_SetConfig(&lb_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&lb_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->lb = Can_Motor_Create(&lb_config);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
@@ -91,6 +99,8 @@ Chassis *Chassis_Create() {
     rb_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&rb_config.config_speed, 5, 0, 10, 0, 10000);
+    ADRC_SetConfig(&rb_config.adrc_config_position, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&rb_config.adrc_config_speed, 300000, 0.001, 0.002, 10, 2, 0.5, 0.25, 0.01, 100, 200, 2000, 5);
     obj->rb = Can_Motor_Create(&rb_config);
 
     // 定义pub
@@ -117,7 +127,7 @@ void OutputmaxLimit(Chassis *obj) {
         }
     } else {
         output_limit = 2000 + 6000 * (obj->cmd_data->power.power_limit - 30) / 90;
-        if(output_limit > 6000) output_limit = 6000;
+        if (output_limit > 6000) output_limit = 6000;
     }
     obj->lf->speed_pid.config.outputMax = output_limit;
     obj->rf->speed_pid.config.outputMax = output_limit;
@@ -147,9 +157,13 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
     mecanum_speed[3] = vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
 
     obj->lf->speed_pid.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
+    obj->lf->adrc_speed.prog.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;
     obj->rf->speed_pid.ref = mecanum_speed[1] / PERIMETER * MOTOR_DECELE_RATIO * 360;
+    obj->rf->adrc_speed.prog.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;
     obj->rb->speed_pid.ref = mecanum_speed[2] / PERIMETER * MOTOR_DECELE_RATIO * 360;
+    obj->rb->adrc_speed.prog.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;
     obj->lb->speed_pid.ref = mecanum_speed[3] / PERIMETER * MOTOR_DECELE_RATIO * 360;
+    obj->lb->adrc_speed.prog.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;
 }
 
 // 小陀螺情况下的旋转速度控制函数，可以写不同的变速小陀螺

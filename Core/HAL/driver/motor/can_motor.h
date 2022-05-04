@@ -1,18 +1,25 @@
 /* 基于can_send/can_recv 创建的标准化的电机控制机制*/
 #ifndef _CAN_MOTOR_H
 #define _CAN_MOTOR_H
+#include "adrc.h"
 #include "circular_queue.h"
 #include "monitor.h"
 #include "pid.h"
 #include "stdint.h"
 
-enum Motor_Model_e { MODEL_3508 = 0, MODEL_2006, MODEL_6020 };
+enum Motor_Model_e { MODEL_3508 = 0,
+                     MODEL_2006,
+                     MODEL_6020 };
 
-enum Motor_PID_Model_e { CURRENT_LOOP = 0, SPEED_LOOP, POSITION_LOOP };  //速度环/位置环/电流环
+enum Motor_PID_Model_e { CURRENT_LOOP = 0,
+                         SPEED_LOOP,
+                         POSITION_LOOP };  //速度环/位置环/电流环
 
-enum Motor_FDB_Model_e { MOTOR_FDB = 0, OTHER_FDB };
+enum Motor_FDB_Model_e { MOTOR_FDB = 0,
+                         OTHER_FDB };
 
-enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0, MOTOR_OUTPUT_REVERSE }; //是否输出反转
+enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0,
+                            MOTOR_OUTPUT_REVERSE };  //是否输出反转
 
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
@@ -24,6 +31,8 @@ typedef struct can_motor_config_t {
     enum Motor_OUTPUT_Model_e output_model;
     struct PID_config_t config_speed;
     struct PID_config_t config_position;
+    struct ADRC_Config_t adrc_config_speed;
+    struct ADRC_Config_t adrc_config_position;
     float* speed_pid_fdb;  // OTHER_FDB模式的ref指针
     float* position_pid_fdb;
     lost_callback lost_callback;
@@ -31,7 +40,8 @@ typedef struct can_motor_config_t {
 
 typedef struct can_motor_t {
     can_motor_config config;
-    enum { MOTOR_ENABLE, MOTOR_STOP } enable;
+    enum { MOTOR_ENABLE,
+           MOTOR_STOP } enable;
     short fdbPosition;       //电机的编码器反馈值
     short last_fdbPosition;  //电机上次的编码器反馈值
     short fdbSpeed;          //电机反馈的转速/rpm
@@ -43,6 +53,9 @@ typedef struct can_motor_t {
     float last_real_position;   //上次真实转过的角度
     struct PID_t speed_pid;     //速度环pid
     struct PID_t position_pid;  //位置环pid
+    struct ADRC_t adrc_speed;
+    struct ADRC_t adrc_position;
+
     short current_output;
 
     float line_speed;                //线速度（m/s，根据角速度算出）

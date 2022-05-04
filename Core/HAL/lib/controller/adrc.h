@@ -65,17 +65,17 @@
 
 // ADRC运算的时候会出现的过程参数
 typedef struct PROG_t {
-    float v0;  //输入预期信号
-    float v1;  //过渡过程之后的跟踪信号
-    float v2;  //过渡过程之后的跟踪信号的微分(v1的微分)
-    float e1;  //误差信号1
-    float e2;  //误差信号2
-    float u0;  //非线性反馈输出的信号
-    float u;   //结合ESO后的输出信号
-    float z1;  // ESO输出信号1
-    float z2;  // ESO输出信号2
-    float z3;  // ESO输出信号3
-    float y;   //反馈信号
+    float ref;     //输入预期信号
+    float v1;      //过渡过程之后的跟踪信号
+    float v2;      //过渡过程之后的跟踪信号的微分(v1的微分)
+    float e1;      //误差信号1
+    float e2;      //误差信号2
+    float u0;      //非线性反馈输出的信号
+    float output;  //结合ESO后的输出信号
+    float z1;      // ESO输出信号1
+    float z2;      // ESO输出信号2
+    float z3;      // ESO输出信号3
+    float fdb;     //反馈信号
 } PROG_t;
 
 //跟踪微分器的参数
@@ -102,25 +102,31 @@ typedef struct ESO_t {
     float b;
 } ESO_t;
 
-// ADRC总结构体
-typedef struct ADRC_t {
-    PROG_t prog;
+typedef struct ADRC_Config_t {
     TD_t td;
     NLSEF_t nlsef;
     ESO_t eso;
+} ADRC_Config_t;
+
+// ADRC总结构体
+typedef struct ADRC_t {
+    PROG_t prog;
+    ADRC_Config_t adrc_config;
 } ADRC_t;
 
+float ConstrainFloat(float amt, float low, float high);
 int sgn(float x);
-float fst(float x1, float x2, float r, float h);
+int fsg(float x, float d);
+float fst(float x1_delta, float x2, float r, float h0);
 float fal(float e, float a, float delta);
 void TDFunction(ADRC_t* adrc_data);
 void NLSEFFunction(ADRC_t* adrc_data);
 void ESOFunction(ADRC_t* adrc_data);
-void GETEXINFO(ADRC_t* adrc_data, float v0, float y);
-void ADRCFunction(ADRC_t* adrc_data, float v0, float y);
-void ADRCInit(ADRC_t* adrc_data,
-              float r, float h, float h0,
-              float Kp, float Kd, float alpha1, float alpha2, float delta,
-              float beta1, float beta2, float beta3, float b);
+void ADRCFunction(ADRC_t* adrc_data);
+void ADRC_SetConfig(ADRC_Config_t* adrc_config,
+                    float r, float h, float h0,
+                    float Kp, float Kd, float alpha1, float alpha2, float delta,
+                    float beta1, float beta2, float beta3, float b);
+void ADRC_Init(ADRC_t* adrc_data, ADRC_Config_t* adrc_config);
 
 #endif

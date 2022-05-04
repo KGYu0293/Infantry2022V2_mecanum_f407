@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "imu_data.h"
 #include "stdint.h"
@@ -18,10 +18,12 @@
 /** 机器人模式定义 **/
 
 // 对模块是否掉线的定义
-typedef enum Module_status_e { module_lost = 0, module_working } Module_status;
+typedef enum Module_status_e { module_lost = 0,
+                               module_working } Module_status;
 
 // 机器人总模式
-typedef enum Robot_mode_e { robot_stop = 0, robot_run } Robot_mode;
+typedef enum Robot_mode_e { robot_stop = 0,
+                            robot_run } Robot_mode;
 
 // 底盘运行模式
 typedef enum Chassis_mode_e {
@@ -84,7 +86,7 @@ typedef struct Cmd_chassis_speed_t {
 
 // 对底盘功率的控制量
 typedef struct Cmd_chassis_power_t {
-    uint8_t if_consume_supercap; //是否消耗电容
+    uint8_t if_consume_supercap;  //是否消耗电容
     uint8_t power_limit;
     float power_now;
     uint16_t power_buffer;  // 缓冲功率
@@ -133,7 +135,7 @@ typedef struct Upload_chassis_t {
 // 板间通信定义
 // 云台->底盘数据包
 typedef struct Gimbal_board_send_t {
-    uint8_t if_consume_supercap;            // 是否消耗电容
+    uint8_t if_consume_supercap;       // 是否消耗电容
     Robot_mode now_robot_mode;         // 遥控器在云台主控 包含stop模式与云台重要模块掉线
     Chassis_mode chassis_mode;         // 底盘模式
     Cmd_chassis_speed chassis_target;  // 底盘速度控制

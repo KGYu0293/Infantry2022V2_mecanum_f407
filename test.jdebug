@@ -4,8 +4,8 @@
 *                         www.segger.com                             *
 **********************************************************************
 
-File          : E:/STM32Prj/STM32F407_2022_framework/ozone.jdebug
-Created       : 28 Nov 2021 06:33
+File          : G:/RM-code/Infantry2022V1_mecanum_F407/test.jdebug
+Created       : 4 May 2022 09:40
 Ozone Version : V3.24g
 */
 
@@ -23,18 +23,15 @@ void OnProjectLoad (void) {
   // Dialog-generated settings
   //
   Project.SetDevice ("STM32F407IG");
-  Project.SetHostIF ("IP", "192.168.1.14");
+  Project.SetHostIF ("IP", "192.168.1.20");
   Project.SetTargetIF ("SWD");
-  Project.SetTIFSpeed ("12 MHz");
-  Project.AddPathSubstitute ("E:/STM32Prj/STM32F407_2022_framework", "$(ProjectDir)");
-  Project.AddPathSubstitute ("e:/stm32prj/stm32f407_2022_framework", "$(ProjectDir)");
-  Project.SetTraceSource ("SWO");
+  Project.SetTIFSpeed ("4 MHz");
+  Project.AddPathSubstitute ("G:/RM-code/Infantry2022V1_mecanum_F407", "$(ProjectDir)");
+  Project.AddPathSubstitute ("g:/rm-code/infantry2022v1_mecanum_f407", "$(ProjectDir)");
   Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4F.svd");
   //
   // User settings
   //
-  Edit.SysVar (VAR_HSS_SPEED, FREQ_500_HZ);
-  Project.SetOSPlugin ("FreeRTOSPlugin");
   File.Open ("$(ProjectDir)/build/STM32F407_2022_framework.elf");
 }
 
