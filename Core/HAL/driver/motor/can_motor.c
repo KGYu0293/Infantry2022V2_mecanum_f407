@@ -67,8 +67,8 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     }
     PID_Init(&obj->speed_pid, &obj->config.config_speed);
     PID_Init(&obj->position_pid, &obj->config.config_position);
-    ADRC_Init(&obj->adrc_speed, &obj->config.adrc_config_speed);
-    ADRC_Init(&obj->adrc_position, &obj->config.adrc_config_position);
+    //ADRC_Init(&obj->adrc_speed, &obj->config.adrc_config_speed);
+    //ADRC_Init(&obj->adrc_position, &obj->config.adrc_config_position);
     obj->monitor = Monitor_Register(obj->config.lost_callback, 5, obj);
 
     obj->enable = MOTOR_STOP;
@@ -137,7 +137,7 @@ void Can_Motor_Calc_Send() {
                         obj->adrc_position.prog.fdb = obj->real_position;
                     }
                     PID_Calc(&obj->position_pid);
-                    ADRCFunction(&obj->adrc_position);
+                    //ADRCFunction(&obj->adrc_position);
                     obj->speed_pid.ref = obj->position_pid.output;
                     obj->adrc_speed.prog.ref = obj->adrc_position.prog.output;
                 }
@@ -149,7 +149,7 @@ void Can_Motor_Calc_Send() {
                         obj->speed_pid.fdb = obj->velocity;
                     }
                     PID_Calc(&obj->speed_pid);
-                    ADRCFunction(&obj->adrc_speed);
+                    //ADRCFunction(&obj->adrc_speed);
                     obj->current_output = obj->speed_pid.output;
                     // obj->current_output = obj->adrc_speed.prog.output;
                 }
