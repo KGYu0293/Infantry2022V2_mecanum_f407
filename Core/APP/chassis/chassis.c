@@ -12,12 +12,16 @@
 
 // wheel track distance(mm)，轮距
 #define WHEELTRACK 340
+
 // wheelbase distance(mm)，轴距
 #define WHEELBASE 340
+
 // gimbal is relative to chassis center x axis offset(mm)，云台相对于底盘中心的偏移，往右为正
 #define ROTATE_X_OFFSET 0
+
 // gimbal is relative to chassis center y axis offset(mm)，云台相对于底盘中心的偏移，往前为正
 #define ROTATE_Y_OFFSET 0
+
 // the deceleration ratio of chassis motor，底盘电机减速比
 #define MOTOR_DECELE_RATIO 19.0f
 
