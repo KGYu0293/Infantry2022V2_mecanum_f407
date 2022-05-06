@@ -15,14 +15,12 @@ void referee_driver_init() {
 
 Referee *referee_Create(referee_config *config) {
     Referee *obj = (Referee *)malloc(sizeof(Referee));
-    memset(obj, 0, sizeof(sizeof(Referee)));
+    memset(obj, 0, sizeof(Referee));
     obj->config = *config;
     obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     cvector_pushback(referee_instances, &obj);
     // 数据接收队列
     obj->primary_data = create_circular_queue(sizeof(uint8_t), REFEREE_RX_QUENE_MAX_LEN);
-    memset(&(obj->rx_data), 0, sizeof(referee_rx_data));
-    memset(&(obj->tool), 0, sizeof(referee_unpack_tool));
     obj->tool.next_step_wait_len = 1;
     obj->robot_status_received = 0;
     return obj;
@@ -122,8 +120,7 @@ void referee_data_solve(Referee *obj) {
                 crc16_recv |= ((uint16_t)byte_now << 8);
                 // printf_log("a:%d %d\n",REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length,obj->tool.buffer_pt);
                 // 包错误判断-CRC16校验
-                uint16_t crc16_result =
-                    CRC16_Modbus_calc(&(obj->tool.rx_pack.header.SOF), REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length, crc16_default);
+                uint16_t crc16_result = CRC16_Modbus_calc(&(obj->tool.rx_pack.header.SOF), REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + obj->tool.rx_pack.header.data_length, crc16_default);
 
                 if (crc16_result != crc16_recv) {
                     obj->tool.step = s_header_sof;
@@ -208,7 +205,7 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
         case DART_CILENT_CMD_T:
             memcpy(&obj->rx_data.dart_cilent_cmd, rx_pack->data, sizeof(obj->rx_data.dart_cilent_cmd));
             break;
-        case ROBOT_INTERACT_ID:{
+        case ROBOT_INTERACT_ID: {
             // 机器人间通信接收
             uint16_t recv_len = rx_pack->header.data_length;
             memcpy(&obj->rx_data.interactve_data, rx_pack->data, recv_len);

@@ -1,13 +1,12 @@
 #include "can_recv.h"
 
 #include "bsp_can.h"
-#include "soft_crc.h"
 #include "cvector.h"
+#include "soft_crc.h"
 #include "stdio.h"
 
 cvector* can_recv_instances;
-void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,
-                        uint32_t len);
+void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data, uint32_t len);
 
 void CanRecv_Driver_Init() {
     can_recv_instances = cvector_create(sizeof(can_recv*));
@@ -17,10 +16,11 @@ void CanRecv_Driver_Init() {
 
 can_recv* CanRecv_Create(can_recv_config* config) {
     can_recv* obj = (can_recv*)malloc(sizeof(can_recv));
+    memset(obj, 0, sizeof(can_recv));
     obj->config = *config;
     obj->data_rx.len = obj->config.data_len;
     obj->data_rx.data = (uint8_t*)malloc(obj->config.data_len);
-    memset(obj->data_rx.data,0,obj->config.data_len);
+    memset(obj->data_rx.data, 0, obj->config.data_len);
     obj->buf_len = obj->config.data_len + 5;
     obj->rxbuf = (uint8_t*)malloc(obj->buf_len);
     obj->recv_len = 0;
@@ -32,12 +32,10 @@ can_recv* CanRecv_Create(can_recv_config* config) {
     return obj;
 }
 
-void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,
-                        uint32_t len) {
+void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data, uint32_t len) {
     for (size_t i = 0; i < can_recv_instances->cv_len; ++i) {
         can_recv* now = *(can_recv**)cvector_val_at(can_recv_instances, i);
-        if (now->config.bsp_can_index == can_id &&
-            now->config.can_identifier == identifier) {
+        if (now->config.bsp_can_index == can_id && now->config.can_identifier == identifier) {
             if (data[0] == 's') {
                 now->recv_status = 1;
             }
@@ -49,8 +47,7 @@ void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data,
                 }
                 memcpy(now->rxbuf + now->recv_len, data, len);
                 now->recv_len += len;
-                if (now->rxbuf[now->recv_len - 1] == 'e' &&
-                    now->recv_len == now->buf_len) {
+                if (now->rxbuf[now->recv_len - 1] == 'e' && now->recv_len == now->buf_len) {
                     if (CheckVaild(now->rxbuf + 1, now->buf_len - 2)) {
                         BufferToData(now->rxbuf + 1, &now->data_rx);
                         now->recv_status = 0;

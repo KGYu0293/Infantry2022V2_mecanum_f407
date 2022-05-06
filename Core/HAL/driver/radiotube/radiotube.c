@@ -7,6 +7,7 @@
 
 spi_EIO *Spi_EIO_Create(spi_eio_config *config) {
     spi_EIO *obj = (spi_EIO *)malloc(sizeof(spi_EIO));
+    memset(obj, 0, sizeof(spi_EIO));
     obj->config = *config;
     obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     memset(obj, 0, sizeof(spi_EIO));

@@ -3,6 +3,7 @@
 #include "stdlib.h"
 canpc* CanPC_Create(canpc_config* config) {
     canpc* obj = (canpc*)malloc(sizeof(canpc));
+    memset(obj, 0, sizeof(canpc));
     obj->config = *config;
     can_recv_config recv_config;
     can_send_config send_config;
@@ -22,6 +23,4 @@ canpc* CanPC_Create(canpc_config* config) {
     return obj;
 }
 
-void CanPC_Send(canpc* obj, canpc_send* data) {
-    CanSend_Send(obj->send, (uint8_t*)data);
-}
+void CanPC_Send(canpc* obj, canpc_send* data) { CanSend_Send(obj->send, (uint8_t*)data); }

@@ -1,4 +1,5 @@
 #include "gimbal_board_cmd.h"
+
 #include "bsp.h"
 #define INIT_FORWARD 3152  // 云台朝向底盘正前时云台yaw编码器值
 // monitor处理函数
@@ -17,6 +18,7 @@ float get_offset_angle(short init_forward, short now_encoder);  // 获取云台�
 gimbal_board_cmd* Gimbal_board_CMD_Create() {
     // 创建实例
     gimbal_board_cmd* obj = (gimbal_board_cmd*)malloc(sizeof(gimbal_board_cmd));
+    memset(obj, 0, sizeof(gimbal_board_cmd));
 
     // 板间通信配置
     can_send_config send_config;

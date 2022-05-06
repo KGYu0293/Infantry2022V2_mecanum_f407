@@ -17,9 +17,6 @@ color_rgb purple = {14, 4, 23};
 color_rgb blue = {0, 0, 20};
 color_rgb off = {0, 0, 0};
 
-
-
-
 //工具函数，转换rgb值到一个长度24的uint16数组（TIMER的CCR寄存器为16位）
 void rgb_2_raw(uint16_t* buff, color_rgb color) {
     for (uint16_t i = 0; i < 8; ++i) {
@@ -37,6 +34,7 @@ void array_2_raw(uint16_t* buff, color_rgb* color_buff, uint32_t len) {
 
 ws2812* ws2812_create(ws2812_config* config) {
     ws2812* obj = (ws2812*)malloc(sizeof(ws2812));
+    memset(obj, 0, sizeof(ws2812));
     obj->config = *config;
     obj->send_len = 3 + 24 * obj->config.max_len + 1;
     obj->buffer = malloc(obj->send_len * 2);
@@ -45,9 +43,7 @@ ws2812* ws2812_create(ws2812_config* config) {
     return obj;
 }
 
-void ws2812_send_frame(ws2812* obj) {
-    BSP_PWM_StartCCR_DMA(obj->config.pwm_id, (uint32_t*)obj->buffer, obj->send_len);
-}
+void ws2812_send_frame(ws2812* obj) { BSP_PWM_StartCCR_DMA(obj->config.pwm_id, (uint32_t*)obj->buffer, obj->send_len); }
 
 void ws2812_set_all(ws2812* obj, color_rgb color) {
     for (size_t i = 0; i < obj->config.max_len; ++i) {
@@ -56,11 +52,9 @@ void ws2812_set_all(ws2812* obj, color_rgb color) {
     ws2812_send_frame(obj);
 }
 
-void ws2812_close_all(ws2812* obj) {
-    ws2812_set_all(obj, off);
-}
+void ws2812_close_all(ws2812* obj) { ws2812_set_all(obj, off); }
 
-void ws2812_set_array(ws2812* obj,color_rgb* color_buffer,uint32_t len){
-    array_2_raw(obj->frame_start,color_buffer,len);
+void ws2812_set_array(ws2812* obj, color_rgb* color_buffer, uint32_t len) {
+    array_2_raw(obj->frame_start, color_buffer, len);
     ws2812_send_frame(obj);
 }

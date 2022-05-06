@@ -34,6 +34,7 @@ void Speed_set(Chassis *obj, Cmd_chassis *param);
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
+    memset(obj, 0, sizeof(Chassis));
 
     obj->offset_x = ROTATE_X_OFFSET;
     obj->offset_y = ROTATE_Y_OFFSET;

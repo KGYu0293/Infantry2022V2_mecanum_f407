@@ -1,4 +1,5 @@
 #include "DT7_DR16.h"
+
 #include "bsp.h"
 #include "cvector.h"
 
@@ -33,6 +34,7 @@ void dt7_driver_init(void) {
 // 构造函数
 dt7Remote *dt7_Create(dt7_config *config) {
     dt7Remote *obj = (dt7Remote *)malloc(sizeof(dt7Remote));
+    memset(obj, 0, sizeof(dt7Remote));
     obj->config = *config;
     obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
     cvector_pushback(dt7_instances, &obj);

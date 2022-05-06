@@ -1,4 +1,5 @@
 #include "gimbal.h"
+
 #include "bsp.h"
 // 云台水平并朝向底盘正前方时云台和底盘的编码器值
 #define PITCH_MOTOR_ENCORDER_BIAS 841
@@ -12,6 +13,8 @@ void gimbal_imu_lost(void *imu) { printf_log("gimbal imu lost!!!gimbal stopped.\
 
 Gimbal *Gimbal_Create() {
     Gimbal *obj = (Gimbal *)malloc(sizeof(Gimbal));
+    memset(obj, 0, sizeof(Gimbal));
+
     //外设初始化
     BMI088_config internal_imu_config;
     internal_imu_config.bsp_gpio_accel_index = GPIO_BMI088_ACCEL_NS;

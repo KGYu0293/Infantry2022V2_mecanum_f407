@@ -1,13 +1,13 @@
 #include "can_send.h"
 
 #include "bsp_can.h"
-#include "soft_crc.h"
 #include "bsp_log.h"
 #include "cvector.h"
-
+#include "soft_crc.h"
 
 can_send* CanSend_Create(can_send_config* config) {
     can_send* obj = (can_send*)malloc(sizeof(can_send));
+    memset(obj, 0, sizeof(can_send));
     obj->config = *config;
     obj->buf_len = obj->config.data_len + 5;
     obj->txbuf = (uint8_t*)malloc(obj->buf_len);

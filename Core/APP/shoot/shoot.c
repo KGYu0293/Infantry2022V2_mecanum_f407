@@ -24,6 +24,7 @@ void shoot_motor_lost(void *motor) {
 
 Shoot *Shoot_Create(void) {
     Shoot *obj = (Shoot *)malloc(sizeof(Shoot));
+    memset(obj, 0, sizeof(Shoot));
 
     // 电机初始化
     can_motor_config friction_a_config;
@@ -142,7 +143,7 @@ void Shoot_Update(Shoot *obj) {
                     obj->friction_a->speed_pid.ref = 41300;
                     obj->friction_b->speed_pid.ref = -41300;
                     break;
-                case 0:// 刹车
+                case 0:  // 刹车
                     obj->friction_a->speed_pid.ref = 0;
                     obj->friction_b->speed_pid.ref = 0;
                 default:
