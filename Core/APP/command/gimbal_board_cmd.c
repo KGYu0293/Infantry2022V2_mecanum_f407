@@ -164,7 +164,7 @@ void remote_mode_update(gimbal_board_cmd* obj) {
     obj->send_data.if_consume_supercap = 0;  //遥控器模式不消耗超级电容
     obj->send_data.chassis_target.vy = 16.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
     obj->send_data.chassis_target.vx = 16.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
-    if (obj->remote->data.rc.s1 == 1) {
+    if (obj->remote->data.rc.s1 == 2) {
         // 小陀螺模式
         obj->send_data.chassis_mode = chassis_rotate_run;
         obj->send_data.chassis_target.vy *= 0.60f;
@@ -176,12 +176,12 @@ void remote_mode_update(gimbal_board_cmd* obj) {
 
     // 发射机构控制
     obj->shoot_control.mode = shoot_run;
-    if (obj->remote->data.rc.s1 == 2) {
-        obj->shoot_control.mode = shoot_stop;
+    if (obj->remote->data.rc.s1 == 1) {
+        obj->shoot_control.bullet_mode = bullet_holdon;
+        obj->shoot_control.bullet_speed = 0;
         if (obj->remote->data.rc.ch4 > CHx_BIAS + 400) obj->shoot_control.mag_mode = magazine_open;
         if (obj->remote->data.rc.ch4 < CHx_BIAS - 400) obj->shoot_control.mag_mode = magazine_close;
     } else {
-        obj->shoot_control.mode = shoot_run;
         obj->shoot_control.bullet_mode = bullet_continuous;
         obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;
@@ -333,12 +333,13 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     else
         obj->shoot_control.mag_mode = magazine_open;
     // 发射机构控制参数
-    if (obj->remote->data.rc.s1 == 2) {
-        obj->shoot_control.mode = shoot_stop;
+    obj->shoot_control.mode = shoot_run;
+    if (obj->remote->data.rc.s1 == 1) {
+        // 发射机构刹车
         obj->shoot_control.bullet_mode = bullet_holdon;
+        obj->shoot_control.bullet_speed = 0;
     } else {
         // 发弹控制，单发，双发, 射频和小电脑控制待完善
-        obj->shoot_control.mode = shoot_run;                                                          // 开发射机构
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限
         obj->shoot_control.fire_rate = 3;                                                             // 固定射频
