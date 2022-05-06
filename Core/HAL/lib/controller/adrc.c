@@ -3,7 +3,7 @@
  * @brief          : ADRC算法实现
  * @Author         : 李鸣航
  * @Date           : 2022-04-09 14:48
-    * @LastEditTime   : 2022-05-04 20:56
+ * @LastEditTime   : 2022-05-06 21:57
  * @Note           : 使用该算法之前请务必阅读说明文档，禁止随意调参
  * @Copyright(c)   : 哈尔滨工业大学（深圳）南工骁鹰机器人队版权所有 Critical HIT copyrighted
  */
@@ -86,7 +86,7 @@ float fal(float e, float a, float delta) {
  * @param {float} h0 滤波因子
  */
 float fst(float x1_delta, float x2, float r, float h0) {
-    float d, y, a0, a, a1, a2, a3;
+    float d, y, a0, a, a1, a2;
     d = r * h0 * h0;
     a0 = h0 * x2;
     y = x1_delta + a0;
