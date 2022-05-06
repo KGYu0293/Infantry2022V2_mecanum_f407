@@ -34,6 +34,7 @@ Shoot *Shoot_Create(void) {
     friction_a_config.motor_pid_model = SPEED_LOOP;
     friction_a_config.position_fdb_model = MOTOR_FDB;
     friction_a_config.speed_fdb_model = MOTOR_FDB;
+    friction_a_config.output_model = MOTOR_OUTPUT_NORMAL;
     friction_a_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_a_config.config_position, 2, 0, 0, 0, 5000);
     PID_SetConfig(&friction_a_config.config_speed, 4, 0.015, 0.8, 2000, 5000);
@@ -46,7 +47,8 @@ Shoot *Shoot_Create(void) {
     friction_b_config.motor_pid_model = SPEED_LOOP;
     friction_b_config.position_fdb_model = MOTOR_FDB;
     friction_b_config.speed_fdb_model = MOTOR_FDB;
-    friction_b_config.lost_callback = shoot_motor_lost;
+    friction_a_config.output_model = MOTOR_OUTPUT_NORMAL;
+    friction_a_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_b_config.config_position, 2, 0, 0, 0, 5000);
     PID_SetConfig(&friction_b_config.config_speed, 4, 0.015, 0.8, 2000, 5000);
     obj->friction_b = Can_Motor_Create(&friction_b_config);
@@ -58,6 +60,7 @@ Shoot *Shoot_Create(void) {
     load_config.motor_pid_model = POSITION_LOOP;
     load_config.position_fdb_model = MOTOR_FDB;
     load_config.speed_fdb_model = MOTOR_FDB;
+    load_config.output_model = MOTOR_OUTPUT_NORMAL;
     load_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&load_config.config_position, 2, 0, 0, 0, 5000);
     PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 600);

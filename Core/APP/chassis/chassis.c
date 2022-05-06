@@ -67,6 +67,7 @@ Chassis *Chassis_Create() {
     lf_config.motor_pid_model = SPEED_LOOP;
     lf_config.position_fdb_model = MOTOR_FDB;
     lf_config.speed_fdb_model = MOTOR_FDB;
+    lf_config.output_model = MOTOR_OUTPUT_NORMAL;
     lf_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&lf_config.config_speed, 5, 0, 10, 0, 10000);
@@ -79,6 +80,7 @@ Chassis *Chassis_Create() {
     rf_config.motor_pid_model = SPEED_LOOP;
     rf_config.position_fdb_model = MOTOR_FDB;
     rf_config.speed_fdb_model = MOTOR_FDB;
+    rf_config.output_model = MOTOR_OUTPUT_NORMAL;
     rf_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&rf_config.config_speed, 5, 0, 10, 0, 10000);
@@ -91,6 +93,7 @@ Chassis *Chassis_Create() {
     lb_config.motor_pid_model = SPEED_LOOP;
     lb_config.position_fdb_model = MOTOR_FDB;
     lb_config.speed_fdb_model = MOTOR_FDB;
+    lb_config.output_model = MOTOR_OUTPUT_NORMAL;
     lb_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&lb_config.config_speed, 5, 0, 10, 0, 10000);
@@ -103,6 +106,7 @@ Chassis *Chassis_Create() {
     rb_config.motor_pid_model = SPEED_LOOP;
     rb_config.position_fdb_model = MOTOR_FDB;
     rb_config.speed_fdb_model = MOTOR_FDB;
+    rb_config.output_model = MOTOR_OUTPUT_NORMAL;
     rb_config.lost_callback = chassis_motor_lost;
     PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 5000);
     PID_SetConfig(&rb_config.config_speed, 5, 0, 10, 0, 10000);
