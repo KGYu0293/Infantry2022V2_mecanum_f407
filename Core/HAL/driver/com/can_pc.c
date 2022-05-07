@@ -1,6 +1,7 @@
 #include "can_pc.h"
 
-#include "stdlib.h"
+#include <stdlib.h>
+#include <string.h>
 canpc* CanPC_Create(canpc_config* config) {
     canpc* obj = (canpc*)malloc(sizeof(canpc));
     memset(obj, 0, sizeof(canpc));

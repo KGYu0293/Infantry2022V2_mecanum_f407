@@ -23,7 +23,11 @@ void OnProjectLoad (void) {
   // Dialog-generated settings
   //
   Project.SetDevice ("STM32F407IG");
+<<<<<<< HEAD:ozone.jdebug
+  Project.SetHostIF ("IP", "192.168.1.19");
+=======
   Project.SetHostIF ("IP", "192.168.1.20");
+>>>>>>> b488455d45be07618304f06c20334a9d523b8216:test.jdebug
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");
   Project.AddPathSubstitute ("G:/RM-code/Infantry2022V1_mecanum_F407", "$(ProjectDir)");
