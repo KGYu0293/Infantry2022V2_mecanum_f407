@@ -3,21 +3,20 @@
 
 #include "stdint.h"
 
-
 typedef struct color_rgb_t {
     uint8_t r, g, b;
 } color_rgb;
 
-typedef struct ws2812_config_t{
+typedef struct ws2812_config_t {
     uint8_t pwm_id;
     uint32_t max_len;
 } ws2812_config;
 
-typedef struct ws2812_t{
-	uint16_t* buffer;
-	uint16_t* frame_start;
+typedef struct ws2812_t {
+    uint16_t* buffer;
+    uint16_t* frame_start;
     uint16_t send_len;
-	ws2812_config config;
+    ws2812_config config;
 } ws2812;
 
 extern color_rgb red;
@@ -29,6 +28,6 @@ extern color_rgb off;
 ws2812* ws2812_create(ws2812_config* config);
 void ws2812_close_all(ws2812* obj);
 void ws2812_set_all(ws2812* obj, color_rgb color);
-void ws2812_set_array(ws2812* obj,color_rgb* color_buffer,uint32_t len);
+void ws2812_set_array(ws2812* obj, color_rgb* color_buffer, uint32_t len);
 
 #endif

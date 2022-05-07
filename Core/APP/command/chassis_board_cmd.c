@@ -1,4 +1,5 @@
 #include "chassis_board_cmd.h"
+
 #include "bsp.h"
 
 // monitor处理函数
@@ -10,6 +11,7 @@ void chassis_core_module_lost(void* obj) {
 chassis_board_cmd* Chassis_board_CMD_Create() {
     // 创建实例
     chassis_board_cmd* obj = (chassis_board_cmd*)malloc(sizeof(chassis_board_cmd));
+    memset(obj, 0, sizeof(chassis_board_cmd));
 
     // 板间通信配置
     can_send_config send_config;
@@ -39,7 +41,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     referee_config.bsp_uart_index = UART_REFEREE_PORT;
     referee_config.lost_callback = NULL;
     obj->referee = referee_Create(&referee_config);
-    obj->ui = NULL; //初始化为NULL
+    obj->ui = NULL;  //初始化为NULL
 
     // 定义publisher和subscriber
     obj->chassis_cmd_puber = register_pub("cmd_chassis");
@@ -63,7 +65,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->mode = robot_stop;
     }
 
-    // 接收底盘回传信息，判断云台IMU在线且初始化完成
+    // 接收底盘回传信息，判断底盘IMU在线且初始化完成
     publish_data chassis_upload = obj->chassis_upload_sub->getdata(obj->chassis_upload_sub);
     if (chassis_upload.len == -1) {
         obj->send_data.gyro_yaw = 0;
@@ -85,9 +87,9 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     }
 
     // 裁判系统在线
-    if (obj->referee->monitor->count > 0 && obj->referee->robot_status_received > 0){
+    if (obj->referee->monitor->count > 0 && obj->referee->robot_status_received > 0) {
         //第一次收到时候，初始化UI
-        if(obj->referee->robot_status_received == 1){
+        if (obj->referee->robot_status_received == 1) {
             robot_ui_config ui_config;
             ui_config.referee = obj->referee;
             ui_config.robot_id = obj->referee->rx_data.game_robot_state.robot_id;
@@ -138,14 +140,13 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
 
     // 板间通信
     obj->send_data.shoot_referee_data.bullet_speed_max = obj->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
-    obj->send_data.shoot_referee_data.heat_limit_remain =
-        obj->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - obj->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;
+    obj->send_data.shoot_referee_data.heat_limit_remain = obj->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - obj->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;
     obj->send_data.shoot_referee_data.bullet_speed_max = 15;
     obj->send_data.shoot_referee_data.heat_limit_remain = 30;
     CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));
 
     //更新UI信息
-    if(obj->ui != NULL){
+    if (obj->ui != NULL) {
         Robot_UI_update(obj->ui);
     }
 }

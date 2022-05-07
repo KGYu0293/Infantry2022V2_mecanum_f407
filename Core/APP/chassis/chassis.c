@@ -1,19 +1,27 @@
 #include "chassis.h"
-#include "bsp.h"
+
 #include <math.h>
+
+#include "bsp.h"
 
 // the radius of wheel(mm)，轮子半径
 #define RADIUS 71  // 71.25
+
 // the perimeter of wheel(mm)，轮子周长
 #define PERIMETER 448  // 71.25*2pi
+
 // wheel track distance(mm)，轮距
 #define WHEELTRACK 340
+
 // wheelbase distance(mm)，轴距
 #define WHEELBASE 340
+
 // gimbal is relative to chassis center x axis offset(mm)，云台相对于底盘中心的偏移，往右为正
 #define ROTATE_X_OFFSET 0
+
 // gimbal is relative to chassis center y axis offset(mm)，云台相对于底盘中心的偏移，往前为正
 #define ROTATE_Y_OFFSET 0
+
 // the deceleration ratio of chassis motor，底盘电机减速比
 #define MOTOR_DECELE_RATIO 19.0f
 
@@ -26,6 +34,7 @@ void Speed_set(Chassis *obj, Cmd_chassis *param);
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
+    memset(obj, 0, sizeof(Chassis));
 
     obj->offset_x = ROTATE_X_OFFSET;
     obj->offset_y = ROTATE_Y_OFFSET;
@@ -117,7 +126,7 @@ void OutputmaxLimit(Chassis *obj) {
         }
     } else {
         output_limit = 2000 + 6000 * (obj->cmd_data->power.power_limit - 30) / 90;
-        if(output_limit > 6000) output_limit = 6000;
+        if (output_limit > 6000) output_limit = 6000;
     }
     obj->lf->speed_pid.config.outputMax = output_limit;
     obj->rf->speed_pid.config.outputMax = output_limit;

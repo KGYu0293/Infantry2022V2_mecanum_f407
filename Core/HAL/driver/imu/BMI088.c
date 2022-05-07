@@ -1,4 +1,5 @@
 #include "BMI088.h"
+
 #include "BMI088def.h"
 #include "BMI088reg.h"
 #include "bsp_delay.h"
@@ -85,6 +86,7 @@ void BMI088_Update_All() {
 // BMI088构造函数
 BMI088_imu *BMI088_Create(BMI088_config *config) {
     BMI088_imu *obj = (BMI088_imu *)malloc(sizeof(BMI088_imu));
+    memset(obj, 0, sizeof(BMI088_imu));
     obj->config = *config;
     while (BMI088_init(obj))
         ;

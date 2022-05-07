@@ -133,6 +133,7 @@ void Can_Motor_Calc_Send() {
                         obj->position_pid.fdb = obj->real_position;
                     }
                     PID_Calc(&obj->position_pid);
+                    // ADRCFunction(&obj->adrc_position);
                     obj->speed_pid.ref = obj->position_pid.output;
                 }
                 if (obj->config.motor_pid_model >= SPEED_LOOP) {

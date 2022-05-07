@@ -1,8 +1,8 @@
 #include "shoot.h"
 
 // #include "bsp_pwm.h"
-#include "bsp_time.h"
 #include "bsp.h"
+#include "bsp_time.h"
 
 /* 摩擦轮半径(mm) */
 #define RADIUS 30
@@ -24,6 +24,7 @@ void shoot_motor_lost(void *motor) {
 
 Shoot *Shoot_Create(void) {
     Shoot *obj = (Shoot *)malloc(sizeof(Shoot));
+    memset(obj, 0, sizeof(Shoot));
 
     // 电机初始化
     can_motor_config friction_a_config;
@@ -80,7 +81,7 @@ void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
     switch (param->bullet_mode) {
         case bullet_holdon:
             obj->load->config.motor_pid_model = SPEED_LOOP;
-            obj->load->speed_pid.ref = 0;  // 待在原地
+            obj->load->speed_pid.ref = 0;  // 刹车
             break;
         case bullet_reverse:  // 反转 防卡弹
             obj->load->config.motor_pid_model = SPEED_LOOP;
@@ -142,6 +143,9 @@ void Shoot_Update(Shoot *obj) {
                     obj->friction_a->speed_pid.ref = 41300;
                     obj->friction_b->speed_pid.ref = -41300;
                     break;
+                case 0:  // 刹车
+                    obj->friction_a->speed_pid.ref = 0;
+                    obj->friction_b->speed_pid.ref = 0;
                 default:
                     //待实测
                     obj->friction_a->speed_pid.ref = 41300;
