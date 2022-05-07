@@ -1,6 +1,7 @@
 
 
 Breakpoint=D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/APP/app.c:52:1, State=BP_STATE_DISABLED
+OpenDocument="gimbal_board_cmd.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/APP/command/gimbal_board_cmd.c", Line=342
 OpenDocument="hal.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/hal.c", Line=0
 OpenDocument="main.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=73
 OpenDocument="startup_stm32f407xx.s", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=52
@@ -19,7 +20,4 @@ TableHeader="Task List", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Na
 TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[301;299;110;100]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
 TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;359]
-WatchedExpression="cmd", RefreshRate=5, Window=Watched Data 1
-WatchedExpression="uart_ports", RefreshRate=5, Window=Watched Data 1
-WatchedExpression="now_msg", RefreshRate=5, Window=Watched Data 1
-WatchedExpression="huart", Window=Watched Data 1
+WatchedExpression="shoot", Window=Watched Data 1

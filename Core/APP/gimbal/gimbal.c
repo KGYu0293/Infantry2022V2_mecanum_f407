@@ -48,7 +48,7 @@ Gimbal *Gimbal_Create() {
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 1.4, 0.003, 1.6, 2500, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 200, 0.7, 1, 5000, 25000);
+    PID_SetConfig(&pitch_config.config_speed, 170, 0.7, 1, 5000, 25000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub、pub

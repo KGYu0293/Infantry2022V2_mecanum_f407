@@ -23,7 +23,7 @@ void OnProjectLoad (void) {
   // Dialog-generated settings
   //
   Project.SetDevice ("STM32F407IG");
-  Project.SetHostIF ("IP", "192.168.1.14");
+  Project.SetHostIF ("IP", "192.168.1.19");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("12 MHz");
   Project.AddPathSubstitute ("E:/STM32Prj/STM32F407_2022_framework", "$(ProjectDir)");
