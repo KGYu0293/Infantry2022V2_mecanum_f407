@@ -22,7 +22,7 @@ TARGET = STM32F407_2022_framework
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+OPT = -Ofast
 
 
 #######################################
