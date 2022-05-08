@@ -132,7 +132,7 @@ void OutputmaxLimit(Chassis *obj) {
         output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
         if (output_limit < 3000) output_limit = 3000;
         if (output_limit > 8000) output_limit = 8000;
-        if (obj->super_cap->cap_percent < 30) output_limit = 3000;
+        if (obj->super_cap->cap_percent < 30) output_limit = 2000;
     }
     obj->lf->speed_pid.config.outputMax = output_limit;
     obj->rf->speed_pid.config.outputMax = output_limit;
@@ -211,7 +211,7 @@ void Chassis_Update(Chassis *obj) {
 
     //设置电容充电功率，在缓冲功率充足时，多充能
     if (obj->cmd_data->power.power_buffer > 30) {
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 5;
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
     } else {
         obj->super_cap->power_set = obj->cmd_data->power.power_limit;
     }

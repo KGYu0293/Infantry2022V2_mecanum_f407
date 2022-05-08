@@ -10,11 +10,11 @@ typedef struct robot_ui_config_t {
 typedef struct robot_ui_t {
     robot_ui_config config;
     referee_ui* ui_sender;
-    graphic_data test;
-    graphic_data test_line;
-    graphic_data test_circle;
-    graphic_data test_float;
-    graphic_data test_str;
+    graphic_data cap_line;
+    graphic_data cap_rec_outline;
+    graphic_data cap_float;
+    int cap_line_len;
+    float cap_percent;
     //UI刷新时间戳
     uint32_t time_refresh;
 } robot_ui;

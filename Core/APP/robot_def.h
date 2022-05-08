@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "imu_data.h"
 #include "stdint.h"
@@ -128,7 +128,7 @@ typedef struct Upload_gimbal_t {
 // 底盘模块回传cmd的数据
 typedef struct Upload_chassis_t {
     Module_status chassis_status;
-    uint8_t chassis_supercap_percent;
+    float chassis_supercap_percent;
     imu_data* chassis_imu;
 } Upload_chassis;
 

@@ -1,4 +1,5 @@
 
+OpenDocument="app.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/APP/app.c", Line=3
 OpenDocument="startup_stm32f407xx.s", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=50
 OpenDocument="main.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=71
 OpenToolbar="Debug", Floating=0, x=0, y=0
@@ -8,7 +9,8 @@ OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=798, h=675, FilterBarSh
 OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=1137, h=279, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;992]
 TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
-TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[213;272;100;213]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[229;272;100;180]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
 TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;359]
 WatchedExpression="cmd", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="chassis", RefreshRate=5, Window=Watched Data 1

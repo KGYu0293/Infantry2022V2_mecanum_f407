@@ -34,20 +34,21 @@ Super_cap_wuli *Super_cap_wuli_Create(super_cap_wuli_config *config) {
 void Super_cap_wuli_Getpercent(Super_cap_wuli *obj) {
     //最好用函数拟合
     //或者多描几个点省算力（bushi
-    if (obj->voltage_cap_fdb < 15)
-        obj->cap_percent = 20;
-    else if (obj->voltage_cap_fdb >= 15 && obj->voltage_cap_fdb < 17)
-        obj->cap_percent = 35;
-    else if (obj->voltage_cap_fdb >= 17 && obj->voltage_cap_fdb < 19)
-        obj->cap_percent = 50;
-    else if (obj->voltage_cap_fdb >= 19 && obj->voltage_cap_fdb < 21)
-        obj->cap_percent = 65;
-    else if (obj->voltage_cap_fdb >= 21 && obj->voltage_cap_fdb < 23)
-        obj->cap_percent = 80;
-    else if (obj->voltage_cap_fdb >= 23 && obj->voltage_cap_fdb < 24.5)
-        obj->cap_percent = 95;
-    else if (obj->voltage_cap_fdb >= 24.5 && obj->voltage_cap_fdb < 25)
-        obj->cap_percent = 100;
+    // if (obj->voltage_cap_fdb < 15)
+    //     obj->cap_percent = 20;
+    // else if (obj->voltage_cap_fdb >= 15 && obj->voltage_cap_fdb < 17)
+    //     obj->cap_percent = 35;
+    // else if (obj->voltage_cap_fdb >= 17 && obj->voltage_cap_fdb < 19)
+    //     obj->cap_percent = 50;
+    // else if (obj->voltage_cap_fdb >= 19 && obj->voltage_cap_fdb < 21)
+    //     obj->cap_percent = 65;
+    // else if (obj->voltage_cap_fdb >= 21 && obj->voltage_cap_fdb < 23)
+    //     obj->cap_percent = 80;
+    // else if (obj->voltage_cap_fdb >= 23 && obj->voltage_cap_fdb < 24.5)
+    //     obj->cap_percent = 95;
+    // else if (obj->voltage_cap_fdb >= 24.5 && obj->voltage_cap_fdb < 25)
+    //     obj->cap_percent = 100;
+    obj->cap_percent = (obj->voltage_cap_fdb - 14.0) / (24.0 - 14.0) * 100;
 }
 
 void Super_cap_wuli_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len) {

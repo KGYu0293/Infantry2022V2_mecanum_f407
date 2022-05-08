@@ -74,7 +74,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         // obj->send_data.gyro_yaw = ((imu_data*)chassis_upload_data.data)->gyro[2];
         obj->chassis_upload_data = (Upload_chassis*)chassis_upload.data;
         obj->send_data.gyro_yaw = obj->chassis_upload_data->chassis_imu->gyro[2];
-        obj->send_data.chassis_supercap_percent = obj->chassis_upload_data->chassis_supercap_percent;
+        obj->send_data.chassis_supercap_percent = (uint8_t)obj->chassis_upload_data->chassis_supercap_percent;
         // 底盘模块掉线
         if (obj->chassis_upload_data->chassis_status == module_lost) {
             obj->mode = robot_stop;
@@ -145,6 +145,9 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
 
     //更新UI信息
     if (obj->ui != NULL) {
+        if (obj->chassis_upload_data != NULL) {
+            obj->ui->cap_percent = obj->chassis_upload_data->chassis_supercap_percent;
+        }
         Robot_UI_update(obj->ui);
     }
 }
