@@ -135,21 +135,21 @@ void Shoot_Update(Shoot *obj) {
                     break;
                 case 18:
                     //待实测
-                    obj->friction_a->speed_pid.ref = 41300;
-                    obj->friction_b->speed_pid.ref = -41300;
+                    obj->friction_a->speed_pid.ref = 30500;
+                    obj->friction_b->speed_pid.ref = -30500;
                     break;
                 case 15:
                     //待实测
-                    obj->friction_a->speed_pid.ref = 41300;
-                    obj->friction_b->speed_pid.ref = -41300;
+                    obj->friction_a->speed_pid.ref = 28000;
+                    obj->friction_b->speed_pid.ref = -28000;
                     break;
                 case 0:  // 刹车
                     obj->friction_a->speed_pid.ref = 0;
                     obj->friction_b->speed_pid.ref = 0;
                 default:
                     //待实测
-                    obj->friction_a->speed_pid.ref = 41300;
-                    obj->friction_b->speed_pid.ref = -41300;
+                    obj->friction_a->speed_pid.ref = 28000;
+                    obj->friction_b->speed_pid.ref = -28000;
                     break;
             }
             Shoot_load_Update(obj, obj->cmd_data);

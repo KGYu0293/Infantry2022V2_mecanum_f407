@@ -4,9 +4,9 @@
 *                         www.segger.com                             *
 **********************************************************************
 
-File          : G:/RM-code/Infantry2022V1_mecanum_F407/test.jdebug
-Created       : 4 May 2022 09:40
-Ozone Version : V3.24g
+File          : 
+Created       : 8 May 2022 14:54
+Ozone Version : V3.26d
 */
 
 /*********************************************************************
@@ -23,15 +23,11 @@ void OnProjectLoad (void) {
   // Dialog-generated settings
   //
   Project.SetDevice ("STM32F407IG");
-<<<<<<< HEAD:ozone.jdebug
-  Project.SetHostIF ("IP", "192.168.1.19");
-=======
-  Project.SetHostIF ("IP", "192.168.1.20");
->>>>>>> b488455d45be07618304f06c20334a9d523b8216:test.jdebug
+  Project.SetHostIF ("USB", "20220507");
   Project.SetTargetIF ("SWD");
-  Project.SetTIFSpeed ("4 MHz");
-  Project.AddPathSubstitute ("G:/RM-code/Infantry2022V1_mecanum_F407", "$(ProjectDir)");
-  Project.AddPathSubstitute ("g:/rm-code/infantry2022v1_mecanum_f407", "$(ProjectDir)");
+  Project.SetTIFSpeed ("12 MHz");
+  Project.AddPathSubstitute ("D:/STM32Projects/Infantry2022V1_mecanum_F407", "$(ProjectDir)");
+  Project.AddPathSubstitute ("d:/stm32projects/infantry2022v1_mecanum_f407", "$(ProjectDir)");
   Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4F.svd");
   //
   // User settings
@@ -301,6 +297,18 @@ void AfterTargetDownload (void) {
 **********************************************************************
 */
 //void OnError (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterProjectLoad
+*
+* Function description
+*   After Project load routine. Optional.
+*
+**********************************************************************
+*/
+//void AfterProjectLoad (void) {
 //}
 
 /*********************************************************************

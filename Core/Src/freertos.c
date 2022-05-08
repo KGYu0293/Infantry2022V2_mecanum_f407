@@ -20,10 +20,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-
-#include "cmsis_os.h"
-#include "main.h"
 #include "task.h"
+#include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,65 +54,65 @@
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
-    .name = "defaultTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for ImuTask */
 osThreadId_t ImuTaskHandle;
 const osThreadAttr_t ImuTask_attributes = {
-    .name = "ImuTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityHigh,
+  .name = "ImuTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for LogTask */
 osThreadId_t LogTaskHandle;
 const osThreadAttr_t LogTask_attributes = {
-    .name = "LogTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
+  .name = "LogTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for MotorTask */
 osThreadId_t MotorTaskHandle;
 const osThreadAttr_t MotorTask_attributes = {
-    .name = "MotorTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityHigh,
+  .name = "MotorTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for MonitorTask */
 osThreadId_t MonitorTaskHandle;
 const osThreadAttr_t MonitorTask_attributes = {
-    .name = "MonitorTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityHigh,
+  .name = "MonitorTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for RobotCMDTask */
 osThreadId_t RobotCMDTaskHandle;
 const osThreadAttr_t RobotCMDTask_attributes = {
-    .name = "RobotCMDTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
+  .name = "RobotCMDTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for SuperCapTask */
 osThreadId_t SuperCapTaskHandle;
 const osThreadAttr_t SuperCapTask_attributes = {
-    .name = "SuperCapTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityLow,
+  .name = "SuperCapTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for RefereeTask */
 osThreadId_t RefereeTaskHandle;
 const osThreadAttr_t RefereeTask_attributes = {
-    .name = "RefereeTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
+  .name = "RefereeTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for RefereeSendTask */
 osThreadId_t RefereeSendTaskHandle;
 const osThreadAttr_t RefereeSendTask_attributes = {
-    .name = "RefereeSendTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
+  .name = "RefereeSendTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -134,66 +133,67 @@ void StartRefereeSendTask(void *argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
- * @brief  FreeRTOS initialization
- * @param  None
- * @retval None
- */
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
 void MX_FREERTOS_Init(void) {
-    /* USER CODE BEGIN Init */
+  /* USER CODE BEGIN Init */
 
-    /* USER CODE END Init */
+  /* USER CODE END Init */
 
-    /* USER CODE BEGIN RTOS_MUTEX */
+  /* USER CODE BEGIN RTOS_MUTEX */
     /* add mutexes, ... */
-    /* USER CODE END RTOS_MUTEX */
+  /* USER CODE END RTOS_MUTEX */
 
-    /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
-    /* USER CODE END RTOS_SEMAPHORES */
+  /* USER CODE END RTOS_SEMAPHORES */
 
-    /* USER CODE BEGIN RTOS_TIMERS */
+  /* USER CODE BEGIN RTOS_TIMERS */
     /* start timers, add new ones, ... */
-    /* USER CODE END RTOS_TIMERS */
+  /* USER CODE END RTOS_TIMERS */
 
-    /* USER CODE BEGIN RTOS_QUEUES */
+  /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
-    /* USER CODE END RTOS_QUEUES */
+  /* USER CODE END RTOS_QUEUES */
 
-    /* Create the thread(s) */
-    /* creation of defaultTask */
-    defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-    /* creation of ImuTask */
-    ImuTaskHandle = osThreadNew(StartImuTask, NULL, &ImuTask_attributes);
+  /* creation of ImuTask */
+  ImuTaskHandle = osThreadNew(StartImuTask, NULL, &ImuTask_attributes);
 
-    /* creation of LogTask */
-    LogTaskHandle = osThreadNew(StartLogTask, NULL, &LogTask_attributes);
+  /* creation of LogTask */
+  LogTaskHandle = osThreadNew(StartLogTask, NULL, &LogTask_attributes);
 
-    /* creation of MotorTask */
-    MotorTaskHandle = osThreadNew(StartMotorTask, NULL, &MotorTask_attributes);
+  /* creation of MotorTask */
+  MotorTaskHandle = osThreadNew(StartMotorTask, NULL, &MotorTask_attributes);
 
-    /* creation of MonitorTask */
-    MonitorTaskHandle = osThreadNew(StartMonitorTask, NULL, &MonitorTask_attributes);
+  /* creation of MonitorTask */
+  MonitorTaskHandle = osThreadNew(StartMonitorTask, NULL, &MonitorTask_attributes);
 
-    /* creation of RobotCMDTask */
-    RobotCMDTaskHandle = osThreadNew(StartRobotCMDTask, NULL, &RobotCMDTask_attributes);
+  /* creation of RobotCMDTask */
+  RobotCMDTaskHandle = osThreadNew(StartRobotCMDTask, NULL, &RobotCMDTask_attributes);
 
-    /* creation of SuperCapTask */
-    SuperCapTaskHandle = osThreadNew(StartCapTask, NULL, &SuperCapTask_attributes);
+  /* creation of SuperCapTask */
+  SuperCapTaskHandle = osThreadNew(StartCapTask, NULL, &SuperCapTask_attributes);
 
-    /* creation of RefereeTask */
-    RefereeTaskHandle = osThreadNew(StartRefereeTask, NULL, &RefereeTask_attributes);
+  /* creation of RefereeTask */
+  RefereeTaskHandle = osThreadNew(StartRefereeTask, NULL, &RefereeTask_attributes);
 
-    /* creation of RefereeSendTask */
-    RefereeSendTaskHandle = osThreadNew(StartRefereeSendTask, NULL, &RefereeSendTask_attributes);
+  /* creation of RefereeSendTask */
+  RefereeSendTaskHandle = osThreadNew(StartRefereeSendTask, NULL, &RefereeSendTask_attributes);
 
-    /* USER CODE BEGIN RTOS_THREADS */
+  /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
-    /* USER CODE END RTOS_THREADS */
+  /* USER CODE END RTOS_THREADS */
 
-    /* USER CODE BEGIN RTOS_EVENTS */
+  /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
-    /* USER CODE END RTOS_EVENTS */
+  /* USER CODE END RTOS_EVENTS */
+
 }
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -203,8 +203,9 @@ void MX_FREERTOS_Init(void) {
  * @retval None
  */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument) {
-    /* USER CODE BEGIN StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN StartDefaultTask */
     /* Infinite loop */
     // Buzzer_Init(&internal_buzzer,music2,14);
     portTickType currentTimeDefault;
@@ -214,7 +215,7 @@ void StartDefaultTask(void *argument) {
         HAL_Buzzer_Loop();
         vTaskDelayUntil(&currentTimeDefault, 100);
     }
-    /* USER CODE END StartDefaultTask */
+  /* USER CODE END StartDefaultTask */
 }
 
 /* USER CODE BEGIN Header_StartImuTask */
@@ -224,8 +225,9 @@ void StartDefaultTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartImuTask */
-void StartImuTask(void *argument) {
-    /* USER CODE BEGIN StartImuTask */
+void StartImuTask(void *argument)
+{
+  /* USER CODE BEGIN StartImuTask */
     /* Infinite loop */
     portTickType currentTimeImu;
     currentTimeImu = xTaskGetTickCount();
@@ -233,7 +235,7 @@ void StartImuTask(void *argument) {
         HAL_Imu_Loop();
         vTaskDelayUntil(&currentTimeImu, 2);
     }
-    /* USER CODE END StartImuTask */
+  /* USER CODE END StartImuTask */
 }
 
 /* USER CODE BEGIN Header_StartLogTask */
@@ -243,15 +245,16 @@ void StartImuTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartLogTask */
-void StartLogTask(void *argument) {
-    /* USER CODE BEGIN StartLogTask */
+void StartLogTask(void *argument)
+{
+  /* USER CODE BEGIN StartLogTask */
     portTickType currentTimeLog;
     currentTimeLog = xTaskGetTickCount();
     for (;;) {
         APP_Log_Loop();
         vTaskDelayUntil(&currentTimeLog, 10);
     }
-    /* USER CODE END StartLogTask */
+  /* USER CODE END StartLogTask */
 }
 
 /* USER CODE BEGIN Header_StartMotorTask */
@@ -261,8 +264,9 @@ void StartLogTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartMotorTask */
-void StartMotorTask(void *argument) {
-    /* USER CODE BEGIN StartMotorTask */
+void StartMotorTask(void *argument)
+{
+  /* USER CODE BEGIN StartMotorTask */
     portTickType currentTimeMotor;
     currentTimeMotor = xTaskGetTickCount();
     /* Infinite loop */
@@ -270,7 +274,7 @@ void StartMotorTask(void *argument) {
         HAL_Motor_Calc_Loop();
         vTaskDelayUntil(&currentTimeMotor, 1);
     }
-    /* USER CODE END StartMotorTask */
+  /* USER CODE END StartMotorTask */
 }
 
 /* USER CODE BEGIN Header_StartMonitorTask */
@@ -280,8 +284,9 @@ void StartMotorTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartMonitorTask */
-void StartMonitorTask(void *argument) {
-    /* USER CODE BEGIN StartMonitorTask */
+void StartMonitorTask(void *argument)
+{
+  /* USER CODE BEGIN StartMonitorTask */
     /* Infinite loop */
     portTickType currentTimeMonitor;
     currentTimeMonitor = xTaskGetTickCount();
@@ -289,7 +294,7 @@ void StartMonitorTask(void *argument) {
         HAL_Monitor_Loop();
         vTaskDelayUntil(&currentTimeMonitor, 100);
     }
-    /* USER CODE END StartMonitorTask */
+  /* USER CODE END StartMonitorTask */
 }
 
 /* USER CODE BEGIN Header_StartRobotCMDTask */
@@ -299,8 +304,9 @@ void StartMonitorTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartRobotCMDTask */
-void StartRobotCMDTask(void *argument) {
-    /* USER CODE BEGIN StartRobotCMDTask */
+void StartRobotCMDTask(void *argument)
+{
+  /* USER CODE BEGIN StartRobotCMDTask */
     /* Infinite loop */
     portTickType currentTimeRobotCMD;
     currentTimeRobotCMD = xTaskGetTickCount();
@@ -308,7 +314,7 @@ void StartRobotCMDTask(void *argument) {
         APP_Loop();
         vTaskDelayUntil(&currentTimeRobotCMD, 2);
     }
-    /* USER CODE END StartRobotCMDTask */
+  /* USER CODE END StartRobotCMDTask */
 }
 
 /* USER CODE BEGIN Header_StartCapTask */
@@ -318,8 +324,9 @@ void StartRobotCMDTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartCapTask */
-void StartCapTask(void *argument) {
-    /* USER CODE BEGIN StartCapTask */
+void StartCapTask(void *argument)
+{
+  /* USER CODE BEGIN StartCapTask */
     /* Infinite loop */
     portTickType currentTimeSuperCap;
     currentTimeSuperCap = xTaskGetTickCount();
@@ -327,7 +334,7 @@ void StartCapTask(void *argument) {
         HAL_Super_cap_wuli_Loop();
         vTaskDelayUntil(&currentTimeSuperCap, 2);
     }
-    /* USER CODE END StartCapTask */
+  /* USER CODE END StartCapTask */
 }
 
 /* USER CODE BEGIN Header_StartRefereeTask */
@@ -337,8 +344,9 @@ void StartCapTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartRefereeTask */
-void StartRefereeTask(void *argument) {
-    /* USER CODE BEGIN StartRefereeTask */
+void StartRefereeTask(void *argument)
+{
+  /* USER CODE BEGIN StartRefereeTask */
     portTickType currentTimeReferee;
     currentTimeReferee = xTaskGetTickCount();
     /* Infinite loop */
@@ -346,7 +354,7 @@ void StartRefereeTask(void *argument) {
         HAL_Referee_Recv_Loop();
         vTaskDelayUntil(&currentTimeReferee, 10);
     }
-    /* USER CODE END StartRefereeTask */
+  /* USER CODE END StartRefereeTask */
 }
 
 /* USER CODE BEGIN Header_StartRefereeSendTask */
@@ -356,17 +364,19 @@ void StartRefereeTask(void *argument) {
  * @retval None
  */
 /* USER CODE END Header_StartRefereeSendTask */
-void StartRefereeSendTask(void *argument) {
-    /* USER CODE BEGIN StartRefereeSendTask */
+void StartRefereeSendTask(void *argument)
+{
+  /* USER CODE BEGIN StartRefereeSendTask */
     /* Infinite loop */
     for (;;) {
         HAL_Referee_Send_Loop();
         osDelay(20);
     }
-    /* USER CODE END StartRefereeSendTask */
+  /* USER CODE END StartRefereeSendTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
+

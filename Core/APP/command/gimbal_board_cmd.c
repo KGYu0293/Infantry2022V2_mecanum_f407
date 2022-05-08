@@ -37,7 +37,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // 小电脑通信配置
     canpc_config pc_config;
-    pc_config.bsp_can_index = 0;
+    pc_config.bsp_can_index = 1;
     pc_config.recv_identifer = 0x001;
     pc_config.send_identifer = 0x002;
     pc_config.lost_callback = pc_lost;
@@ -177,13 +177,15 @@ void remote_mode_update(gimbal_board_cmd* obj) {
     }
 
     // 发射机构控制
-    obj->shoot_control.mode = shoot_run;
+    
     if (obj->remote->data.rc.s1 == 1) {
+        obj->shoot_control.mode = shoot_stop;
         obj->shoot_control.bullet_mode = bullet_holdon;
         obj->shoot_control.bullet_speed = 0;
         if (obj->remote->data.rc.ch4 > CHx_BIAS + 400) obj->shoot_control.mag_mode = magazine_open;
         if (obj->remote->data.rc.ch4 < CHx_BIAS - 400) obj->shoot_control.mag_mode = magazine_close;
     } else {
+        obj->shoot_control.mode = shoot_run;
         obj->shoot_control.bullet_mode = bullet_continuous;
         obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;
@@ -343,12 +345,13 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     else
         obj->shoot_control.mag_mode = magazine_open;
     // 发射机构控制参数
-    obj->shoot_control.mode = shoot_run;
     if (obj->remote->data.rc.s1 == 1) {
         // 发射机构刹车
         obj->shoot_control.bullet_mode = bullet_holdon;
         obj->shoot_control.bullet_speed = 0;
+        obj->shoot_control.mode = shoot_stop;
     } else {
+        obj->shoot_control.mode = shoot_run;
         // 发弹控制，单发，双发, 射频和小电脑控制待完善
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限

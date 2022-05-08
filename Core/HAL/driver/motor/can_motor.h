@@ -21,6 +21,9 @@ enum Motor_FDB_Model_e { MOTOR_FDB = 0,
 enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0,
                             MOTOR_OUTPUT_REVERSE };  //是否输出反转
 
+enum Motor_CTRL_Model_e { MOTOR_PID = 0,
+                          MOTOR_ADRC };  //控制方案
+
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
     uint8_t motor_set_id;  //电调上通过闪灯次数确定的id
