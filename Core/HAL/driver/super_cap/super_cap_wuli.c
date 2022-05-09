@@ -27,7 +27,7 @@ Super_cap_wuli *Super_cap_wuli_Create(super_cap_wuli_config *config) {
     cvector_pushback(super_cap_wuli_instances, &obj);
     BSP_CAN_AddFilter(obj->config.bsp_can_index, obj->config.super_cap_wuli_rx_id);
 
-    obj->monitor = Monitor_Register(obj->config.lost_callback, 5, obj);
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 20, obj);
     return obj;
 }
 
