@@ -105,6 +105,10 @@ void Gimbal_Update(Gimbal *gimbal) {
             break;
         // 跟随底盘
         case gimbal_middle:
+            // 启动电机
+            gimbal->yaw->enable = MOTOR_ENABLE;
+            gimbal->pitch->enable = MOTOR_ENABLE;
+            // 设定编码器控制
             gimbal->yaw->config.speed_fdb_model = MOTOR_FDB;
             gimbal->yaw->config.position_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
