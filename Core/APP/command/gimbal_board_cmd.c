@@ -83,8 +83,10 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
     if ((obj->recv->monitor->count < 1)) {
         obj->mode = robot_stop;
         obj->pc_send_data.robot_id = 0;
+        obj->pc_send_data.bullet_speed = 0;
     } else {
         obj->pc_send_data.robot_id = obj->recv_data->robot_id;
+        obj->pc_send_data.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;
     }
     // 判断云台IMU是否上线
     publish_data gimbal_data_fdb = obj->gimbal_upload_suber->getdata(obj->gimbal_upload_suber);
