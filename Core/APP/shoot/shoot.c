@@ -70,8 +70,8 @@ Shoot *Shoot_Create(void) {
     Servo_config magazine_config;
     magazine_config.model = MODEL_POS;
     magazine_config.bsp_pwm_index = PWM_SERVO_1_PORT;
-    magazine_config.max_angle = 180;
-    magazine_config.initial_angle = 90;
+    magazine_config.max_angle = 270;
+    magazine_config.initial_angle = 104;
     obj->mag_lid = Servo_Create(&magazine_config);
 
     obj->shoot_cmd_suber = register_sub("cmd_shoot", 1);
@@ -172,7 +172,7 @@ void Shoot_Update(Shoot *obj) {
             obj->mag_lid->pos_servo_control = 0;
             break;
         case magazine_close:
-            obj->mag_lid->pos_servo_control = 180;
+            obj->mag_lid->pos_servo_control = 104;
             break;
     }
 }

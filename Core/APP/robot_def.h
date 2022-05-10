@@ -53,7 +53,7 @@ typedef enum Shoot_mode_e {
 
 // 弹仓盖模式
 typedef enum Magazine_mode_e {
-    magazine_close = 0,  // 开弹仓
+    magazine_close = 104,  // 开弹仓
     magazine_open        // 关弹仓
 } Magazine_mode;
 
