@@ -18,7 +18,7 @@ Servo *Servo_Create(Servo_config *config) {
     obj->config = *config;
     cvector_pushback(servo_instances, &obj);
     BSP_PWM_Start(obj->config.bsp_pwm_index);
-
+    obj->pos_servo_control = obj->config.initial_angle;
     return obj;
 }
 

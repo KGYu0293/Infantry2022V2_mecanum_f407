@@ -66,6 +66,14 @@ Shoot *Shoot_Create(void) {
     PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 600);
     obj->load = Can_Motor_Create(&load_config);
 
+    // 舵机
+    Servo_config magazine_config;
+    magazine_config.model = MODEL_POS;
+    magazine_config.bsp_pwm_index = PWM_SERVO_1_PORT;
+    magazine_config.max_angle = 180;
+    magazine_config.initial_angle = 90;
+    obj->mag_lid = Servo_Create(&magazine_config);
+
     obj->shoot_cmd_suber = register_sub("cmd_shoot", 1);
     obj->cmd_data = NULL;
     obj->cooldown_start = obj->cooldown_time = 0;
@@ -161,9 +169,10 @@ void Shoot_Update(Shoot *obj) {
     switch (obj->cmd_data->mag_mode) {
         case magazine_open:
             // BSP_PWM_SetCCR();
+            obj->mag_lid->pos_servo_control = 0;
             break;
         case magazine_close:
-            // BSP_PWM_SetCCR();
+            obj->mag_lid->pos_servo_control = 180;
             break;
     }
 }

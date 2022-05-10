@@ -91,7 +91,8 @@
         "referee_ui.h": "c",
         "robot_ui.h": "c",
         "bsp_random.h": "c",
-        "bsp_time.h": "c"
+        "bsp_time.h": "c",
+        "pwm_servo.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

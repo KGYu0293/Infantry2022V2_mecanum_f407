@@ -6,11 +6,14 @@
 #include "stdint.h"
 #include "bsp_log.h"
 #include "can_motor.h"
+#include "pwm_servo.h"
 
 typedef struct Shoot_t {
     can_motor *friction_a;
     can_motor *friction_b;
     can_motor *load;
+
+    Servo *mag_lid;
 
     Cmd_shoot* cmd_data;
 
