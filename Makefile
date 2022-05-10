@@ -126,6 +126,7 @@ Core/HAL/driver/referee/robot_ui.c \
 Core/HAL/driver/ws2812b/ws2812b.c \
 Core/HAL/driver/super_cap/super_cap_wuli.c \
 Core/HAL/driver/radiotube/radiotube.c \
+Core/HAL/driver/servo/pwm_servo.c \
 Core/HAL/lib/common.c \
 Core/HAL/lib/soft_crc.c \
 Core/HAL/lib/MahonyAHRS.c \
@@ -241,6 +242,7 @@ C_INCLUDES += \
 -ICore/HAL/driver/ws2812b \
 -ICore/HAL/driver/radiotube \
 -ICore/HAL/driver/super_cap \
+-ICore/HAL/driver/servo \
 -ICore/HAL/lib \
 -ICore/HAL/lib/controller/ \
 -ICore/HAL/monitor \

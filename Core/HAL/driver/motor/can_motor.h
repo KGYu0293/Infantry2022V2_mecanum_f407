@@ -7,22 +7,15 @@
 #include "pid.h"
 #include "stdint.h"
 
-enum Motor_Model_e { MODEL_3508 = 0,
-                     MODEL_2006,
-                     MODEL_6020 };
+enum Motor_Model_e { MODEL_3508 = 0, MODEL_2006, MODEL_6020 };
 
-enum Motor_PID_Model_e { CURRENT_LOOP = 0,
-                         SPEED_LOOP,
-                         POSITION_LOOP };  //速度环/位置环/电流环
+enum Motor_PID_Model_e { CURRENT_LOOP = 0, SPEED_LOOP, POSITION_LOOP };  //速度环/位置环/电流环
 
-enum Motor_FDB_Model_e { MOTOR_FDB = 0,
-                         OTHER_FDB };
+enum Motor_FDB_Model_e { MOTOR_FDB = 0, OTHER_FDB };
 
-enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0,
-                            MOTOR_OUTPUT_REVERSE };  //是否输出反转
+enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0, MOTOR_OUTPUT_REVERSE };  //是否输出反转
 
-enum Motor_CTRL_Model_e { MOTOR_PID = 0,
-                          MOTOR_ADRC };  //控制方案
+enum Motor_CTRL_Model_e { MOTOR_PID = 0, MOTOR_ADRC };  //控制方案
 
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
@@ -43,8 +36,7 @@ typedef struct can_motor_config_t {
 
 typedef struct can_motor_t {
     can_motor_config config;
-    enum { MOTOR_ENABLE,
-           MOTOR_STOP } enable;
+    enum { MOTOR_STOP = 0, MOTOR_ENABLE } enable;
     short fdbPosition;       //电机的编码器反馈值
     short last_fdbPosition;  //电机上次的编码器反馈值
     short fdbSpeed;          //电机反馈的转速/rpm

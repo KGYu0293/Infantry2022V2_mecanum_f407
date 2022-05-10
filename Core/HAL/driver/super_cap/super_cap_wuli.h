@@ -31,6 +31,4 @@ typedef struct super_cap_wuli_t {
 void Super_cap_wuli_Driver_Init();
 Super_cap_wuli* Super_cap_wuli_Create(super_cap_wuli_config* config);
 void Super_cap_wuli_Send();
-void Super_cap_wuli_FeedbackData_Update(Super_cap_wuli* obj, uint8_t* data);
-void Super_cap_wuli_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data, uint32_t len);
 #endif
