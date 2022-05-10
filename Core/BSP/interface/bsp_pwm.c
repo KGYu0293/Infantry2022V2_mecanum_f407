@@ -20,10 +20,10 @@ void BSP_PWM_Init() {
 
     pwm_ports[2].base = PWM_2_BASE;
     pwm_ports[2].channel = PWM_2_CHANNEL;
-    //处理HAL库DMA BUG
-    HAL_DMA_DeInit(&PWM_DMA_1);
-    HAL_DMA_Init(&PWM_DMA_1);
-    HAL_TIM_PWM_Stop_DMA(PWM_2_BASE, PWM_2_CHANNEL);
+    // 处理HAL库DMA BUG
+    // HAL_DMA_DeInit(&PWM_DMA_1);
+    // HAL_DMA_Init(&PWM_DMA_1);
+    // HAL_TIM_PWM_Stop_DMA(PWM_2_BASE, PWM_2_CHANNEL);
 }
 
 void BSP_PWM_Start(uint8_t pwm_index) { HAL_TIM_PWM_Start(pwm_ports[pwm_index].base, pwm_ports[pwm_index].channel); }
