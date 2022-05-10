@@ -212,6 +212,7 @@ void StartDefaultTask(void *argument)
     currentTimeDefault = xTaskGetTickCount();
     for (;;) {
         APP_Layer_default_loop();
+        HAL_Layer_Default_Loop();
         HAL_Buzzer_Loop();
         vTaskDelayUntil(&currentTimeDefault, 100);
     }
