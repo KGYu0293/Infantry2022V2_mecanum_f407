@@ -116,6 +116,7 @@ int main(void)
   MX_TIM4_Init();
   MX_RNG_Init();
   MX_TIM1_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   BSP_Layer_Init();
   HAL_Layer_Init();
