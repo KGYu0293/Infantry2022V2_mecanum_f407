@@ -30,25 +30,29 @@ Servo *Servo_Create(Servo_config *config) {
  */
 uint32_t servo_ccr_calc(Servo *obj) {
     uint32_t ccr = 0;
-
-    if (obj->config.model == MODEL_360) {
-        if (obj->servo_360_control.speed > 100) obj->servo_360_control.speed = 100;
-        if (obj->servo_360_control.direc == servo_forward) {
-            ccr = 1500 + 10 * obj->servo_360_control.speed;
-        } else {
-            ccr = 1500 - 10 * obj->servo_360_control.speed;
-        }
-    } else {
-        int angle_max = 0;
-        if (obj->config.model == MODEL_90)
-            angle_max = 90;
-        else if (obj->config.model == MODEL_180)
-            angle_max = 180;
-        else if (obj->config.model == MODEL_270)
-            angle_max = 270;
-        // 计算
-        if (obj->set_angle > angle_max) obj->set_angle = angle_max;
-        ccr = CCR_START + ((CCR_END - CCR_START) * obj->set_angle / angle_max);
+    switch (obj->config.model) {
+        case MODEL_SPEED:
+            if (obj->speed_servo_control.speed > 100) obj->speed_servo_control.speed = 100;
+            switch (obj->speed_servo_control.direc) {
+                case servo_hold:
+                    ccr = 1500;
+                    break;
+                case servo_forward:
+                    ccr = 1500 + 10 * obj->speed_servo_control.speed;
+                    break;
+                case servo_reverse:
+                    ccr = 1500 - 10 * obj->speed_servo_control.speed;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case MODEL_POS:
+            if (obj->pos_servo_control > obj->config.max_angle) obj->pos_servo_control = obj->config.max_angle;
+            ccr = CCR_START + ((CCR_END - CCR_START) * obj->pos_servo_control / obj->config.max_angle);
+            break;
+        default:
+            break;
     }
 
     return ccr;
