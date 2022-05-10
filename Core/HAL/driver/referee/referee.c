@@ -175,7 +175,6 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
             if (!obj->robot_status_received) {
                 obj->robot_status_received = 1;
             }
-
             memcpy(&obj->rx_data.game_robot_state, rx_pack->data, sizeof(obj->rx_data.game_robot_state));
             break;
         case POWER_HEAT_DATA_CMD_ID:

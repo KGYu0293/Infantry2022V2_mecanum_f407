@@ -82,6 +82,9 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
     // 板间通信-收
     if ((obj->recv->monitor->count < 1)) {
         obj->mode = robot_stop;
+        obj->pc_send_data.robot_id = 0;
+    } else {
+        obj->pc_send_data.robot_id = obj->recv_data->robot_id;
     }
     // 判断云台IMU是否上线
     publish_data gimbal_data_fdb = obj->gimbal_upload_suber->getdata(obj->gimbal_upload_suber);
@@ -177,7 +180,6 @@ void remote_mode_update(gimbal_board_cmd* obj) {
     }
 
     // 发射机构控制
-    
     if (obj->remote->data.rc.s1 == 1) {
         obj->shoot_control.mode = shoot_stop;
         obj->shoot_control.bullet_mode = bullet_holdon;
@@ -194,8 +196,6 @@ void remote_mode_update(gimbal_board_cmd* obj) {
 }
 
 void mouse_key_mode_update(gimbal_board_cmd* obj) {
-    // static enum { chassis_follow_gimbal, gimbal_follow_chassis, independent } chassis_gimbal_follow_mode = chassis_follow_gimbal;
-
     // 云台-底盘运动模式
     // 按一下r:小陀螺
     if (obj->remote->data.key_single_press_cnt.r != obj->remote->last_data.key_single_press_cnt.r) {
@@ -310,7 +310,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
                 *obj->pc->data_updated = 0;
                 // 自瞄开
                 // 计算真实yaw值
-                if(obj->pc->pc_recv_data->wait_time >= 0){
+                if (obj->pc->pc_recv_data->wait_time >= 0) {
                     float yaw_target = obj->pc->pc_recv_data->yaw * 8192.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 8192.0;
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] > pi) yaw_target -= 8192;
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] < -pi) yaw_target += 8192;
@@ -322,7 +322,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
                     obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
                     obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
                 }
-                
+
                 pc_lost_cnt = 10;
             } else {
                 pc_lost_cnt--;

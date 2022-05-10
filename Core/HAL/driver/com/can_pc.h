@@ -11,6 +11,7 @@
 typedef struct canpc_send_t {
     float euler[3];
     uint8_t auto_mode_flag;
+    uint8_t robot_id;
 } canpc_send;
 
 typedef struct canpc_recv_t {

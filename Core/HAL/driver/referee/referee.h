@@ -16,7 +16,7 @@ typedef struct referee_config_t {
 
 // 解析后的裁判系统数据
 typedef struct referee_rx_data_t {
-    Robot_id id;
+    // Robot_id id; game_robot_state里有id
 
     ext_game_state_t game_state;
     ext_game_result_t game_result;

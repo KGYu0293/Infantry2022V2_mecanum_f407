@@ -6,9 +6,11 @@
 #define GIMBAL_BOARD
 // #define CHASSIS_BOARD
 
-#include "imu_data.h"
 #include "stdint.h"
 #include "stdlib.h"
+// 部分外设数据定义
+#include "imu_data.h"
+#include "referee_def.h"
 
 // 各模块pub_sub的参数结构体
 // 各部分对外接口统一存放
@@ -149,6 +151,7 @@ typedef struct Chassis_board_send_t {
         uint16_t bullet_speed_max;   // 弹速
         uint16_t heat_limit_remain;  // 剩余热量
     } shoot_referee_data;
+    uint8_t robot_id;
     uint8_t chassis_supercap_percent;
 } Chassis_board_send_data;
 
