@@ -357,7 +357,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         // 发弹控制，单发，双发, 射频和小电脑控制待完善
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限
-        obj->shoot_control.fire_rate = 3;                                                             // 固定射频
+        obj->shoot_control.fire_rate = 6;                                                             // 固定射频
         if (obj->remote->data.mouse.press_l) {
             obj->shoot_control.bullet_mode = bullet_continuous;
         } else {

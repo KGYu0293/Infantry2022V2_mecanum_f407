@@ -26,7 +26,7 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->config = *_config;
     referee_ui_config sender_config;
     sender_config.referee = obj->config.referee;
-    sender_config.robot_id = obj->config.robot_id;
+    // sender_config.robot_id = obj->config.robot_id;
     //创建referee_ui 对象
     obj->ui_sender = referee_ui_create(&sender_config);
 

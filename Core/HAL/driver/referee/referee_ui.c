@@ -1,4 +1,5 @@
 #include "referee_ui.h"
+
 #include "soft_crc.h"
 #define FRAMEHEADER_LEN 5
 #define CMD_LEN 2
@@ -244,8 +245,8 @@ referee_ui* referee_ui_create(referee_ui_config* config) {
     memset(obj, 0, sizeof(referee_ui));
     obj->config = *config;
     obj->elements = create_circular_queue(sizeof(graphic_cmd), 60);  //最多60个待发送的数据
-    obj->send_frame.data_header.sender_ID = config->robot_id;
-    obj->send_frame.data_header.receiver_ID = Robot_Client_ID(config->robot_id);
+    obj->send_frame.data_header.sender_ID = config->referee->rx_data.game_robot_state.robot_id;
+    obj->send_frame.data_header.receiver_ID = Robot_Client_ID(config->referee->rx_data.game_robot_state.robot_id);
     obj->send_frame.header.SOF = 0xA5;
     obj->send_frame.header.seq = 0;
     obj->send_frame.cmd_id = 0x301;
@@ -264,6 +265,8 @@ void referee_ui_add_cmd(referee_ui* obj, graphic_cmd* element) {
 void Referee_UI_Loop() {
     for (size_t i = 0; i < referee_ui_instances->cv_len; ++i) {
         referee_ui* obj = *((referee_ui**)cvector_val_at(referee_ui_instances, i));
+        obj->send_frame.data_header.sender_ID = obj->config.referee->rx_data.game_robot_state.robot_id;
+        obj->send_frame.data_header.receiver_ID = Robot_Client_ID(obj->config.referee->rx_data.game_robot_state.robot_id);
         uint16_t graphic_num = 0;
         while (obj->elements->cq_len > 0) {
             graphic_cmd* now_cmd = circular_queue_front(obj->elements);

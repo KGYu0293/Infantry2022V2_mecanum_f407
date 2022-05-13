@@ -4,7 +4,6 @@
 
 typedef struct robot_ui_config_t {
     Referee* referee;
-    uint8_t robot_id;
 } robot_ui_config;
 
 typedef struct robot_ui_t {

@@ -62,7 +62,6 @@ typedef struct graphic_cmd_t {
 
 typedef struct referee_ui_config_t {
     Referee* referee;  // referee_ui 依赖referee对象
-    uint16_t robot_id;
 } referee_ui_config;
 
 typedef struct referee_ui_t {

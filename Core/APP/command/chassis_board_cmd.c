@@ -92,7 +92,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         if (obj->referee->robot_status_received == 1) {
             robot_ui_config ui_config;
             ui_config.referee = obj->referee;
-            ui_config.robot_id = obj->referee->rx_data.game_robot_state.robot_id;
+            // ui_config.robot_id = obj->referee->rx_data.game_robot_state.robot_id;
             obj->ui = Create_Robot_UI(&ui_config);
             obj->referee->robot_status_received = 2;
         }
