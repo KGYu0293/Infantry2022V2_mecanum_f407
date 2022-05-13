@@ -238,7 +238,6 @@ typedef struct {
     uint8_t dart_launch_opening_status;
     uint8_t dart_attack_target;
     uint16_t target_change_time;
-    uint16_t last_dart_launch_time;
     uint16_t operate_launch_cmd_time;
 } ext_dart_cilent_cmd_t;
 
