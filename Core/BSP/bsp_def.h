@@ -3,7 +3,7 @@
  * @brief          : BSP层所有配置的宏定义
  * @Author         : 李鸣航
  * @Date           : 2022-05-01 20:45
- * @LastEditTime   : 2022-05-03 11:04
+ * @LastEditTime   : 2022-05-15 17:18
  * @Note           : 请仔细阅读注释，严禁私自更改，随意更改，否则后果自负
  * @Copyright(c)   : 哈尔滨工业大学（深圳）南工骁鹰机器人队版权所有 Critical HIT copyrighted
  */
@@ -95,14 +95,12 @@
 /**
  * @brief      :pwm_ports[0]的宏定义配置，分别为定时器索引、通道数
  * @attention  :pwm数目一定要和DEVICE_PWM_CNT一致
- *              0以后以此类推
+ *              0代表pwm_ports[0]，1代表pwm_ports[1]，以此类推
  */
 #define PWM_0_BASE &htim10
 #define PWM_0_CHANNEL TIM_CHANNEL_1
-
 #define PWM_1_BASE &htim4
 #define PWM_1_CHANNEL TIM_CHANNEL_3
-
 #define PWM_2_BASE &htim1
 #define PWM_2_CHANNEL TIM_CHANNEL_1
 #define PWM_3_BASE &htim1
@@ -117,13 +115,13 @@
 #define PWM_7_CHANNEL TIM_CHANNEL_2
 #define PWM_8_BASE &htim8
 #define PWM_8_CHANNEL TIM_CHANNEL_3
+
 /**
  * @brief      :APP层和HAL层会调用的PWM口的宏定义
  * @attention  :0代表pwm_ports[0]，1代表pwm_ports[1]，以此类推
  */
 #define PWM_BMI088_HEAT_PORT 0
 #define PWM_BUZZER_PORT 1
-
 #define PWM_SERVO_1_PORT 2  // 从远离DBUS端开始数
 #define PWM_SERVO_2_PORT 3
 #define PWM_SERVO_3_PORT 4
