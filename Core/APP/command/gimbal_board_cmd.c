@@ -382,7 +382,7 @@ void send_cmd_and_data(gimbal_board_cmd* obj) {
 
 float get_offset_angle(short init_forward, short now_encoder) {
     short tmp = 0;
-    if (init_forward < 4096) {
+    if (init_forward < 4096) { 
         if (now_encoder > init_forward && now_encoder <= 4096 + init_forward) {
             tmp = now_encoder - init_forward;
         } else if (now_encoder > 4096 + init_forward) {
