@@ -9,3 +9,11 @@ float invSqrt(float x) {
     y = y * (1.5f - (halfx * y * y));
     return y;
 }
+
+int sgn(int x){
+    return x == 0 ? 0 : x > 0 ? 1 : -1;
+}
+
+int fsgn(float x) {
+    return (x != 0.0f ? (x < 0.0f ? -1.0f : 1.0f) : 0.0f);
+}

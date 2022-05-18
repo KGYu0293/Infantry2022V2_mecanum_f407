@@ -263,25 +263,33 @@ void BMI088_heat_control(BMI088_imu *obj) {
 // BMI088读取函数
 void BMI088_read_raw(BMI088_imu *obj) {
     uint8_t buf[8] = {0};
+    static float acc_raw[3];
+    static float gyro_raw[3];
     int16_t tmp;
 
     //加速度
     BMI088_accel_read(obj, BMI088_ACCEL_XOUT_L, buf, 6);
     tmp = (int16_t)((buf[1]) << 8) | buf[0];
-    obj->data.accel[0] = tmp * BMI088_ACCEL_SEN;
+    acc_raw[0] = tmp * BMI088_ACCEL_SEN;
     tmp = (int16_t)((buf[3]) << 8) | buf[2];
-    obj->data.accel[1] = tmp * BMI088_ACCEL_SEN;
+    acc_raw[1] = tmp * BMI088_ACCEL_SEN;
     tmp = (int16_t)((buf[5]) << 8) | buf[4];
-    obj->data.accel[2] = tmp * BMI088_ACCEL_SEN;
+    acc_raw[2] = tmp * BMI088_ACCEL_SEN;
 
     //陀螺仪
     BMI088_gyro_read(obj, BMI088_GYRO_CHIP_ID, buf, 8);
     tmp = (int16_t)((buf[3]) << 8) | buf[2];
-    obj->data.gyro[0] = tmp * BMI088_GYRO_SEN;
+    gyro_raw[0] = tmp * BMI088_GYRO_SEN;
     tmp = (int16_t)((buf[5]) << 8) | buf[4];
-    obj->data.gyro[1] = tmp * BMI088_GYRO_SEN;
+    gyro_raw[1] = tmp * BMI088_GYRO_SEN;
     tmp = (int16_t)((buf[7]) << 8) | buf[6];
-    obj->data.gyro[2] = tmp * BMI088_GYRO_SEN;
+    gyro_raw[2] = tmp * BMI088_GYRO_SEN;
+
+    //坐标系转换
+    for(int i = 0;i < 3;++i){
+        obj->data.accel[i] = acc_raw[obj->config.imu_axis_convert[i] - 1] * sgn(obj->config.imu_axis_convert[i]);
+        obj->data.gyro[i] = gyro_raw[obj->config.imu_axis_convert[i + 3] - 1] * sgn(obj->config.imu_axis_convert[i + 3]);
+    }
 
     //温度
     BMI088_accel_read(obj, BMI088_TEMP_M, buf, 2);

@@ -6,4 +6,6 @@
 #define DEG2RAD pi / 180.0f
 
 float invSqrt(float x);
+int sgn(int x);
+int fsgn(float x);
 #endif

@@ -114,15 +114,7 @@ typedef struct ADRC_t {
     ADRC_Config_t adrc_config;
 } ADRC_t;
 
-float ConstrainFloat(float amt, float low, float high);
-int sgn(float x);
-int fsg(float x, float d);
-float fst(float x1_delta, float x2, float r, float h0);
-float fal(float e, float a, float delta);
-void TDFunction(ADRC_t* adrc_data);
-void NLSEFFunction(ADRC_t* adrc_data);
-void ESOFunction(ADRC_t* adrc_data);
-void ADRCFunction(ADRC_t* adrc_data);
+
 void ADRC_SetConfig(ADRC_Config_t* adrc_config,
                     float r, float h, float h0,
                     float Kp, float Kd, float alpha1, float alpha2, float delta,

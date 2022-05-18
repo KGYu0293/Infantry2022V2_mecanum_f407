@@ -11,7 +11,6 @@
 #include "monitor.h"
 #include "pid.h"
 #include "stdint.h"
-
 typedef struct BMI088_config_t {
     uint8_t bsp_spi_index;
     uint8_t bsp_pwm_heat_index;
@@ -19,6 +18,7 @@ typedef struct BMI088_config_t {
     uint8_t bsp_gpio_gyro_index;
     float temp_target;
     lost_callback lost_callback;
+    char imu_axis_convert[6]; //定义坐标转换矩阵[a1 a2 a3 g1 g2 g3]，公式为 Acc_real[i] = Acc_raw[a_i - 1] * sgn(a_i)，Gyro_real[i] = Gyro_raw[g_i - 1] * sgn(g_i)
 } BMI088_config;
 
 typedef struct BMI088_imu_t {

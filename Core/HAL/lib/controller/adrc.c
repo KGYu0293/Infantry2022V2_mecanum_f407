@@ -11,8 +11,21 @@
 #include "adrc.h"
 
 #include <string.h>
-
+#include <common.h>
 #include "math.h"
+
+
+float ConstrainFloat(float amt, float low, float high);
+int fsg(float x, float d);
+float fst(float x1_delta, float x2, float r, float h0);
+float fal(float e, float a, float delta);
+void TDFunction(ADRC_t* adrc_data);
+void NLSEFFunction(ADRC_t* adrc_data);
+void ESOFunction(ADRC_t* adrc_data);
+void ADRCFunction(ADRC_t* adrc_data);
+
+
+
 
 /**
  * @brief      :浮点数限幅函数
@@ -26,30 +39,13 @@ float ConstrainFloat(float amt, float low, float high) {
 }
 
 /**
- * @brief      :符号函数，x大于0时返回1，x小于0时返回-1，x等于0时返回0
- * @attention  :无
- * @return  {int} 1  x大于0
- *          {int} -1 x小于0
- *          {int} 0  x等于0
- * @param {float} x 需要判断的变量
- */
-int sgn(float x) {
-    if (x > 1E-6)
-        return 1;
-    else if (x < 1E-6)
-        return -1;
-    else
-        return 0;
-}
-
-/**
  * @brief      :二维符号函数
  * @attention  :无
  * @param {float} x 输入1
  * @param {float} d 输入2
  */
 int fsg(float x, float d) {
-    return ((sgn(x + d) - sgn(x - d)) / 2);
+    return ((fsgn(x + d) - fsgn(x - d)) / 2);
 }
 
 /**
@@ -68,8 +64,8 @@ int fsg(float x, float d) {
  */
 float fal(float e, float a, float delta) {
     int s = 0;
-    s = (sgn(e + delta) - sgn(e - delta)) / 2;
-    return (e * s / (powf(delta, 1 - a)) + powf(fabs(e), a) * sgn(e) * (1 - s));
+    s = (fsgn(e + delta) - fsgn(e - delta)) / 2;
+    return (e * s / (powf(delta, 1 - a)) + powf(fabs(e), a) * fsgn(e) * (1 - s));
 }
 
 /**
@@ -91,9 +87,9 @@ float fst(float x1_delta, float x2, float r, float h0) {
     a0 = h0 * x2;
     y = x1_delta + a0;
     a1 = sqrt(d * (d + 8 * fabs(y)));
-    a2 = a0 + sgn(y) * (a1 - d) / 2;
+    a2 = a0 + fsgn(y) * (a1 - d) / 2;
     a = (a0 + y) * fsg(y, d) + a2 * (1 - fsg(y, d));
-    return (-r * (a / d) * fsg(a, d) - r * sgn(a) * (1 - fsg(a, d)));
+    return (-r * (a / d) * fsg(a, d) - r * fsgn(a) * (1 - fsg(a, d)));
 }
 
 /**

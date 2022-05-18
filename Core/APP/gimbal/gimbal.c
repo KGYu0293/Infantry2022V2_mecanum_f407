@@ -23,6 +23,13 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.bsp_spi_index = SPI_BMI088_PORT;
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
     internal_imu_config.lost_callback = gimbal_imu_lost;
+    //定义转换矩阵
+    internal_imu_config.imu_axis_convert[0] = 1;
+    internal_imu_config.imu_axis_convert[1] = 2;
+    internal_imu_config.imu_axis_convert[2] = 3;
+    internal_imu_config.imu_axis_convert[3] = 1;
+    internal_imu_config.imu_axis_convert[4] = 2;
+    internal_imu_config.imu_axis_convert[5] = 3;
     obj->imu = BMI088_Create(&internal_imu_config);
 
     can_motor_config yaw_config;

@@ -19,7 +19,7 @@
  */
 
 #include "pid.h"
-
+#include "common.h" 
 #include "math.h"
 
 /**
@@ -28,9 +28,7 @@
  * @retval 输入的符号，正负1或0
  */
 
-float_t fsgn(float input) {
-    return (input != 0.0f ? (input < 0.0f ? -1.0f : 1.0f) : 0.0f);
-}
+
 
 /**
  * @brief PID计算函数，位置式和增量式合在一起
