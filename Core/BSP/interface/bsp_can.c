@@ -16,6 +16,7 @@
 #include "bsp_can.h"
 
 #include "bsp_def.h"
+#include "bsp_time.h"
 #include "can.h"
 #include "cvector.h"
 
@@ -63,8 +64,17 @@ void BSP_CAN_Send(uint8_t can_id, uint16_t identifier, uint8_t *data,
     txconf.IDE = CAN_ID_STD;
     txconf.RTR = CAN_RTR_DATA;
     txconf.DLC = len;
-    while (HAL_CAN_GetTxMailboxesFreeLevel(can_devices[can_id].device) == 0)
-        ;
+    uint32_t can_tx_start_time = BSP_sys_time_ms();
+    while (HAL_CAN_GetTxMailboxesFreeLevel(can_devices[can_id].device) == 0){
+        // HAL_CAN_AbortTxRequest
+        uint32_t can_tx_now_time = BSP_sys_time_ms();
+        // 2ms还没有发送出去，放弃发送
+        if(can_tx_now_time > can_tx_start_time + 2){
+            HAL_CAN_AbortTxRequest(can_devices[can_id].device,CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2);
+            __NOP();
+            break;
+        }
+    }
     HAL_CAN_AddTxMessage(can_devices[can_id].device, &txconf, data,
                          &can_devices[can_id].tx_mailbox);
 }

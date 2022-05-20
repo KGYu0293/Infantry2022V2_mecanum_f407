@@ -37,11 +37,3 @@ void BSP_PWM_SetARR(uint8_t pwm_index, uint32_t arr_value) { __HAL_TIM_SetAutore
 void BSP_PWM_StartCCR_DMA(uint8_t pwm_index, uint32_t* ccr_data, uint16_t len) { HAL_TIM_PWM_Start_DMA(pwm_ports[pwm_index].base, pwm_ports[pwm_index].channel, ccr_data, len); }
 
 uint32_t BSP_PWM_ReadCCR(uint8_t pwm_index) { return HAL_TIM_ReadCapturedValue(pwm_ports[pwm_index].base, pwm_ports[pwm_index].channel); }
-
-void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef* htim) {
-    for (size_t i = 0; i < DEVICE_PWM_CNT; ++i) {
-        if (htim == pwm_ports[i].base) {
-            HAL_TIM_PWM_Stop_DMA(pwm_ports[i].base, pwm_ports[i].channel);
-        }
-    }
-}
