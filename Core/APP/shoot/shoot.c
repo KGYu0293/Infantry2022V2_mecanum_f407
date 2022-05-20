@@ -63,7 +63,7 @@ Shoot *Shoot_Create(void) {
     load_config.output_model = MOTOR_OUTPUT_NORMAL;
     load_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&load_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 10000);
+    PID_SetConfig(&load_config.config_speed, 20, 0.1, 0, 2000, 10000);
     obj->load = Can_Motor_Create(&load_config);
 
     // 舵机

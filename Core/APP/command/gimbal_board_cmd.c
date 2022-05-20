@@ -360,6 +360,8 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         obj->shoot_control.fire_rate = 6;                                                             // 固定射频
         if (obj->remote->data.mouse.press_l) {
             obj->shoot_control.bullet_mode = bullet_continuous;
+        } else if (obj->remote->data.mouse.press_r) {
+            obj->shoot_control.bullet_mode = bullet_reverse;
         } else {
             obj->shoot_control.bullet_mode = bullet_holdon;
         }
@@ -382,7 +384,7 @@ void send_cmd_and_data(gimbal_board_cmd* obj) {
 
 float get_offset_angle(short init_forward, short now_encoder) {
     short tmp = 0;
-    if (init_forward < 4096) { 
+    if (init_forward < 4096) {
         if (now_encoder > init_forward && now_encoder <= 4096 + init_forward) {
             tmp = now_encoder - init_forward;
         } else if (now_encoder > 4096 + init_forward) {
