@@ -24,12 +24,9 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
     internal_imu_config.lost_callback = gimbal_imu_lost;
     //定义转换矩阵
-    internal_imu_config.imu_axis_convert[0] = 1;
-    internal_imu_config.imu_axis_convert[1] = 2;
+    internal_imu_config.imu_axis_convert[0] = -2;
+    internal_imu_config.imu_axis_convert[1] = 1;
     internal_imu_config.imu_axis_convert[2] = 3;
-    internal_imu_config.imu_axis_convert[3] = 1;
-    internal_imu_config.imu_axis_convert[4] = 2;
-    internal_imu_config.imu_axis_convert[5] = 3;
     obj->imu = BMI088_Create(&internal_imu_config);
 
     can_motor_config yaw_config;
@@ -52,9 +49,9 @@ Gimbal *Gimbal_Create() {
     pitch_config.motor_set_id = 1;
     pitch_config.motor_pid_model = POSITION_LOOP;
     pitch_config.position_fdb_model = OTHER_FDB;
-    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]);  // 此处使用陀螺仪pitch轴X
+    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[1]);  // 此处使用陀螺仪pitch轴X
     pitch_config.speed_fdb_model = OTHER_FDB;
-    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[0]);
+    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[1]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 1.4, 0.003, 1.6, 2500, 5000);

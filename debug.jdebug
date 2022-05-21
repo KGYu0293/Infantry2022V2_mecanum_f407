@@ -23,7 +23,7 @@ void OnProjectLoad (void) {
   // Dialog-generated settings
   //
   Project.SetDevice ("STM32F407IG");
-  Project.SetHostIF ("USB", "20220507");
+  Project.SetHostIF ("USB", "29783368");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("12 MHz");
   Project.AddPathSubstitute ("D:/STM32Projects/Infantry2022V1_mecanum_F407", "$(ProjectDir)");
