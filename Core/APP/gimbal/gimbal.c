@@ -35,7 +35,7 @@ Gimbal *Gimbal_Create() {
     yaw_config.motor_set_id = 1;
     yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
-    yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z
+    yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 此处使用陀螺仪yaw轴Z
     yaw_config.speed_fdb_model = OTHER_FDB;
     yaw_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[2]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
@@ -91,7 +91,7 @@ void Gimbal_Update(Gimbal *gimbal) {
 
     // p轴限位值获取
     gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
-    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_8192[1] + (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
+    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_8192[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
 
     // 模块控制
     switch (gimbal->cmd_data->mode) {
