@@ -14,6 +14,8 @@
 #include "can_send.h"
 #include "referee.h"
 #include "robot_ui.h"
+#include "indicator_led.h"
+
 typedef struct Chassis_board_cmd_t {
     // 机器人状态
     Robot_mode mode;
@@ -26,6 +28,7 @@ typedef struct Chassis_board_cmd_t {
     buzzer *internal_buzzer;
     Referee *referee;
     robot_ui *ui;
+    Indicator_led *indicator_led;
     // 与子模块交互
     Publisher *chassis_cmd_puber;
     Cmd_chassis chassis_control;  //发送给底盘的控制量

@@ -92,7 +92,9 @@
         "robot_ui.h": "c",
         "bsp_random.h": "c",
         "bsp_time.h": "c",
-        "pwm_servo.h": "c"
+        "pwm_servo.h": "c",
+        "indicator_led.h": "c",
+        "bsp_gpio.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

@@ -7,12 +7,12 @@
  * @Note           : 请仔细阅读注释，严禁私自更改，随意更改，否则后果自负
  * @Copyright(c)   : 哈尔滨工业大学（深圳）南工骁鹰机器人队版权所有 Critical HIT copyrighted
  */
-#ifndef _BSP_H_
-#define _BSP_H_
+#ifndef _BSP_DEF_H_
+#define _BSP_DEF_H_
 
 /**
- * @brief      :黑科技宏函数
- * @attention  :禁止更改
+ * @brief      :宏函数
+ * @attention  :请勿更改
  */
 #define LINK(a, b, c) a##_##b##_##c
 
@@ -26,7 +26,7 @@
 /**
  * @brief      :主控共使用（拥有）的can总线数量
  * @attention  :如果使用A板或C板，此处值为2
- *              如果使用F7板子，此处值为3，且bsp_can.c中的内容也需要更改，此时应询问电控组长，禁止自行更改
+ *              如果使用stm32F7系列主控，此处值为3，且bsp_can.c中的内容也需要更改，此时应询问电控组长，禁止自行更改
  */
 #define DEVICE_CAN_CNT 2
 
@@ -54,23 +54,35 @@
  * @brief      :主控用到的GPIO口的数目
  * @attention  :用到几个就填几个，如果更改的话需要在bsp_gpio.c中的函数里面加上额外的gpio配置，并添加如下的宏定义
  */
-#define DEVICE_GPIO_CNT 2
+#define DEVICE_GPIO_CNT 6
 
 /**
- * @brief      :gpio_ports[0]的宏定义配置，分别为引脚定义、输入还是输出模式
+ * @brief      :gpio_ports[x]的宏定义配置，分别为引脚定义、输入还是输出模式
  * @attention  :gpio数目一定要和DEVICE_GPIO_CNT一致
  */
 #define GPIO_0_BASE GPIOA
 #define GPIO_0_PIN GPIO_PIN_4
 #define GPIO_0_MODE GPIO_OUTPUT_MODE
 
-/**
- * @brief      :gpio_ports[1]的宏定义配置，分别为引脚定义、输入还是输出模式
- * @attention  :gpio数目一定要和DEVICE_GPIO_CNT一致
- */
 #define GPIO_1_BASE GPIOB
 #define GPIO_1_PIN GPIO_PIN_0
 #define GPIO_1_MODE GPIO_OUTPUT_MODE
+
+#define GPIO_2_BASE GPIOC
+#define GPIO_2_PIN GPIO_PIN_8
+#define GPIO_2_MODE GPIO_OUTPUT_MODE
+
+#define GPIO_3_BASE GPIOH
+#define GPIO_3_PIN GPIO_PIN_10
+#define GPIO_3_MODE GPIO_OUTPUT_MODE
+
+#define GPIO_4_BASE GPIOH
+#define GPIO_4_PIN GPIO_PIN_11
+#define GPIO_4_MODE GPIO_OUTPUT_MODE
+
+#define GPIO_5_BASE GPIOH
+#define GPIO_5_PIN GPIO_PIN_12
+#define GPIO_5_MODE GPIO_OUTPUT_MODE
 
 /**
  * @brief      :APP层和HAL层会调用的GPIO口的宏定义
@@ -78,6 +90,10 @@
  */
 #define GPIO_BMI088_ACCEL_NS 0
 #define GPIO_BMI088_GYRO_NS 1
+#define GPIO_5V_OUTPUT 2
+#define GPIO_LED1 3
+#define GPIO_LED2 4
+#define GPIO_LED3 5
 
 /*--------------------------------------------------bsp_pwm--------------------------------------------------*/
 /**

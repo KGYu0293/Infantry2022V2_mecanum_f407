@@ -61,6 +61,12 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
     remote_config.lost_callback = gimbal_core_module_lost;
     obj->remote = dt7_Create(&remote_config);
 
+    Indicator_led_config led_config;
+    led_config.bsp_gpio_led1_index = GPIO_LED1;
+    led_config.bsp_gpio_led2_index = GPIO_LED2;
+    led_config.bsp_gpio_led3_index = GPIO_LED3;
+    obj->indicator_led = indicator_led_Create(&led_config);
+
     // memset 0
     obj->mode = robot_stop;
     memset(&(obj->pc_send_data), 0, sizeof(canpc_send));
