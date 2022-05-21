@@ -1,7 +1,7 @@
 #ifndef _IMU_DATA_H_
 #define _IMU_DATA_H_
 
-//此处欧拉角定义为 绕固定参考坐标轴旋转X-Y-Y 也就是 pitch roll yaw
+//此处欧拉角定义为 绕固定参考坐标轴旋转X-Y-Z 也就是 roll pitch yaw
 typedef struct imu_data_t {
     //XYZ
     float accel[3];  //加速度
