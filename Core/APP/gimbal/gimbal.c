@@ -111,9 +111,20 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
-            gimbal->yaw->position_pid.ref = gimbal->cmd_data->yaw;
+            // yaw轴
+            float yaw_ref;
+            yaw_ref = gimbal->cmd_data->yaw;
+            // 防止连续旋转
+            // while ((yaw_ref - gimbal->imu->data.euler_8192[1]) > 4096) {
+            //     yaw_ref -= 8192;
+            // }
+            // while ((yaw_ref - gimbal->imu->data.euler_8192[1]) < -4096) {
+            //     yaw_ref += 8192;
+            // }
+            gimbal->yaw->position_pid.ref = yaw_ref;
+            // pitch轴
             gimbal->pitch->position_pid.ref = gimbal->cmd_data->pitch;
-            // 软件限位
+            // p轴软件限位
             // if (gimbal->pitch->position_pid.ref > gimbal->pitch_limit_up) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_up;
             // if (gimbal->pitch->position_pid.ref < gimbal->pitch_limit_down) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_down;
             break;
