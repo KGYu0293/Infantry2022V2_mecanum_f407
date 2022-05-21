@@ -37,7 +37,7 @@ Shoot *Shoot_Create(void) {
     friction_a_config.output_model = MOTOR_OUTPUT_NORMAL;
     friction_a_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_a_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_a_config.config_speed, 4, 0.015, 0.8, 2000, 5000);
+    PID_SetConfig(&friction_a_config.config_speed, 4, 0.015, 0.8, 2000, 15000);
     obj->friction_a = Can_Motor_Create(&friction_a_config);
 
     can_motor_config friction_b_config;
@@ -50,7 +50,7 @@ Shoot *Shoot_Create(void) {
     friction_b_config.output_model = MOTOR_OUTPUT_NORMAL;
     friction_b_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&friction_b_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_b_config.config_speed, 4, 0.015, 0.8, 2000, 5000);
+    PID_SetConfig(&friction_b_config.config_speed, 4, 0.015, 0.8, 2000, 15000);
     obj->friction_b = Can_Motor_Create(&friction_b_config);
 
     can_motor_config load_config;
@@ -63,7 +63,7 @@ Shoot *Shoot_Create(void) {
     load_config.output_model = MOTOR_OUTPUT_NORMAL;
     load_config.lost_callback = shoot_motor_lost;
     PID_SetConfig(&load_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 600);
+    PID_SetConfig(&load_config.config_speed, 20, 0, 0, 2000, 10000);
     obj->load = Can_Motor_Create(&load_config);
 
     // 舵机
@@ -71,7 +71,7 @@ Shoot *Shoot_Create(void) {
     magazine_config.model = MODEL_POS;
     magazine_config.bsp_pwm_index = PWM_SERVO_1_PORT;
     magazine_config.max_angle = 270;
-    magazine_config.initial_angle = 104;
+    magazine_config.initial_angle = 100;
     obj->mag_lid = Servo_Create(&magazine_config);
 
     obj->shoot_cmd_suber = register_sub("cmd_shoot", 1);
@@ -106,18 +106,19 @@ void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - load_delta_pos;
             obj->cooldown_start = time_now;
-            obj->cooldown_time = 0;  //待测试
+            obj->cooldown_time = 250;  //待测试
+            break;
         case bullet_double:
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - (2 * load_delta_pos);
             obj->cooldown_start = time_now;
-            obj->cooldown_time = 0;  //待测试
+            obj->cooldown_time = 450;  //待测试
             break;
         case bullet_trible:
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - (3 * load_delta_pos);
             obj->cooldown_start = time_now;
-            obj->cooldown_time = 0;  //待测试
+            obj->cooldown_time = 650;  //待测试
             break;
     }
 }
@@ -151,16 +152,16 @@ void Shoot_Update(Shoot *obj) {
                     break;
                 case 15:
                     // 14.3
-                    obj->friction_a->speed_pid.ref = 28150;
-                    obj->friction_b->speed_pid.ref = -28150;
+                    obj->friction_a->speed_pid.ref = 27500;
+                    obj->friction_b->speed_pid.ref = -27500;
                     break;
                 case 0:  // 刹车
                     obj->friction_a->speed_pid.ref = 0;
                     obj->friction_b->speed_pid.ref = 0;
                 default:
                     //待实测
-                    obj->friction_a->speed_pid.ref = 28150;
-                    obj->friction_b->speed_pid.ref = -28150;
+                    obj->friction_a->speed_pid.ref = 27500;
+                    obj->friction_b->speed_pid.ref = -27500;
                     break;
             }
             Shoot_load_Update(obj, obj->cmd_data);
@@ -172,7 +173,7 @@ void Shoot_Update(Shoot *obj) {
             obj->mag_lid->pos_servo_control = 0;
             break;
         case magazine_close:
-            obj->mag_lid->pos_servo_control = 104;
+            obj->mag_lid->pos_servo_control = 106;
             break;
     }
 }
