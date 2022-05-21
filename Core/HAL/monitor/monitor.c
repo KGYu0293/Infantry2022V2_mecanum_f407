@@ -35,3 +35,7 @@ void Monitor_Loop() {
         }
     }
 }
+
+uint8_t is_Offline(monitor_item* obj){
+    return obj->count <= 0;
+}
