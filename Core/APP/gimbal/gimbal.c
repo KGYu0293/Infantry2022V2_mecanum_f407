@@ -92,6 +92,10 @@ void Gimbal_Update(Gimbal *gimbal) {
     gimbal_upload.len = sizeof(Upload_gimbal);
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_upload);
 
+    // p轴限位值获取
+    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
+    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_8192[1] + (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
+
     // 模块控制
     switch (gimbal->cmd_data->mode) {
         case gimbal_stop:
@@ -109,6 +113,9 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
             gimbal->yaw->position_pid.ref = gimbal->cmd_data->yaw;
             gimbal->pitch->position_pid.ref = gimbal->cmd_data->pitch;
+            // 软件限位
+            // if (gimbal->pitch->position_pid.ref > gimbal->pitch_limit_up) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_up;
+            // if (gimbal->pitch->position_pid.ref < gimbal->pitch_limit_down) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_down;
             break;
         // 跟随底盘
         case gimbal_middle:

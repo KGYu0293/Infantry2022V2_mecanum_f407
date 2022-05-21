@@ -18,11 +18,8 @@ typedef struct Gimbal_t {
     Upload_gimbal gimbal_upload_data;
     Cmd_gimbal* cmd_data;
 
-    // // 陀螺仪->pid参数
-    // float* yaw_pos_ref;
-    // float* yaw_spe_ref;
-    // float* pitch_pos_ref;
-    // float* pitch_spe_ref;
+    float pitch_limit_down;
+    float pitch_limit_up;
 } Gimbal;
 
 Gimbal* Gimbal_Create(void);
