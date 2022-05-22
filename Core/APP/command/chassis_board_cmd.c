@@ -43,6 +43,12 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
     obj->referee = referee_Create(&referee_config);
     obj->ui = NULL;  //初始化为NULL
 
+    Indicator_led_config led_config;
+    led_config.bsp_gpio_led1_index = GPIO_LED1;
+    led_config.bsp_gpio_led2_index = GPIO_LED2;
+    led_config.bsp_gpio_led3_index = GPIO_LED3;
+    obj->indicator_led = indicator_led_Create(&led_config);
+
     // 定义publisher和subscriber
     obj->chassis_cmd_puber = register_pub("cmd_chassis");
     obj->chassis_upload_sub = register_sub("upload_chassis", 1);

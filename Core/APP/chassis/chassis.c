@@ -167,8 +167,40 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
     obj->lb->speed_pid.ref = mecanum_speed[3] / PERIMETER * MOTOR_DECELE_RATIO * 360;
 }
 
-// 小陀螺情况下的旋转速度控制函数，可以写不同的变速小陀螺
-float auto_rotate_param(void) { return 150; }
+// 小陀螺情况下的旋转速度控制函数
+float auto_rotate_param(Cmd_chassis *param) {
+    static float rotate = 0;
+
+    // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
+    // // 基准转速 = 最低转速 + 高功率下加速旋转
+    // float rotate_benchmark = 150 + (param->power.power_limit - 30) * 1;
+    // if (spin_speed_change == 0) {
+    //     // 定速
+    //     rotate = rotate_benchmark;
+    // } else {
+    //     // 变速范围
+    //     float rotate_max = rotate_benchmark + 50;
+    //     float rotate_min = rotate_benchmark - 50;
+    //     if (rotate < rotate_min) rotate = rotate_min;
+    //     if (rotate > rotate_max) rotate = rotate_max;
+    //     if (spin_speed_change == 1) {
+    //         // 加速
+    //         rotate += 0.0005;
+    //         if (rotate > rotate_max){
+    //             spin_speed_change = 2;
+    //         }
+    //     }else {
+    //         // 减速 建议不要使用功率减速 以使同功率下整体平均转速较高
+    //         rotate -= 0.0001;
+    //         if (rotate < rotate_min){
+    //             spin_speed_change = 1;
+    //         }
+    //     }
+    // }
+
+    rotate = 150;
+    return rotate;
+}
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
@@ -180,10 +212,10 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
     if (param->mode == chassis_run)
         mecanum_calculate(obj, vx, vy, param->target.rotate);
     else if (param->mode == chassis_rotate_run) {
-        float w = auto_rotate_param();
+        float w = auto_rotate_param(param);
         mecanum_calculate(obj, vx, vy, w);
     } else if (param->mode == chassis_run_follow_offset) {
-        float w = 0.1f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
+        float w = 0.11f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
         mecanum_calculate(obj, vx, vy, w);
     }
 }

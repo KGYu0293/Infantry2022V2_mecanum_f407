@@ -124,6 +124,8 @@ void Can_Motor_Calc_Send() {
             for (int id = 0; id < 4; id++) {
                 can_motor *obj = motor_instances[can_index][identifier][id];
                 if (obj == NULL) continue;
+                //电机掉线判断，如果同一个包内的所有的电机都掉线，那么这个包将不会发出
+                if (is_Offline(obj->monitor)) continue;
                 identifier_send = 1;
                 if (obj->config.motor_pid_model == POSITION_LOOP) {
                     if (obj->config.position_fdb_model == OTHER_FDB) {

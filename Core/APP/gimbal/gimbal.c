@@ -24,12 +24,9 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.temp_target = 55.0f;  //设定温度为55度
     internal_imu_config.lost_callback = gimbal_imu_lost;
     //定义转换矩阵
-    internal_imu_config.imu_axis_convert[0] = 1;
-    internal_imu_config.imu_axis_convert[1] = 2;
+    internal_imu_config.imu_axis_convert[0] = -2;
+    internal_imu_config.imu_axis_convert[1] = 1;
     internal_imu_config.imu_axis_convert[2] = 3;
-    internal_imu_config.imu_axis_convert[3] = 1;
-    internal_imu_config.imu_axis_convert[4] = 2;
-    internal_imu_config.imu_axis_convert[5] = 3;
     obj->imu = BMI088_Create(&internal_imu_config);
 
     can_motor_config yaw_config;
@@ -38,7 +35,7 @@ Gimbal *Gimbal_Create() {
     yaw_config.motor_set_id = 1;
     yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
-    yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 陀螺仪模式反馈值更新 需参照C板实际安装方向 此处使用陀螺仪yaw轴Z
+    yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 此处使用陀螺仪yaw轴Z
     yaw_config.speed_fdb_model = OTHER_FDB;
     yaw_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[2]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
@@ -52,9 +49,9 @@ Gimbal *Gimbal_Create() {
     pitch_config.motor_set_id = 1;
     pitch_config.motor_pid_model = POSITION_LOOP;
     pitch_config.position_fdb_model = OTHER_FDB;
-    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[0]);  // 此处使用陀螺仪pitch轴X
+    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[1]);  // 此处使用陀螺仪pitch轴X
     pitch_config.speed_fdb_model = OTHER_FDB;
-    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[0]);
+    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[1]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 1.4, 0.003, 1.6, 2500, 5000);
@@ -92,6 +89,10 @@ void Gimbal_Update(Gimbal *gimbal) {
     gimbal_upload.len = sizeof(Upload_gimbal);
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_upload);
 
+    // p轴限位值获取
+    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
+    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_8192[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
+
     // 模块控制
     switch (gimbal->cmd_data->mode) {
         case gimbal_stop:
@@ -107,8 +108,22 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
-            gimbal->yaw->position_pid.ref = gimbal->cmd_data->yaw;
+            // yaw轴
+            float yaw_ref;
+            yaw_ref = gimbal->cmd_data->yaw;
+            // 防止连续旋转
+            // while ((yaw_ref - gimbal->imu->data.euler_8192[1]) > 4096) {
+            //     yaw_ref -= 8192;
+            // }
+            // while ((yaw_ref - gimbal->imu->data.euler_8192[1]) < -4096) {
+            //     yaw_ref += 8192;
+            // }
+            gimbal->yaw->position_pid.ref = yaw_ref;
+            // pitch轴
             gimbal->pitch->position_pid.ref = gimbal->cmd_data->pitch;
+            // p轴软件限位
+            // if (gimbal->pitch->position_pid.ref > gimbal->pitch_limit_up) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_up;
+            // if (gimbal->pitch->position_pid.ref < gimbal->pitch_limit_down) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_down;
             break;
         // 跟随底盘
         case gimbal_middle:

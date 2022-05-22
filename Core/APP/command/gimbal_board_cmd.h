@@ -12,8 +12,10 @@
 #include "can_pc.h"
 #include "can_recv.h"
 #include "can_send.h"
+#include "indicator_led.h"
 
 typedef struct Gimbal_board_cmd_t {
+    // 标志量
     Robot_mode mode;
     AutoAim_mode autoaim_mode;
     // 机器人启动好标志量
@@ -30,6 +32,7 @@ typedef struct Gimbal_board_cmd_t {
     canpc *pc;
     canpc_send pc_send_data;
     dt7Remote *remote;
+    Indicator_led *indicator_led;
 
     Publisher *shoot_cmd_puber;
     Cmd_shoot shoot_control;
@@ -37,7 +40,7 @@ typedef struct Gimbal_board_cmd_t {
     Cmd_gimbal gimbal_control;
     Subscriber *gimbal_upload_suber;
     Upload_gimbal *gimbal_upload_data;
-    
+
 } gimbal_board_cmd;
 
 gimbal_board_cmd *Gimbal_board_CMD_Create(void);

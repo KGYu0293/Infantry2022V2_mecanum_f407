@@ -287,8 +287,8 @@ void BMI088_read_raw(BMI088_imu *obj) {
 
     //坐标系转换
     for(int i = 0;i < 3;++i){
-        obj->data.accel[i] = acc_raw[obj->config.imu_axis_convert[i] - 1] * sgn(obj->config.imu_axis_convert[i]);
-        obj->data.gyro[i] = gyro_raw[obj->config.imu_axis_convert[i + 3] - 1] * sgn(obj->config.imu_axis_convert[i + 3]);
+        obj->data.accel[i] = acc_raw[abs(obj->config.imu_axis_convert[i]) - 1] * sgn(obj->config.imu_axis_convert[i]);
+        obj->data.gyro[i] = gyro_raw[abs(obj->config.imu_axis_convert[i]) - 1] * sgn(obj->config.imu_axis_convert[i]);
     }
 
     //温度
