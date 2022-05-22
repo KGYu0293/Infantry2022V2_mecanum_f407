@@ -140,7 +140,7 @@ void Gimbal_Update(Gimbal *gimbal) {
             break;
     }
 
-    // 软件限位 使用编码器对pitch轴进行限位 有锅
+    // 软件限位 使用编码器对pitch轴进行限位 会在边缘反复横跳
     // if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
     // {
     //     gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
