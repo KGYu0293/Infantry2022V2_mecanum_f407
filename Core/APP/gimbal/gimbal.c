@@ -2,11 +2,11 @@
 
 #include "bsp.h"
 // 云台水平并朝向底盘正前方时云台和底盘的编码器值
-#define PITCH_MOTOR_ENCORDER_BIAS 841
+#define PITCH_MOTOR_ENCORDER_BIAS 861
 #define YAW_MOTOR_ENCORDER_BIAS 3153
 // 云台抬头/低头限位
-#define PITCH_ENCORDER_HIGHEST (PITCH_MOTOR_ENCORDER_BIAS + 500)
-#define PITCH_ENCORDER_LOWEST (PITCH_MOTOR_ENCORDER_BIAS - 500)
+#define PITCH_ENCORDER_HIGHEST (PITCH_MOTOR_ENCORDER_BIAS + 600)
+#define PITCH_ENCORDER_LOWEST (PITCH_MOTOR_ENCORDER_BIAS - 600)
 
 void gimbal_motor_lost(void *motor) { printf_log("gimbal motor lost!\n"); }
 void gimbal_imu_lost(void *imu) { printf_log("gimbal imu lost!!!gimbal stopped.\n"); }
@@ -90,8 +90,10 @@ void Gimbal_Update(Gimbal *gimbal) {
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_upload);
 
     // p轴限位值获取
-    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
-    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_8192[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
+    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * 
+        (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
+    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * 
+        (gimbal->imu->data.euler_8192[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
 
     // 模块控制
     switch (gimbal->cmd_data->mode) {
@@ -111,19 +113,19 @@ void Gimbal_Update(Gimbal *gimbal) {
             // yaw轴
             float yaw_ref;
             yaw_ref = gimbal->cmd_data->yaw;
-            // 防止连续旋转
-            // while ((yaw_ref - gimbal->imu->data.euler_8192[1]) > 4096) {
-            //     yaw_ref -= 8192;
-            // }
-            // while ((yaw_ref - gimbal->imu->data.euler_8192[1]) < -4096) {
-            //     yaw_ref += 8192;
-            // }
+            // 防止连续旋转 优化空间较大
+            while ((yaw_ref - gimbal->imu->data.yaw_8192_real) > 4096) {
+                yaw_ref -= 8192;
+            }
+            while ((yaw_ref - gimbal->imu->data.yaw_8192_real) < -4096) {
+                yaw_ref += 8192;
+            }
             gimbal->yaw->position_pid.ref = yaw_ref;
             // pitch轴
             gimbal->pitch->position_pid.ref = gimbal->cmd_data->pitch;
             // p轴软件限位
-            // if (gimbal->pitch->position_pid.ref > gimbal->pitch_limit_up) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_up;
-            // if (gimbal->pitch->position_pid.ref < gimbal->pitch_limit_down) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_down;
+            if (gimbal->pitch->position_pid.ref < gimbal->pitch_limit_up) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_up;
+            if (gimbal->pitch->position_pid.ref > gimbal->pitch_limit_down) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_down;
             break;
         // 跟随底盘
         case gimbal_middle:
@@ -139,13 +141,4 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->pitch->position_pid.ref = PITCH_MOTOR_ENCORDER_BIAS;
             break;
     }
-
-    // 软件限位 使用编码器对pitch轴进行限位 会在边缘反复横跳
-    // if ((gimbal->yaw->fdbPosition < PITCH_ENCORDER_LOWEST) || (gimbal->yaw->fdbPosition > PITCH_ENCORDER_HIGHEST))
-    // {
-    //     gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
-    //     gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-    //     if (gimbal->pitch->fdbPosition < PITCH_ENCORDER_LOWEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_LOWEST;
-    //     if (gimbal->pitch->fdbPosition > PITCH_ENCORDER_HIGHEST) gimbal->pitch->position_pid.ref = PITCH_ENCORDER_HIGHEST;
-    // }
 }

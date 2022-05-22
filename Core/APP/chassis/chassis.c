@@ -23,7 +23,7 @@
 #define ROTATE_Y_OFFSET 0
 
 // the deceleration ratio of chassis motor，底盘电机减速比
-#define MOTOR_DECELE_RATIO 19.0f
+#define MOTOR_DECELE_RATIO 14.0f
 
 #define RADIAN_COEF 57.3f  // 180°/pi
 

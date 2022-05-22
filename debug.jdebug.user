@@ -1,18 +1,12 @@
 
-OpenDocument="main.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=70
-OpenDocument="BMI088.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/driver/imu/BMI088.c", Line=275
-OpenDocument="app.h", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/APP/app.h", Line=0
-OpenDocument="bsp_gpio.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/BSP/interface/bsp_gpio.c", Line=0
-OpenDocument="startup_stm32f407xx.s", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=51
-OpenDocument="app.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/APP/app.c", Line=0
+OpenDocument="main.c", FilePath="D:/RM/RM_code/git_workspace/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=0
 OpenToolbar="Debug", Floating=0, x=0, y=0
-OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=345, h=589, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=702, h=589, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=1193, h=308, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;992]
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=345, h=626, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=702, h=626, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=1920, h=308, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;917]
 TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
 TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[308;272;100;100]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
-TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;571]
 WatchedExpression="gimbal", RefreshRate=5, Window=Watched Data 1
 WatchedExpression="temp", RefreshRate=5, Window=Watched Data 1
