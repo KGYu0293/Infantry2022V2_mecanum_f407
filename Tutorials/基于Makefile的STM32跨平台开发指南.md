@@ -160,7 +160,7 @@ Linux自带GNU Make工具，不需要这一步骤。
 
 在添加到指定用户添加的位置时，使用STM32Cube重新生成工程并不会影响用户已经手动添加的文件和目录。
 
-### C++/C混合编译
+### 拓展：C++/C混合编译
  
 修改Makefile使c++也能编译：
 
@@ -179,18 +179,35 @@ Linux自带GNU Make工具，不需要这一步骤。
 至此，c++/c以可以混合编译了。
 ![img](jpgs\4.png)
 
-关于c/c++互相调用的内容，参考以下文章：
-https://segmentfault.com/a/1190000012221570
+关于c/c++互相调用的内容，参考[以下文章](https://segmentfault.com/a/1190000012221570)
 
-附上改好的一份makefile文件：
-https://github.com/cxnaive/MakeFile-for-CubeMX
+
+附上改好的一份makefile文件[示例](https://github.com/cxnaive/MakeFile-for-CubeMX)
 
 可根据其理解上述内容。
 
 ## 编译 下载与调试
-编译
-改变cube设置后再次生成或使用其他电脑上生成或修改的makefile可能出现编译不通过，此时可以使用rm build命令(即删除bulid文件夹，可以手动打开工程文件夹删除)后再次编译。git等方式同步时若其他协作者修改了makeflie或重新生成了工程一般也需要删除build。一般三次编译之内会不报错。
+### 编译
+安装完成makefile tool插件后可以直接在vscode左侧点击makefile-编译按钮(上面已有示例)。也可以点击vscode最上面一行终端-运行任务-启动下载调试器。该功能并不一定能在所有工程使用，可能需要在.vscode/task.json内手动配置。框架内默认已进行配置。
 
-下载 调试
-使用ozone进行下载与调试。
-ozone可以和keil一样将全局变量添加到watch并实时监测，注意watch的靠右边有一行fresh，默认是不刷新，需要自行下拉更改成需要的频率刷新。
+若改变cube设置后再次生成或使用其他电脑上生成或修改过的makefile，此时直接编译可能出现编译不通过，此时可以使用rm build命令(即删除bulid文件夹，可以手动打开工程文件夹直接删除)后再次编译。git等方式同步时若其他协作者修改了makeflie或重新生成了工程一般也需要删除build。一般三次编译之内会不报错。
+
+### 下载 调试
+方法一：使用ozone软件进行下载与调试。注意ozone只支持jlink下载器。
+ozone可以和keil一样将全局变量添加到watch并实时监测，注意watch的靠右边有一行fresh，**默认是不刷新，需要自行下拉更改成需要的频率刷新**。
+
+方法二：使用openocd进行下载与调试。可以支持多种下载器，可以在vscode内完成下载和调试，但配置复杂，且调试功能不如ozone强大。
+
+注：该方法尚未完全解决。
+
+配置：
+1. 下载vscode插件：Cortex-Debug 
+2. 下载openocd，添加环境变量
+   - [openocd下载地址](https://github.com/openocd-org/openocd/releases/tag/v0.11.0)
+   - 下载后解压，将所得文件夹放到合适的位置。随后添加环境变量，与上述类似，仍是添加解压所得文件夹的bin子文件夹
+3. 下载功能 .vscode/tasks.json
+4. 调试功能 .vscode/launch.json
+
+[jlink驱动下载](https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack)
+
+使用：
