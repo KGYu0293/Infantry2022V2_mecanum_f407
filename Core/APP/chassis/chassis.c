@@ -150,16 +150,16 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 
     r_x = WHEELTRACK / 2 + obj->offset_x;
     r_y = WHEELBASE / 2 - obj->offset_y;
-    mecanum_speed[0] = -vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[0] = vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
     r_x = WHEELTRACK / 2 - obj->offset_x;
     r_y = WHEELBASE / 2 - obj->offset_y;
-    mecanum_speed[1] = -vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[1] = vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
     r_x = WHEELTRACK / 2 - obj->offset_x;
     r_y = WHEELBASE / 2 + obj->offset_y;
-    mecanum_speed[2] = vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[2] = -vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
     r_x = WHEELTRACK / 2 + obj->offset_x;
     r_y = WHEELBASE / 2 + obj->offset_y;
-    mecanum_speed[3] = vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
+    mecanum_speed[3] = -vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
 
     obj->lf->speed_pid.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
     obj->rf->speed_pid.ref = mecanum_speed[1] / PERIMETER * MOTOR_DECELE_RATIO * 360;
