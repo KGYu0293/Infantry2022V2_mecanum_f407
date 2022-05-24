@@ -1,12 +1,7 @@
 #include "gimbal.h"
 
-#include "bsp.h"
-// 云台水平并朝向底盘正前方时云台和底盘的编码器值
-#define PITCH_MOTOR_ENCORDER_BIAS 861
-#define YAW_MOTOR_ENCORDER_BIAS 3153
-// 云台抬头/低头限位
-#define PITCH_ENCORDER_HIGHEST (PITCH_MOTOR_ENCORDER_BIAS + 600)
-#define PITCH_ENCORDER_LOWEST (PITCH_MOTOR_ENCORDER_BIAS - 600)
+#include "bsp_def.h"
+
 
 void gimbal_motor_lost(void *motor) { printf_log("gimbal motor lost!\n"); }
 void gimbal_imu_lost(void *imu) { printf_log("gimbal imu lost!!!gimbal stopped.\n"); }

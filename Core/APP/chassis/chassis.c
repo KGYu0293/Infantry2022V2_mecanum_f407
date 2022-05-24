@@ -4,29 +4,6 @@
 
 #include "bsp.h"
 
-// the radius of wheel(mm)，轮子半径
-#define RADIUS 71  // 71.25
-
-// the perimeter of wheel(mm)，轮子周长
-#define PERIMETER 448  // 71.25*2pi
-
-// wheel track distance(mm)，轮距
-#define WHEELTRACK 340
-
-// wheelbase distance(mm)，轴距
-#define WHEELBASE 340
-
-// gimbal is relative to chassis center x axis offset(mm)，云台相对于底盘中心的偏移，往右为正
-#define ROTATE_X_OFFSET 0
-
-// gimbal is relative to chassis center y axis offset(mm)，云台相对于底盘中心的偏移，往前为正
-#define ROTATE_Y_OFFSET 0
-
-// the deceleration ratio of chassis motor，底盘电机减速比
-#define MOTOR_DECELE_RATIO 14.0f
-
-#define RADIAN_COEF 57.3f  // 180°/pi
-
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 void chassis_imu_lost(void *motor) { printf_log("chassis IMU lost!!\n"); }
 void chassis_super_cap_lost(void *motor) { printf_log("super cap lost!!\n"); }
@@ -36,8 +13,8 @@ Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
     memset(obj, 0, sizeof(Chassis));
 
-    obj->offset_x = ROTATE_X_OFFSET;
-    obj->offset_y = ROTATE_Y_OFFSET;
+    obj->offset_x = CHASSIS_ROTATE_X_OFFSET;
+    obj->offset_y = CHASSIS_ROTATE_Y_OFFSET;
 
     // 外设初始化
     BMI088_config internal_imu_config;
@@ -148,23 +125,23 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
     float r_x, r_y;
     float mecanum_speed[4];
 
-    r_x = WHEELTRACK / 2 + obj->offset_x;
-    r_y = WHEELBASE / 2 - obj->offset_y;
+    r_x = CHASSIS_WHEELTRACK / 2 + obj->offset_x;
+    r_y = CHASSIS_WHEELBASE / 2 - obj->offset_y;
     mecanum_speed[0] = vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
-    r_x = WHEELTRACK / 2 - obj->offset_x;
-    r_y = WHEELBASE / 2 - obj->offset_y;
+    r_x = CHASSIS_WHEELTRACK / 2 - obj->offset_x;
+    r_y = CHASSIS_WHEELBASE / 2 - obj->offset_y;
     mecanum_speed[1] = vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
-    r_x = WHEELTRACK / 2 - obj->offset_x;
-    r_y = WHEELBASE / 2 + obj->offset_y;
+    r_x = CHASSIS_WHEELTRACK / 2 - obj->offset_x;
+    r_y = CHASSIS_WHEELBASE / 2 + obj->offset_y;
     mecanum_speed[2] = -vx - vy - rotate * (r_x + r_y) / RADIAN_COEF;
-    r_x = WHEELTRACK / 2 + obj->offset_x;
-    r_y = WHEELBASE / 2 + obj->offset_y;
+    r_x = CHASSIS_WHEELTRACK / 2 + obj->offset_x;
+    r_y = CHASSIS_WHEELBASE / 2 + obj->offset_y;
     mecanum_speed[3] = -vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
 
-    obj->lf->speed_pid.ref = mecanum_speed[0] / PERIMETER * MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
-    obj->rf->speed_pid.ref = mecanum_speed[1] / PERIMETER * MOTOR_DECELE_RATIO * 360;
-    obj->rb->speed_pid.ref = mecanum_speed[2] / PERIMETER * MOTOR_DECELE_RATIO * 360;
-    obj->lb->speed_pid.ref = mecanum_speed[3] / PERIMETER * MOTOR_DECELE_RATIO * 360;
+    obj->lf->speed_pid.ref = mecanum_speed[0] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
+    obj->rf->speed_pid.ref = mecanum_speed[1] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
+    obj->rb->speed_pid.ref = mecanum_speed[2] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
+    obj->lb->speed_pid.ref = mecanum_speed[3] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
 }
 
 // 小陀螺情况下的旋转速度控制函数

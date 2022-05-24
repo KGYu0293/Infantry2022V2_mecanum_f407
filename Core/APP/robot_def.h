@@ -12,6 +12,9 @@
 #include "imu_data.h"
 #include "referee_def.h"
 
+// 机器人结构参数定义
+#include "robot_struct.h"
+
 // 各模块pub_sub的参数结构体
 // 各部分对外接口统一存放
 // 各部分通过pub_sub方式“沟通”的“通讯协议”

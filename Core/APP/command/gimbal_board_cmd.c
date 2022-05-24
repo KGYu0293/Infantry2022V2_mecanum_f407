@@ -1,7 +1,7 @@
 #include "gimbal_board_cmd.h"
 
-#include "bsp.h"
-#define INIT_FORWARD 3152  // 云台朝向底盘正前时云台yaw编码器值
+#include "bsp_def.h"
+
 // monitor处理函数
 void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!robot stopped for security.\n"); }
 void pc_lost(void* obj) { printf_log("pc lost!\n"); }
@@ -128,7 +128,7 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         stop_mode_update(obj);
     } else if (obj->mode == robot_run) {
         // 获取云台offset
-        obj->send_data.chassis_target.offset_angle = get_offset_angle(INIT_FORWARD, *obj->gimbal_upload_data->yaw_encorder);
+        obj->send_data.chassis_target.offset_angle = get_offset_angle(YAW_MOTOR_ENCORDER_BIAS, *obj->gimbal_upload_data->yaw_encorder);
         // 自瞄关
         obj->pc_send_data.auto_mode_flag = 0;
         // 遥控器控制模式
