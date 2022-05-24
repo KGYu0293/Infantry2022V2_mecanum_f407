@@ -40,7 +40,7 @@ Chassis *Chassis_Create() {
     can_motor_config rb_config;
     lf_config.motor_model = MODEL_3508;
     lf_config.bsp_can_index = 0;
-    lf_config.motor_set_id = 4;
+    lf_config.motor_set_id = 2;
     lf_config.motor_pid_model = SPEED_LOOP;
     lf_config.position_fdb_model = MOTOR_FDB;
     lf_config.speed_fdb_model = MOTOR_FDB;
@@ -51,7 +51,7 @@ Chassis *Chassis_Create() {
     obj->lf = Can_Motor_Create(&lf_config);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
-    rf_config.motor_set_id = 3;
+    rf_config.motor_set_id = 1;
     rf_config.motor_pid_model = SPEED_LOOP;
     rf_config.position_fdb_model = MOTOR_FDB;
     rf_config.speed_fdb_model = MOTOR_FDB;
@@ -62,7 +62,7 @@ Chassis *Chassis_Create() {
     obj->rf = Can_Motor_Create(&rf_config);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
-    lb_config.motor_set_id = 1;
+    lb_config.motor_set_id = 3;
     lb_config.motor_pid_model = SPEED_LOOP;
     lb_config.position_fdb_model = MOTOR_FDB;
     lb_config.speed_fdb_model = MOTOR_FDB;
@@ -73,7 +73,7 @@ Chassis *Chassis_Create() {
     obj->lb = Can_Motor_Create(&lb_config);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
-    rb_config.motor_set_id = 2;
+    rb_config.motor_set_id = 4;
     rb_config.motor_pid_model = SPEED_LOOP;
     rb_config.position_fdb_model = MOTOR_FDB;
     rb_config.speed_fdb_model = MOTOR_FDB;
