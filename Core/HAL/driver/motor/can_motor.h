@@ -1,7 +1,6 @@
 /* 基于can_send/can_recv 创建的标准化的电机控制机制*/
 #ifndef _CAN_MOTOR_H
 #define _CAN_MOTOR_H
-#include "adrc.h"
 #include "circular_queue.h"
 #include "monitor.h"
 #include "pid.h"
@@ -15,8 +14,6 @@ enum Motor_FDB_Model_e { MOTOR_FDB = 0, OTHER_FDB };
 
 enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0, MOTOR_OUTPUT_REVERSE };  //是否输出反转
 
-enum Motor_CTRL_Model_e { MOTOR_PID = 0, MOTOR_ADRC };  //控制方案
-
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
     uint8_t motor_set_id;  //电调上通过闪灯次数确定的id
@@ -27,8 +24,6 @@ typedef struct can_motor_config_t {
     enum Motor_OUTPUT_Model_e output_model;
     struct PID_config_t config_speed;
     struct PID_config_t config_position;
-    struct ADRC_Config_t adrc_config_speed;
-    struct ADRC_Config_t adrc_config_position;
     float* speed_pid_fdb;  // OTHER_FDB模式的ref指针
     float* position_pid_fdb;
     lost_callback lost_callback;
@@ -48,8 +43,6 @@ typedef struct can_motor_t {
     float last_real_position;   //上次真实转过的角度
     struct PID_t speed_pid;     //速度环pid
     struct PID_t position_pid;  //位置环pid
-    struct ADRC_t adrc_speed;
-    struct ADRC_t adrc_position;
 
     short current_output;
 

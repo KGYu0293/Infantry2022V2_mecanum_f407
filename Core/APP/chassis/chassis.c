@@ -94,7 +94,7 @@ Chassis *Chassis_Create() {
     return obj;
 }
 
-//对电流环进行限制 功率限制
+// 对电流环进行限制 简易版功率限制
 void OutputmaxLimit(Chassis *obj) {
     float output_limit = 0;
     if (obj->cmd_data->power.if_consume_supercap) {
@@ -115,6 +115,24 @@ void OutputmaxLimit(Chassis *obj) {
     obj->rf->speed_pid.config.outputMax = output_limit;
     obj->lb->speed_pid.config.outputMax = output_limit;
     obj->rb->speed_pid.config.outputMax = output_limit;
+}
+
+/**
+ * @brief 底盘电机缓启动
+ * @param None
+ * @retval None
+ */
+void ChassisAccelerationLimit(Chassis *obj, Cmd_chassis *param) {
+    double accMax = 3.0f * (double)param->power.power_limit;
+    if (accMax < 170.0f)
+        accMax = 170.0f;
+    else if (accMax > 270.0f)
+        accMax = 270.0f;
+
+    if (fabs(obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb) > accMax) obj->lf->speed_pid.ref = obj->lf->speed_pid.fdb + accMax * (obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb > 0 ? 1 : -1);
+    if (fabs(obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb) > accMax) obj->lb->speed_pid.ref = obj->lb->speed_pid.fdb + accMax * (obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb > 0 ? 1 : -1);
+    if (fabs(obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb) > accMax) obj->rf->speed_pid.ref = obj->rf->speed_pid.fdb + accMax * (obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb > 0 ? 1 : -1);
+    if (fabs(obj->rb->speed_pid.ref - obj->rb->speed_pid.fdb) > accMax) obj->rb->speed_pid.ref = obj->rb->speed_pid.fdb + accMax * (obj->rb->speed_pid.ref - obj->rb->speed_pid.fdb > 0 ? 1 : -1);
 }
 
 /**
@@ -147,7 +165,9 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 // 小陀螺情况下的旋转速度控制函数
 float auto_rotate_param(Cmd_chassis *param) {
     static float rotate = 0;
+    // 位置函数
 
+    // 时间函数
     // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
     // // 基准转速 = 最低转速 + 高功率下加速旋转
     // float rotate_benchmark = 150 + (param->power.power_limit - 30) * 1;
@@ -181,9 +201,6 @@ float auto_rotate_param(Cmd_chassis *param) {
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
-    //功率控制
-    OutputmaxLimit(obj);
-
     float vx = param->target.vx * cos(param->target.offset_angle * DEG2RAD) - param->target.vy * sin(param->target.offset_angle * DEG2RAD);
     float vy = param->target.vx * sin(param->target.offset_angle * DEG2RAD) + param->target.vy * cos(param->target.offset_angle * DEG2RAD);
     if (param->mode == chassis_run)
@@ -195,6 +212,12 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
         float w = 0.11f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
         mecanum_calculate(obj, vx, vy, w);
     }
+
+    // 功率控制
+    OutputmaxLimit(obj);
+    // 加速度限制
+    // if(不在爬坡模式)
+    ChassisAccelerationLimit(obj, param);
 }
 
 void Chassis_Update(Chassis *obj) {
