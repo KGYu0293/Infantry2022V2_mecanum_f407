@@ -160,8 +160,8 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 void mousekey_GimbalChassis_default(gimbal_board_cmd* obj) {
     obj->gimbal_control.mode = gimbal_run;
     obj->send_data.chassis_mode = chassis_run_follow_offset;
-    obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->euler_8192[2];
-    obj->gimbal_control.pitch = obj->gimbal_upload_data->gimbal_imu->euler_8192[1];
+    obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_8192_real;
+    obj->gimbal_control.pitch = obj->gimbal_upload_data->gimbal_imu->euler_8192[PITCH_AXIS];
 }
 
 void stop_mode_update(gimbal_board_cmd* obj) {
@@ -326,8 +326,8 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
                 // 计算真实yaw值
                 if (obj->pc->pc_recv_data->wait_time >= 0) {
                     float yaw_target = obj->pc->pc_recv_data->yaw * 8192.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 8192.0;
-                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] > pi) yaw_target -= 8192;
-                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[2] < -pi) yaw_target += 8192;
+                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 8192;
+                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 8192;
                     obj->gimbal_control.yaw = yaw_target;
                     obj->gimbal_control.pitch = obj->pc->pc_recv_data->roll * 8192.0 / 2 / pi;  // 根据当前情况决定，pitch轴反馈为陀螺仪roll
                 } else {

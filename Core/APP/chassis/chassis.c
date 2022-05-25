@@ -220,7 +220,7 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
     OutputmaxLimit(obj);
     // 加速度限制
     // if(不在爬坡模式)
-    ChassisAccelerationLimit(obj, param);
+    // ChassisAccelerationLimit(obj, param);
 }
 
 void Chassis_Update(Chassis *obj) {

@@ -31,7 +31,7 @@ Gimbal *Gimbal_Create() {
     yaw_config.position_fdb_model = OTHER_FDB;
     yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 此处使用陀螺仪yaw轴Z
     yaw_config.speed_fdb_model = OTHER_FDB;
-    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[2]);
+    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[YAW_AXIS]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
     yaw_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&yaw_config.config_position, 1.6, 0.014, 0.1, 3200, 5000);
@@ -43,9 +43,9 @@ Gimbal *Gimbal_Create() {
     pitch_config.motor_set_id = 1;
     pitch_config.motor_pid_model = POSITION_LOOP;
     pitch_config.position_fdb_model = OTHER_FDB;
-    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[1]);  // 此处使用陀螺仪pitch轴X
+    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[PITCH_AXIS]);  // 此处使用陀螺仪pitch轴X
     pitch_config.speed_fdb_model = OTHER_FDB;
-    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[1]);
+    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[PITCH_AXIS]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
     PID_SetConfig(&pitch_config.config_position, 1.4, 0.003, 1.6, 2500, 5000);
@@ -103,7 +103,7 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.speed_fdb_model = OTHER_FDB;
             gimbal->yaw->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
-            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg[1]);
+            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg[PITCH_AXIS]);
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.output_model = MOTOR_OUTPUT_REVERSE;
             // yaw轴
@@ -135,7 +135,7 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.position_fdb_model = MOTOR_FDB;
             // gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg_reverse[1]);
+            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg_reverse[PITCH_AXIS]);
             gimbal->yaw->position_pid.ref = YAW_MOTOR_ENCORDER_BIAS + gimbal->yaw->round * 8192;
             gimbal->pitch->position_pid.ref = PITCH_MOTOR_ENCORDER_BIAS;
             gimbal->pitch->config.output_model = MOTOR_OUTPUT_NORMAL;
