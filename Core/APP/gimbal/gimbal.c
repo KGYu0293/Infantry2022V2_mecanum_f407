@@ -2,7 +2,6 @@
 
 #include "bsp_def.h"
 
-
 void gimbal_motor_lost(void *motor) { printf_log("gimbal motor lost!\n"); }
 void gimbal_imu_lost(void *imu) { printf_log("gimbal imu lost!!!gimbal stopped.\n"); }
 
@@ -85,10 +84,8 @@ void Gimbal_Update(Gimbal *gimbal) {
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_upload);
 
     // p轴限位值获取
-    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * 
-        (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
-    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * 
-        (gimbal->imu->data.euler_8192[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
+    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
+    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_8192[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
 
     // 模块控制
     switch (gimbal->cmd_data->mode) {
@@ -132,7 +129,7 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.position_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-            gimbal->yaw->position_pid.ref = YAW_MOTOR_ENCORDER_BIAS;
+            gimbal->yaw->position_pid.ref = YAW_MOTOR_ENCORDER_BIAS + gimbal->yaw->round * 8192;
             gimbal->pitch->position_pid.ref = PITCH_MOTOR_ENCORDER_BIAS;
             break;
     }
