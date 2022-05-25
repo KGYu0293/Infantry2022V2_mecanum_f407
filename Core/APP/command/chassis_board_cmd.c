@@ -30,7 +30,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
 
     //蜂鸣器配置
     buzzer_config internal_buzzer_config;
-    uint32_t music_id = 7;
+    uint32_t music_id = 3;
     internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
@@ -154,6 +154,12 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     if (obj->ui != NULL) {
         if (obj->chassis_upload_data != NULL) {
             obj->ui->cap_percent = obj->chassis_upload_data->chassis_supercap_percent;
+            obj->ui->data.fri_mode = obj->recv_data->fri_mode;
+            obj->ui->data.mag_mode = obj->recv_data->mag_mode;
+            obj->ui->data.gimbal_mode = obj->recv_data->gimbal_mode;
+            obj->ui->data.autoaim_mode = obj->recv_data->autoaim_mode;
+            obj->ui->data.chassis_mode = obj->recv_data->chassis_mode;
+            obj->ui->data.pc_online = obj->recv_data->pc_online;
         }
         Robot_UI_update(obj->ui);
     }

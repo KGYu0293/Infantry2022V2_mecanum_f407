@@ -98,10 +98,14 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->enable = MOTOR_ENABLE;
             gimbal->pitch->enable = MOTOR_ENABLE;
             // 设定陀螺仪控制
+            // PID_SetConfig(&gimbal->pitch->position_pid.config, 1.4, 0.003, 1.6, 2500, 5000);
+            // PID_SetConfig(&gimbal->pitch->speed_pid.config, 170, 0.7, 1, 5000, 25000);
             gimbal->yaw->config.speed_fdb_model = OTHER_FDB;
             gimbal->yaw->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
+            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg[1]);
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
+            gimbal->pitch->config.output_model = MOTOR_OUTPUT_REVERSE;
             // yaw轴
             float yaw_ref;
             yaw_ref = gimbal->cmd_data->yaw;
@@ -125,12 +129,16 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->enable = MOTOR_ENABLE;
             gimbal->pitch->enable = MOTOR_ENABLE;
             // 设定编码器控制
-            gimbal->yaw->config.speed_fdb_model = MOTOR_FDB;
+            // PID_SetConfig(&gimbal->pitch->position_pid.config, 0.1, 0.003, 0, 2500, 5000);
+            // PID_SetConfig(&gimbal->pitch->speed_pid.config, 30, 0.7, 0, 5000, 25000);
+            // gimbal->yaw->config.speed_fdb_model = MOTOR_FDB;
             gimbal->yaw->config.position_fdb_model = MOTOR_FDB;
-            gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
+            // gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
+            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg_reverse[1]);
             gimbal->yaw->position_pid.ref = YAW_MOTOR_ENCORDER_BIAS + gimbal->yaw->round * 8192;
             gimbal->pitch->position_pid.ref = PITCH_MOTOR_ENCORDER_BIAS;
+            gimbal->pitch->config.output_model = MOTOR_OUTPUT_NORMAL;
             break;
     }
 }

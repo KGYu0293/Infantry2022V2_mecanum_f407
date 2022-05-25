@@ -160,6 +160,8 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
 void mousekey_GimbalChassis_default(gimbal_board_cmd* obj) {
     obj->gimbal_control.mode = gimbal_run;
     obj->send_data.chassis_mode = chassis_run_follow_offset;
+    obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->euler_8192[2];
+    obj->gimbal_control.pitch = obj->gimbal_upload_data->gimbal_imu->euler_8192[1];
 }
 
 void stop_mode_update(gimbal_board_cmd* obj) {
@@ -353,9 +355,9 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
 
     // c:开关弹仓
     if (obj->remote->data.key_single_press_cnt.c % 2)
-        obj->shoot_control.mag_mode = magazine_close;
-    else
         obj->shoot_control.mag_mode = magazine_open;
+    else
+        obj->shoot_control.mag_mode = magazine_close;
 
     // 发射机构控制参数
     if (obj->remote->data.rc.s1 == 1) {

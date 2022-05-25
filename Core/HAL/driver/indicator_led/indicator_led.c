@@ -30,6 +30,7 @@ Indicator_led *indicator_led_Create(Indicator_led_config *config) {
     memset(obj, 0, sizeof(Indicator_led));
     obj->config = *config;
     cvector_pushback(indicator_led_instances, &obj);
+    return obj;
 }
 
 void indicator_led_Update(Indicator_led *obj) {

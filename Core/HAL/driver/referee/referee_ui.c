@@ -160,6 +160,15 @@ void add_graphic(referee_ui* obj, graphic_data* graphic) {
     tmp.data.operate_tpye = 1;  //添加
     referee_ui_add_cmd(obj, &tmp);
 }
+
+// 删除图形命令
+void del_graphic(referee_ui* obj, graphic_data* graphic) {
+    graphic_cmd tmp;
+    tmp.data = *graphic;
+    tmp.delete_type = 1;
+    tmp.data.operate_tpye = 3;  //删除
+    referee_ui_add_cmd(obj, &tmp);
+}
 // 添加字符串命令
 void add_text(referee_ui* obj, graphic_data* graphic, char* s, uint8_t len) {
     graphic_cmd tmp;
@@ -282,6 +291,7 @@ void Referee_UI_Loop() {
                 memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
                 referee_send_ext(obj->config.referee, &obj->send_frame);
                 circular_queue_pop(obj->elements);
+                break;
             } else if (now_cmd->data.graphic_tpye == char_t) {  //字符特殊处理
                 //如果之前有已经存入send_frame的图片，那就先发送完图片
                 if (graphic_num > 0) break;
@@ -294,6 +304,7 @@ void Referee_UI_Loop() {
                 memcpy(obj->send_frame.data + obj->send_frame.header.data_length - 6, &crc16_now, 2);
                 referee_send_ext(obj->config.referee, &obj->send_frame);
                 circular_queue_pop(obj->elements);
+                break;
             } else {
                 //凑够7个或者直到为空
                 memcpy(obj->send_frame.data + graphic_num * sizeof(graphic_data), &now_cmd->data, sizeof(graphic_data));
