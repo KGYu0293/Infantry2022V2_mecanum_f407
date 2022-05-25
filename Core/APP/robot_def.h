@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "stdint.h"
 #include "stdlib.h"
@@ -57,7 +57,7 @@ typedef enum Shoot_mode_e {
 // 弹仓盖模式
 typedef enum Magazine_mode_e {
     magazine_close = 104,  // 开弹仓
-    magazine_open        // 关弹仓
+    magazine_open          // 关弹仓
 } Magazine_mode;
 
 // 云台模式
@@ -141,15 +141,20 @@ typedef struct Upload_chassis_t {
 // 云台->底盘数据包
 typedef struct Gimbal_board_send_t {
     uint8_t if_consume_supercap;       // 是否消耗电容
-    Robot_mode now_robot_mode;         // 遥控器在云台主控 包含stop模式与云台重要模块掉线
-    Chassis_mode chassis_mode;         // 底盘模式
+    uint8_t now_robot_mode;            // 遥控器在云台主控 包含stop模式与云台重要模块掉线
+    uint8_t chassis_mode;              // 底盘模式
+    uint8_t autoaim_mode;              // UI所需自瞄数据
+    uint8_t pc_online;                 // UI所需PC是否在线
+    uint8_t gimbal_mode;               // UI所需云台数据
+    uint8_t mag_mode;                  // UI所需弹仓盖数据
+    uint8_t fri_mode;                  // UI所需摩擦轮数据
     Cmd_chassis_speed chassis_target;  // 底盘速度控制
 } Gimbal_board_send_data;
 
 // 云台<-底盘数据包
 typedef struct Chassis_board_send_t {
-    Module_status chassis_board_status;  // 同步底盘是否有重要模块掉线
-    float gyro_yaw;                      // 将底盘主控的imu数据发到云台
+    uint8_t chassis_board_status;  // 同步底盘是否有重要模块掉线
+    float gyro_yaw;                // 将底盘主控的imu数据发到云台
     struct {
         uint16_t bullet_speed_max;   // 弹速
         uint16_t heat_limit_remain;  // 剩余热量

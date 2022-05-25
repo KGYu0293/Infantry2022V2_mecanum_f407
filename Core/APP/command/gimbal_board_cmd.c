@@ -148,7 +148,11 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
      if (robot->remote->data.key_single_press_cnt.c != robot->remote->last_data.key_single_press_cnt.c)
          robot->send_data.if_supercap_on = 1 - robot->send_data.if_supercap_on; */
     // obj->send_data.if_supercap_on = 1;
-
+    obj->send_data.fri_mode = obj->shoot_control.mode;
+    obj->send_data.mag_mode = obj->shoot_control.mag_mode;
+    obj->send_data.gimbal_mode = obj->gimbal_control.mode;
+    obj->send_data.autoaim_mode = obj->autoaim_mode;
+    obj->send_data.pc_online = !is_Offline(obj->pc->recv->monitor);
     // 发布控制结果和通信
     send_cmd_and_data(obj);
 }
@@ -352,6 +356,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         obj->shoot_control.mag_mode = magazine_close;
     else
         obj->shoot_control.mag_mode = magazine_open;
+
     // 发射机构控制参数
     if (obj->remote->data.rc.s1 == 1) {
         // 发射机构刹车
