@@ -30,7 +30,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
 
     //蜂鸣器配置
     buzzer_config internal_buzzer_config;
-    uint32_t music_id = 3;
+    uint32_t music_id = 7;
     internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
