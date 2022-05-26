@@ -69,7 +69,7 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // memset 0
     obj->mode = robot_stop;
-    memset(&(obj->pc_send_data), 0, sizeof(canpc_send));
+    memset(&(obj->pc_send_data), 0, sizeof(pc_send));
     memset(&(obj->gimbal_control), 0, sizeof(Cmd_gimbal));
     memset(&(obj->shoot_control), 0, sizeof(Cmd_shoot));
     memset(&(obj->send_data), 0, sizeof(Gimbal_board_send_data));
@@ -144,10 +144,6 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         obj->send_data.now_robot_mode = robot_run;
     }
 
-    /*  //电容为可开关模式则解注释
-     if (robot->remote->data.key_single_press_cnt.c != robot->remote->last_data.key_single_press_cnt.c)
-         robot->send_data.if_supercap_on = 1 - robot->send_data.if_supercap_on; */
-    // obj->send_data.if_supercap_on = 1;
     obj->send_data.fri_mode = obj->shoot_control.mode;
     obj->send_data.mag_mode = obj->shoot_control.mag_mode;
     obj->send_data.gimbal_mode = obj->gimbal_control.mode;
@@ -259,7 +255,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
             obj->autoaim_mode = auto_aim_off;
     }
     // b:大符
-    if (obj->remote->data.key_single_press_cnt.g != obj->remote->last_data.key_single_press_cnt.g) {
+    if (obj->remote->data.key_single_press_cnt.b != obj->remote->last_data.key_single_press_cnt.b) {
         if (obj->autoaim_mode != auto_aim_buff_big)
             obj->autoaim_mode = auto_aim_buff_big;
         else

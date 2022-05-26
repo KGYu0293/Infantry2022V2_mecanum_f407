@@ -1,11 +1,5 @@
-/* 演示如何基于can_send/can_recv 构建特质化的通信*/
-#ifndef _MINIPC_H
-#define _MINIPC_H
-#include "can_recv.h"
-#include "can_send.h"
-#include "datatypes.h"
-#include "monitor.h"
-#include "stdint.h"
+#ifndef _UART_PC_H
+#define _UART_PC_H
 #include <pc_data.h>
 
 typedef struct canpc_config_t {
@@ -25,4 +19,5 @@ typedef struct canpc_t {
 
 canpc* CanPC_Create(canpc_config* config);
 void CanPC_Send(canpc* obj, pc_send* data);
+
 #endif

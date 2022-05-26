@@ -114,6 +114,7 @@ C_SOURCES += \
 Core/HAL/driver/imu/BMI088.c \
 Core/HAL/driver/buzzer/buzzer.c \
 Core/HAL/driver/com/can_pc.c \
+Core/HAL/driver/com/uart_pc.c \
 Core/HAL/driver/com/can_send.c \
 Core/HAL/driver/com/can_recv.c \
 Core/HAL/driver/com/uart_send.c \
