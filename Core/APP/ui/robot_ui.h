@@ -13,6 +13,8 @@ typedef struct ui_status_t{
     uint8_t mag_mode;                  // UI所需弹仓盖数据
     uint8_t fri_mode;                  // UI所需摩擦轮数据
     uint8_t chassis_mode;              // UI所需底盘数据
+    float cap_percent;
+    float bat_voltage;
 } ui_status;
 
 typedef struct robot_ui_t {
@@ -21,7 +23,10 @@ typedef struct robot_ui_t {
     //电容相关
     graphic_data cap_line;
     graphic_data cap_rec_outline;
-    graphic_data cap_float;
+    graphic_data cap_int;
+
+    //电池电压
+    graphic_data bat_float;
 
     //摩擦轮
     graphic_data fri_circle;
@@ -49,7 +54,6 @@ typedef struct robot_ui_t {
     char autoaim_str[UI_TEXT_BUFFER_SIZE];
 
     int cap_line_len;
-    float cap_percent;
     
     ui_status data;
     //UI刷新时间戳

@@ -16,7 +16,8 @@ void Robot_UI_AddElements(robot_ui* obj) {
     // ADD
     add_graphic(obj->ui_sender, &obj->cap_line);
     add_graphic(obj->ui_sender, &obj->cap_rec_outline);
-    add_graphic(obj->ui_sender, &obj->cap_float);
+    add_graphic(obj->ui_sender, &obj->cap_int);
+    add_graphic(obj->ui_sender, &obj->bat_float);
     //指示灯
     add_graphic(obj->ui_sender, &obj->fri_circle);
     add_graphic(obj->ui_sender, &obj->mag_circle);
@@ -34,10 +35,13 @@ void Robot_UI_AddElements(robot_ui* obj) {
 //改变图形元素
 void Robot_UI_ModifyElements(robot_ui* obj) {
     //超级电容电量变化
-    graphic_float_change(&obj->cap_float, obj->cap_percent);
-    int cap_len_now = (int)obj->cap_line_len * obj->cap_percent / 100.0;
+    graphic_int_change(&obj->cap_int, (int)obj->data.cap_percent);
+    int cap_len_now = (int)obj->cap_line_len * obj->data.cap_percent / 100.0;
     obj->cap_line.end_x = obj->cap_line.start_x + cap_len_now;
-    modifiy_graphic(obj->ui_sender, &obj->cap_float);
+    //电池电压
+    graphic_float_change(&obj->bat_float, obj->data.bat_voltage);
+    modifiy_graphic(obj->ui_sender, &obj->cap_int);
+    modifiy_graphic(obj->ui_sender, &obj->bat_float);
     modifiy_graphic(obj->ui_sender, &obj->cap_line);
 
     //摩擦轮变化
@@ -95,10 +99,10 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     } else if (obj->data.autoaim_mode == auto_aim_normal) {
         obj->autoaim_circle.color = Green;
         strset(obj->autoaim_str, "AUTOAIM:NORM");
-    } else if (obj->data.autoaim_mode == auto_aim_buff_small){
+    } else if (obj->data.autoaim_mode == auto_aim_buff_small) {
         obj->autoaim_circle.color = Pink;
         strset(obj->autoaim_str, "AUTOAIM:SMALL");
-    } else if (obj->data.autoaim_mode == auto_aim_buff_big){
+    } else if (obj->data.autoaim_mode == auto_aim_buff_big) {
         obj->autoaim_circle.color = Cyan;
         strset(obj->autoaim_str, "AUTOAIM:BIG");
     }
@@ -129,34 +133,37 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->cap_line_len = 1210 - 710;
     obj->cap_rec_outline = Rectangle(0, 0, Green, 2, 710, 100, 1210, 150);
     obj->cap_line = Line(1, 0, Yellow, 50, 710, 125, 960, 125);
-    obj->cap_float = Float(2, 0, Yellow, 2, 30, 1, 1225, 140, 50.0);
+    // obj->cap_float = Float(2, 0, Yellow, 2, 30, 1, 1225, 140, 50.0);
+    obj->cap_int = Int(2, 0, Yellow, 2, 30, 1225, 140, 50);
+    obj->bat_float = Float(3, 0, RedBlue, 2, 30, 1, 1225, 100, 24.0);
 
     //摩擦轮
-    obj->fri_circle = Circle(3, 0, Green, 8, 150, 731, 10);
-    obj->fri_text = Char(4, 0, White, 3, 20, 20, 180, 740);
+    obj->fri_circle = Circle(4, 0, Green, 8, 150, 731, 10);
+    obj->fri_text = Char(5, 0, White, 3, 20, 20, 180, 740);
     strset(obj->fri_str, "FRI:OFF");
 
     //弹仓
-    obj->mag_circle = Circle(5, 0, Green, 8, 150, 681, 10);
-    obj->mag_text = Char(6, 0, White, 3, 20, 20, 180, 690);
+    obj->mag_circle = Circle(6, 0, Green, 8, 150, 681, 10);
+    obj->mag_text = Char(7, 0, White, 3, 20, 20, 180, 690);
     strset(obj->mag_str, "HATCH:CLOSE");
 
     //云台
-    obj->gimbal_circle = Circle(7, 0, Green, 8, 150, 631, 10);
-    obj->gimbal_text = Char(8, 0, White, 3, 20, 20, 180, 640);
+    obj->gimbal_circle = Circle(8, 0, Green, 8, 150, 631, 10);
+    obj->gimbal_text = Char(9, 0, White, 3, 20, 20, 180, 640);
     strset(obj->gimbal_str, "GIMBAL:NORM");
 
     //底盘
-    obj->chassis_circle = Circle(9, 0, Green, 8, 150, 581, 10);
-    obj->chassis_text = Char(10, 0, White, 3, 20, 20, 180, 590);
+    obj->chassis_circle = Circle(10, 0, Green, 8, 150, 581, 10);
+    obj->chassis_text = Char(11, 0, White, 3, 20, 20, 180, 590);
     strset(obj->chassis_str, "CHASSIS:FOLLOW");
 
     //自瞄
-    obj->autoaim_circle = Circle(11, 0, Green, 8, 150, 531, 10);
-    obj->autoaim_text = Char(12, 0, White, 3, 20, 20, 180, 540);
+    obj->autoaim_circle = Circle(12, 0, Green, 8, 150, 531, 10);
+    obj->autoaim_text = Char(13, 0, White, 3, 20, 20, 180, 540);
     strset(obj->autoaim_str, "AUTOAIM:OFF");
     //初始化percent
-    obj->cap_percent = 0.0;
+    obj->data.cap_percent = 0.0;
+    obj->data.bat_voltage = 0.0;
 
     Robot_UI_AddElements(obj);
     obj->time_refresh = BSP_sys_time_ms();

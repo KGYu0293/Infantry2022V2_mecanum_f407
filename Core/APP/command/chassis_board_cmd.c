@@ -153,7 +153,8 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     // 更新UI信息
     if (obj->ui != NULL) {
         if (obj->chassis_upload_data != NULL) {
-            obj->ui->cap_percent = obj->chassis_upload_data->chassis_supercap_percent;
+            obj->ui->data.cap_percent = obj->chassis_upload_data->chassis_supercap_percent;
+            obj->ui->data.bat_voltage = obj->chassis_upload_data->chassis_battery_voltage;
             obj->ui->data.fri_mode = obj->recv_data->fri_mode;
             obj->ui->data.mag_mode = obj->recv_data->mag_mode;
             obj->ui->data.gimbal_mode = obj->recv_data->gimbal_mode;
