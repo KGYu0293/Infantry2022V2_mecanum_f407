@@ -123,7 +123,7 @@ void OutputmaxLimit(Chassis *obj) {
  * @retval None
  */
 void ChassisAccelerationLimit(Chassis *obj, Cmd_chassis *param) {
-    double accMax = 3.0f * (double)param->power.power_limit;
+    double accMax = 15.0f * (double)param->power.power_limit;
     if (accMax < 170.0f)
         accMax = 170.0f;
     else if (accMax > 270.0f)
