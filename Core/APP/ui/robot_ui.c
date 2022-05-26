@@ -18,6 +18,7 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->cap_rec_outline);
     add_graphic(obj->ui_sender, &obj->cap_int);
     add_graphic(obj->ui_sender, &obj->bat_float);
+    add_graphic(obj->ui_sender, &obj->vision_frame);
     //指示灯
     add_graphic(obj->ui_sender, &obj->fri_circle);
     add_graphic(obj->ui_sender, &obj->mag_circle);
@@ -92,21 +93,28 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     //自瞄模式
     if (!obj->data.pc_online) {
         obj->autoaim_circle.color = White;
+        obj->vision_frame.width = 0;
         strset(obj->autoaim_str, "AUTOAIM:OFFLINE");
     } else if (obj->data.autoaim_mode == auto_aim_off) {
         obj->autoaim_circle.color = Orange;
+        obj->vision_frame.width = 0;
         strset(obj->autoaim_str, "AUTOAIM:OFF");
     } else if (obj->data.autoaim_mode == auto_aim_normal) {
         obj->autoaim_circle.color = Green;
+        obj->vision_frame.width = 1;
         strset(obj->autoaim_str, "AUTOAIM:NORM");
     } else if (obj->data.autoaim_mode == auto_aim_buff_small) {
         obj->autoaim_circle.color = Pink;
+        obj->vision_frame.width = 1;
         strset(obj->autoaim_str, "AUTOAIM:SMALL");
     } else if (obj->data.autoaim_mode == auto_aim_buff_big) {
         obj->autoaim_circle.color = Cyan;
+        obj->vision_frame.width = 1;
         strset(obj->autoaim_str, "AUTOAIM:BIG");
     }
+    obj->vision_frame.color = obj->data.vision_has_taget ? Green: White;
 
+    modifiy_graphic(obj->ui_sender, &obj->vision_frame);
     modifiy_graphic(obj->ui_sender, &obj->fri_circle);
     modifiy_graphic(obj->ui_sender, &obj->mag_circle);
     modifiy_graphic(obj->ui_sender, &obj->gimbal_circle);
@@ -136,30 +144,31 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     // obj->cap_float = Float(2, 0, Yellow, 2, 30, 1, 1225, 140, 50.0);
     obj->cap_int = Int(2, 0, Yellow, 2, 30, 1225, 140, 50);
     obj->bat_float = Float(3, 0, RedBlue, 2, 30, 1, 1225, 100, 24.0);
+    obj->vision_frame = Rectangle(4, 0, White, 0, 820, 430, 1100, 650);
 
     //摩擦轮
-    obj->fri_circle = Circle(4, 0, Green, 8, 150, 731, 10);
-    obj->fri_text = Char(5, 0, White, 3, 20, 20, 180, 740);
+    obj->fri_circle = Circle(5, 0, Green, 8, 150, 731, 10);
+    obj->fri_text = Char(6, 0, White, 3, 20, 20, 180, 740);
     strset(obj->fri_str, "FRI:OFF");
 
     //弹仓
-    obj->mag_circle = Circle(6, 0, Green, 8, 150, 681, 10);
-    obj->mag_text = Char(7, 0, White, 3, 20, 20, 180, 690);
+    obj->mag_circle = Circle(7, 0, Green, 8, 150, 681, 10);
+    obj->mag_text = Char(8, 0, White, 3, 20, 20, 180, 690);
     strset(obj->mag_str, "HATCH:CLOSE");
 
     //云台
-    obj->gimbal_circle = Circle(8, 0, Green, 8, 150, 631, 10);
-    obj->gimbal_text = Char(9, 0, White, 3, 20, 20, 180, 640);
+    obj->gimbal_circle = Circle(9, 0, Green, 8, 150, 631, 10);
+    obj->gimbal_text = Char(10, 0, White, 3, 20, 20, 180, 640);
     strset(obj->gimbal_str, "GIMBAL:NORM");
 
     //底盘
-    obj->chassis_circle = Circle(10, 0, Green, 8, 150, 581, 10);
-    obj->chassis_text = Char(11, 0, White, 3, 20, 20, 180, 590);
+    obj->chassis_circle = Circle(11, 0, Green, 8, 150, 581, 10);
+    obj->chassis_text = Char(12, 0, White, 3, 20, 20, 180, 590);
     strset(obj->chassis_str, "CHASSIS:FOLLOW");
 
     //自瞄
-    obj->autoaim_circle = Circle(12, 0, Green, 8, 150, 531, 10);
-    obj->autoaim_text = Char(13, 0, White, 3, 20, 20, 180, 540);
+    obj->autoaim_circle = Circle(13, 0, Green, 8, 150, 531, 10);
+    obj->autoaim_text = Char(14, 0, White, 3, 20, 20, 180, 540);
     strset(obj->autoaim_str, "AUTOAIM:OFF");
     //初始化percent
     obj->data.cap_percent = 0.0;

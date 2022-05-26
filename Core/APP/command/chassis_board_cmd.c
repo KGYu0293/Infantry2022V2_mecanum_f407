@@ -161,6 +161,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
             obj->ui->data.autoaim_mode = obj->recv_data->autoaim_mode;
             obj->ui->data.chassis_mode = obj->recv_data->chassis_mode;
             obj->ui->data.pc_online = obj->recv_data->pc_online;
+            obj->ui->data.vision_has_taget = obj->recv_data->vision_has_target;
         }
         Robot_UI_update(obj->ui);
     }
