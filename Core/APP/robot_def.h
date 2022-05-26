@@ -111,7 +111,7 @@ typedef struct Cmd_shoot_t {
     Magazine_mode mag_mode;      // 弹仓盖
     uint16_t bullet_speed;       // 弹速
     float fire_rate;             // 射频（发/秒）
-    uint16_t heat_limit_remain;  // 剩余热量，cooling_limit-cooling_heat
+    int16_t heat_limit_remain;  // 剩余热量，cooling_limit-cooling_heat
 } Cmd_shoot;
 
 // 对云台的控制量
@@ -157,7 +157,7 @@ typedef struct Chassis_board_send_t {
     float gyro_yaw;                // 将底盘主控的imu数据发到云台
     struct {
         uint16_t bullet_speed_max;   // 弹速
-        uint16_t heat_limit_remain;  // 剩余热量
+        int16_t heat_limit_remain;  // 剩余热量
     } shoot_referee_data;
     uint8_t robot_id;
     uint8_t chassis_supercap_percent;

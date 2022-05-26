@@ -126,6 +126,7 @@ typedef struct dt7_rx_data_mouse_t {
     int16_t y;
     int16_t z;
     uint8_t press_l;
+    uint32_t press_l_cnt;
     uint8_t press_r;
 } dt7_rx_data_mouse;
 
