@@ -30,7 +30,7 @@ typedef struct Gimbal_board_cmd_t {
     // 外设
     buzzer *internal_buzzer;
     canpc *pc;
-    canpc_send pc_send_data;
+    pc_send pc_send_data;
     dt7Remote *remote;
     Indicator_led *indicator_led;
 

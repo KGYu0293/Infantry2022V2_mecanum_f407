@@ -151,6 +151,9 @@ void BMI088_Update(BMI088_imu *obj) {
     obj->data.gyro_deg[0] = obj->data.gyro[0] * RAD2DEG;
     obj->data.gyro_deg[1] = obj->data.gyro[1] * RAD2DEG;
     obj->data.gyro_deg[2] = obj->data.gyro[2] * RAD2DEG;
+    obj->data.gyro_deg_reverse[0] = -obj->data.gyro_deg[0];
+    obj->data.gyro_deg_reverse[1] = -obj->data.gyro_deg[1];
+    obj->data.gyro_deg_reverse[2] = -obj->data.gyro_deg[2];
     obj->data.euler_deg[0] = obj->data.euler[0] * RAD2DEG;
     obj->data.euler_deg[1] = obj->data.euler[1] * RAD2DEG;
     obj->data.euler_deg[2] = obj->data.euler[2] * RAD2DEG;

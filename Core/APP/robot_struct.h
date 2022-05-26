@@ -38,3 +38,7 @@
 #define SHOOT_UNIT_HEAT_17MM 10
 /* 每发射一颗小弹增加的热量 */
 #define SHOOT_UNIT_HEAT_42MM 100
+//定义轴与下标的对应关系
+#define ROLL_AXIS 0
+#define PITCH_AXIS 1
+#define YAW_AXIS 2

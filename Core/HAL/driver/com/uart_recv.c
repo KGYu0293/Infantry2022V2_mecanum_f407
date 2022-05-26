@@ -1,6 +1,7 @@
 #include "uart_recv.h"
 
 #include "bsp_uart.h"
+#include "bsp_def.h"
 #include "soft_crc.h"
 #include "cvector.h"
 #include "stdio.h"
@@ -16,9 +17,11 @@ void UartRecv_Driver_Init() {
 
 uart_recv* UartRecv_Create(uart_recv_config* config) {
     uart_recv* obj = (uart_recv*)malloc(sizeof(uart_recv));
+    memset(obj,0,sizeof(uart_recv));
     obj->config = *config;
     obj->data_rx.len = obj->config.data_len;
     obj->data_rx.data = (uint8_t*)malloc(obj->config.data_len);
+    memset(obj->data_rx.data,0,obj->config.data_len);
     //identifier 2位，起始s结束e 2位，crc16 2位，len 1位
     obj->buf_len = obj->config.data_len + 7;
     obj->rxbuf = (uint8_t*) malloc(obj->buf_len);
@@ -26,6 +29,7 @@ uart_recv* UartRecv_Create(uart_recv_config* config) {
     obj->recv_status = 0;
     obj->data_updated = 0;
     cvector_pushback(uart_recv_instances,&obj);
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 20, obj);
     return obj;
 }
 
@@ -58,6 +62,7 @@ void UartRecv_RxCallBack(uint8_t uart_index, uint8_t* data, uint32_t len){
                         now->recv_status = 0;
                         now->recv_len = 0;
                         now->data_updated = 1;
+                        now->monitor->reset(now->monitor);
                         if(now->config.notify_func != NULL){
                             now->config.notify_func(now);
                         }

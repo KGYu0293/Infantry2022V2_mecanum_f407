@@ -1,12 +1,21 @@
 
-OpenDocument="main.c", FilePath="D:/RM/RM_code/git_workspace/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=0
+
+Breakpoint=D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/driver/com/can_recv.c:38, State=BP_STATE_ON
+OpenDocument="freertos.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/Src/freertos.c", Line=320
+OpenDocument="referee_ui.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/driver/referee/referee_ui.c", Line=274
+OpenDocument="main.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=74
+OpenDocument="BMI088.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/driver/imu/BMI088.c", Line=270
+OpenDocument="stm32f4xx_it.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/Src/stm32f4xx_it.c", Line=96
+OpenDocument="app.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/APP/app.c", Line=0
+OpenDocument="can_recv.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/driver/com/can_recv.c", Line=1
 OpenToolbar="Debug", Floating=0, x=0, y=0
-OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=345, h=626, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=702, h=626, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=1920, h=308, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;917]
+OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=744, h=261, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=345, h=955, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=1, w=744, h=693, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[162;119;134;100;168;100]
+TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;992]
 TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
-TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[308;272;100;100]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[336;272;100;100]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
-WatchedExpression="gimbal", RefreshRate=5, Window=Watched Data 1
-WatchedExpression="temp", RefreshRate=5, Window=Watched Data 1
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;554]
+WatchedExpression="cmd", RefreshRate=5, Window=Watched Data 1

@@ -2,6 +2,7 @@
 #define _H_UART_RECV_H
 #include "datatypes.h"
 #include "stdint.h"
+#include <monitor.h>
 struct uart_recv_config_t;
 struct uart_recv_t;
 
@@ -15,6 +16,7 @@ struct uart_recv_config_t{
     uint8_t data_len;
     uint16_t uart_identifier;
     uart_recv_notify notify_func;
+    lost_callback lost_callback;
 };
 
 struct uart_recv_t {
@@ -25,6 +27,7 @@ struct uart_recv_t {
     uint8_t recv_status;
     uint8_t data_updated;
     uint8_t* rxbuf;
+    monitor_item* monitor;
 };
 
 void UartRecv_Driver_Init();

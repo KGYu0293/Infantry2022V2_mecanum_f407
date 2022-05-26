@@ -114,6 +114,7 @@ C_SOURCES += \
 Core/HAL/driver/imu/BMI088.c \
 Core/HAL/driver/buzzer/buzzer.c \
 Core/HAL/driver/com/can_pc.c \
+Core/HAL/driver/com/uart_pc.c \
 Core/HAL/driver/com/can_send.c \
 Core/HAL/driver/com/can_recv.c \
 Core/HAL/driver/com/uart_send.c \
@@ -122,7 +123,6 @@ Core/HAL/driver/motor/can_motor.c \
 Core/HAL/driver/remote/DT7_DR16.c \
 Core/HAL/driver/referee/referee.c \
 Core/HAL/driver/referee/referee_ui.c \
-Core/HAL/driver/referee/robot_ui.c \
 Core/HAL/driver/ws2812b/ws2812b.c \
 Core/HAL/driver/super_cap/super_cap_wuli.c \
 Core/HAL/driver/radiotube/radiotube.c \
@@ -148,6 +148,7 @@ Core/APP/command/gimbal_board_cmd.c \
 Core/APP/chassis/chassis.c \
 Core/APP/shoot/shoot.c \
 Core/APP/gimbal/gimbal.c \
+Core/APP/ui/robot_ui.c \
 Core/BSP/bsp.c \
 Core/BSP/interface/bsp_spi.c \
 Core/BSP/interface/bsp_gpio.c \
@@ -254,6 +255,7 @@ C_INCLUDES += \
 -ICore/APP/shoot \
 -ICore/APP/gimbal \
 -ICore/APP/chassis \
+-ICore/APP/ui \
 -ICore/BSP \
 -ICore/BSP/lib \
 -ICore/BSP/interface \

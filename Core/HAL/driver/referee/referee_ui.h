@@ -99,4 +99,5 @@ void add_text(referee_ui* obj, graphic_data* graphic, char* s, uint8_t len);
 void modifiy_graphic(referee_ui* obj, graphic_data* graphic);
 // 修改字符串命令
 void modifiy_text(referee_ui* obj, graphic_data* graphic, char* s, uint8_t len);
+void del_graphic(referee_ui* obj, graphic_data* graphic);
 #endif
