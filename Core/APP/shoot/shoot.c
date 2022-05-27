@@ -49,8 +49,8 @@ Shoot *Shoot_Create(void) {
     load_config.speed_fdb_model = MOTOR_FDB;
     load_config.output_model = MOTOR_OUTPUT_NORMAL;
     load_config.lost_callback = shoot_motor_lost;
-    PID_SetConfig(&load_config.config_position, 2, 0, 0, 0, 5000);
-    PID_SetConfig(&load_config.config_speed, 20, 0.1, 0, 2000, 10000);
+    PID_SetConfig(&load_config.config_position, 1.5, 0, 0, 0, 20000);
+    PID_SetConfig(&load_config.config_speed, 2, 0.1, 0, 2000, 25000);
     obj->load = Can_Motor_Create(&load_config);
 
     // 舵机
@@ -68,7 +68,7 @@ Shoot *Shoot_Create(void) {
 };
 
 void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
-    if (param->heat_limit_remain < SHOOT_UNIT_HEAT_17MM) {
+    if (param->heat_limit_remain <= SHOOT_UNIT_HEAT_17MM * 3) {
         param->bullet_mode = bullet_holdon;
     }
     // 发射一个弹丸编码器转过的角度
@@ -78,22 +78,26 @@ void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
     if (time_now < obj->cooldown_start + obj->cooldown_time) return;
     switch (param->bullet_mode) {
         case bullet_holdon:
-            obj->load->config.motor_pid_model = SPEED_LOOP;
-            obj->load->speed_pid.ref = 0;  // 刹车
+            obj->load->config.motor_pid_model = POSITION_LOOP;
+            obj->load->position_pid.ref = obj->load->real_position;  // 刹车
             break;
         case bullet_reverse:  // 反转 防卡弹
             obj->load->config.motor_pid_model = SPEED_LOOP;
             obj->load->speed_pid.ref = 10 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
             break;
         case bullet_continuous:
-            obj->load->config.motor_pid_model = SPEED_LOOP;
-            obj->load->speed_pid.ref = -param->fire_rate * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
+            // obj->load->config.motor_pid_model = SPEED_LOOP;
+            // obj->load->speed_pid.ref = -param->fire_rate * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
+            obj->load->config.motor_pid_model = POSITION_LOOP;
+            obj->load->position_pid.ref = obj->load->real_position - load_delta_pos;
+            obj->cooldown_start = time_now;
+            obj->cooldown_time = (int)(1000 / param->fire_rate);  //待测试
             break;
         case bullet_single:
             obj->load->config.motor_pid_model = POSITION_LOOP;
             obj->load->position_pid.ref = obj->load->real_position - load_delta_pos;
             obj->cooldown_start = time_now;
-            obj->cooldown_time = 250;  //待测试
+            obj->cooldown_time = 300;  //待测试
             break;
         case bullet_double:
             obj->load->config.motor_pid_model = POSITION_LOOP;

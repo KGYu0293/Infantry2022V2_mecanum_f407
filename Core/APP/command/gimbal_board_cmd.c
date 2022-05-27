@@ -310,6 +310,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         if (obj->autoaim_mode == auto_aim_off) {
             obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
             obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
+            obj->send_data.vision_has_target = 0;
             //不管开没开自瞄，都更新pc接收数据的状态
             if (*obj->pc->data_updated) {
                 *obj->pc->data_updated = 0;
@@ -326,11 +327,13 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 8192;
                     obj->gimbal_control.yaw = yaw_target;
                     obj->gimbal_control.pitch = obj->pc->pc_recv_data->roll * 8192.0 / 2 / pi;  // 根据当前情况决定，pitch轴反馈为陀螺仪roll
+                    obj->send_data.vision_has_target = 1;
                 } else {
                     // 没有目标
                     //使用鼠标控制云台
                     obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
                     obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
+                    obj->send_data.vision_has_target = 0;
                 }
 
                 pc_lost_cnt = 10;
@@ -342,6 +345,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
                     //使用鼠标控制云台
                     obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
                     obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
+                    obj->send_data.vision_has_target = 0;
                 }
             }
         }
@@ -366,9 +370,14 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         // 发弹控制，单发，双发, 射频和小电脑控制待完善
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限
-        obj->shoot_control.fire_rate = 6;                                                             // 固定射频
+        obj->shoot_control.fire_rate = 10;                                                            // 固定射频
         if (obj->remote->data.mouse.press_l) {
-            obj->shoot_control.bullet_mode = bullet_continuous;
+            //按住20ms以上
+            if (obj->remote->data.mouse.press_l_cnt > 10) {
+                obj->shoot_control.bullet_mode = bullet_continuous;
+            } else {
+                obj->shoot_control.bullet_mode = bullet_single;
+            }
         } else if (obj->remote->data.mouse.press_r) {
             obj->shoot_control.bullet_mode = bullet_reverse;
         } else {

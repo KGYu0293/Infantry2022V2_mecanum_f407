@@ -76,6 +76,8 @@ void dt7_data_solve(dt7Remote *obj) {
     obj->data.mouse.y = ((int16_t)obj->primary_data[8]) | ((int16_t)obj->primary_data[9] << 8);
     obj->data.mouse.z = ((int16_t)obj->primary_data[10]) | ((int16_t)obj->primary_data[11] << 8);
     obj->data.mouse.press_l = obj->primary_data[12];
+    if(obj->last_data.mouse.press_l && obj->data.mouse.press_l) obj->data.mouse.press_l_cnt = obj->last_data.mouse.press_l_cnt + 1;
+    else if(obj->last_data.mouse.press_l && !obj->data.mouse.press_l) obj->data.mouse.press_l_cnt = 0;
     obj->data.mouse.press_r = obj->primary_data[13];
     // 键盘按键解算-是否按下
     uint16_t keyboard = (int16_t)obj->primary_data[14] | ((int16_t)obj->primary_data[15] << 8);

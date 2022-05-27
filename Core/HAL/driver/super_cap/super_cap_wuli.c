@@ -48,7 +48,7 @@ void Super_cap_wuli_Getpercent(Super_cap_wuli *obj) {
     //     obj->cap_percent = 95;
     // else if (obj->voltage_cap_fdb >= 24.5 && obj->voltage_cap_fdb < 25)
     //     obj->cap_percent = 100;
-    obj->cap_percent = (obj->voltage_cap_fdb - 14.0) / (24.0 - 14.0) * 100;
+    obj->cap_percent = (obj->voltage_cap_fdb - 14.0) / (obj->voltage_input_fdb - 2 - 14.0) * 100;
 }
 
 void Super_cap_wuli_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len) {

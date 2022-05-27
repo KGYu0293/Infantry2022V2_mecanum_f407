@@ -107,11 +107,11 @@ typedef struct Cmd_chassis_t {
 // 对发射机构的控制量
 typedef struct Cmd_shoot_t {
     Shoot_mode mode;
-    Bullet_mode bullet_mode;     // 发射模式
-    Magazine_mode mag_mode;      // 弹仓盖
-    uint16_t bullet_speed;       // 弹速
-    float fire_rate;             // 射频（发/秒）
-    uint16_t heat_limit_remain;  // 剩余热量，cooling_limit-cooling_heat
+    Bullet_mode bullet_mode;    // 发射模式
+    Magazine_mode mag_mode;     // 弹仓盖
+    uint16_t bullet_speed;      // 弹速
+    float fire_rate;            // 射频（发/秒）
+    int16_t heat_limit_remain;  // 剩余热量，cooling_limit-cooling_heat
 } Cmd_shoot;
 
 // 对云台的控制量
@@ -134,6 +134,7 @@ typedef struct Upload_gimbal_t {
 typedef struct Upload_chassis_t {
     Module_status chassis_status;
     float chassis_supercap_percent;
+    float chassis_battery_voltage;
     imu_data* chassis_imu;
 } Upload_chassis;
 
@@ -148,6 +149,7 @@ typedef struct Gimbal_board_send_t {
     uint8_t gimbal_mode;               // UI所需云台数据
     uint8_t mag_mode;                  // UI所需弹仓盖数据
     uint8_t fri_mode;                  // UI所需摩擦轮数据
+    uint8_t vision_has_target;         // 自瞄是否检测到目标
     Cmd_chassis_speed chassis_target;  // 底盘速度控制
 } Gimbal_board_send_data;
 
@@ -156,8 +158,8 @@ typedef struct Chassis_board_send_t {
     uint8_t chassis_board_status;  // 同步底盘是否有重要模块掉线
     float gyro_yaw;                // 将底盘主控的imu数据发到云台
     struct {
-        uint16_t bullet_speed_max;   // 弹速
-        uint16_t heat_limit_remain;  // 剩余热量
+        uint16_t bullet_speed_max;  // 弹速
+        int16_t heat_limit_remain;  // 剩余热量
     } shoot_referee_data;
     uint8_t robot_id;
     uint8_t chassis_supercap_percent;

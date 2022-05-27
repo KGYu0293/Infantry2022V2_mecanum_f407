@@ -233,6 +233,7 @@ void Chassis_Update(Chassis *obj) {
 
     //电容剩余值
     obj->upload_data.chassis_supercap_percent = obj->super_cap->cap_percent;
+    obj->upload_data.chassis_battery_voltage = obj->super_cap->voltage_input_fdb;
     // 发送回传数据指针
     publish_data chassis_upload;
     chassis_upload.data = (uint8_t *)&(obj->upload_data);
