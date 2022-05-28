@@ -4,6 +4,7 @@
 #include <robot_def.h>
 #include <robot_ui.h>
 #include <string.h>
+#define REPEAT(x) for(int i = 0;i < 4;++i) {x}
 // 2s刷新一次
 #define UI_REFRESH_INTERVAL 2000
 
@@ -50,7 +51,7 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
         obj->fri_circle.color = Green;
         strset(obj->fri_str, "FRI:ON");
     } else {
-        obj->fri_circle.color = White;
+        obj->fri_circle.color = Orange;
         strset(obj->fri_str, "FRI:OFF");
     }
 
@@ -92,11 +93,11 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
 
     //自瞄模式
     if (!obj->data.pc_online) {
-        obj->autoaim_circle.color = White;
+        obj->autoaim_circle.color = Orange;
         obj->vision_frame.width = 0;
         strset(obj->autoaim_str, "AUTOAIM:OFFLINE");
     } else if (obj->data.autoaim_mode == auto_aim_off) {
-        obj->autoaim_circle.color = Orange;
+        obj->autoaim_circle.color = White;
         obj->vision_frame.width = 0;
         strset(obj->autoaim_str, "AUTOAIM:OFF");
     } else if (obj->data.autoaim_mode == auto_aim_normal) {
@@ -125,6 +126,7 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     modifiy_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);
     modifiy_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);
     modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);
+    obj->last_data = obj->data;
 }
 
 robot_ui* Create_Robot_UI(robot_ui_config* _config) {

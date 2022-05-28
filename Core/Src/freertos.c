@@ -371,7 +371,7 @@ void StartRefereeSendTask(void *argument)
     /* Infinite loop */
     for (;;) {
         HAL_Referee_Send_Loop();
-        osDelay(20);
+        osDelay(15);
     }
   /* USER CODE END StartRefereeSendTask */
 }

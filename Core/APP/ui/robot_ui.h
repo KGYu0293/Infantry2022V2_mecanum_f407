@@ -59,6 +59,7 @@ typedef struct robot_ui_t {
     int cap_line_len;
 
     ui_status data;
+    ui_status last_data;
     // UI刷新时间戳
     uint32_t time_refresh;
 } robot_ui;
