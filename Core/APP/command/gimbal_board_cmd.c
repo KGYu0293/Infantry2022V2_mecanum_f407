@@ -209,6 +209,7 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
 
 void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     // 云台-底盘运动模式
+    obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     // 按一下r:小陀螺
     if (obj->remote->data.key_single_press_cnt.r != obj->remote->last_data.key_single_press_cnt.r) {
         if (obj->send_data.chassis_mode != chassis_rotate_run) {
