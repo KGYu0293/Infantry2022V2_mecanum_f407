@@ -164,7 +164,6 @@ void Shoot_Update(Shoot *obj) {
     }
     switch (obj->cmd_data->mag_mode) {
         case magazine_open:
-            // BSP_PWM_SetCCR();
             obj->mag_lid->pos_servo_control = 0;
             break;
         case magazine_close:

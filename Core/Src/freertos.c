@@ -84,21 +84,21 @@ osThreadId_t MonitorTaskHandle;
 const osThreadAttr_t MonitorTask_attributes = {
   .name = "MonitorTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityHigh1,
 };
 /* Definitions for RobotCMDTask */
 osThreadId_t RobotCMDTaskHandle;
 const osThreadAttr_t RobotCMDTask_attributes = {
   .name = "RobotCMDTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for SuperCapTask */
 osThreadId_t SuperCapTaskHandle;
 const osThreadAttr_t SuperCapTask_attributes = {
   .name = "SuperCapTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for RefereeTask */
 osThreadId_t RefereeTaskHandle;
@@ -112,7 +112,7 @@ osThreadId_t RefereeSendTaskHandle;
 const osThreadAttr_t RefereeSendTask_attributes = {
   .name = "RefereeSendTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/

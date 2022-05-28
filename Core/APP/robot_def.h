@@ -23,12 +23,10 @@
 /** 机器人模式定义 **/
 
 // 对模块是否掉线的定义
-typedef enum Module_status_e { module_lost = 0,
-                               module_working } Module_status;
+typedef enum Module_status_e { module_lost = 0, module_working } Module_status;
 
 // 机器人总模式
-typedef enum Robot_mode_e { robot_stop = 0,
-                            robot_run } Robot_mode;
+typedef enum Robot_mode_e { robot_stop = 0, robot_run } Robot_mode;
 
 // 底盘运行模式
 typedef enum Chassis_mode_e {
@@ -56,8 +54,8 @@ typedef enum Shoot_mode_e {
 
 // 弹仓盖模式
 typedef enum Magazine_mode_e {
-    magazine_close = 104,  // 开弹仓
-    magazine_open          // 关弹仓
+    magazine_close,  // 开弹仓
+    magazine_open    // 关弹仓
 } Magazine_mode;
 
 // 云台模式
