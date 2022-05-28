@@ -49,8 +49,8 @@ Shoot *Shoot_Create(void) {
     load_config.speed_fdb_model = MOTOR_FDB;
     load_config.output_model = MOTOR_OUTPUT_NORMAL;
     load_config.lost_callback = shoot_motor_lost;
-    PID_SetConfig(&load_config.config_position, 1.5, 0, 0, 0, 20000);
-    PID_SetConfig(&load_config.config_speed, 2, 0.1, 0, 2000, 25000);
+    PID_SetConfig(&load_config.config_position, 1.5, 0, 0, 0, 15000);
+    PID_SetConfig(&load_config.config_speed, 2, 0.1, 0, 2000, 10000);
     obj->load = Can_Motor_Create(&load_config);
 
     // 舵机
@@ -89,9 +89,13 @@ void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
             // obj->load->config.motor_pid_model = SPEED_LOOP;
             // obj->load->speed_pid.ref = -param->fire_rate * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
             obj->load->config.motor_pid_model = POSITION_LOOP;
-            obj->load->position_pid.ref = obj->load->real_position - load_delta_pos;
-            obj->cooldown_start = time_now;
-            obj->cooldown_time = (int)(1000 / param->fire_rate);  //待测试
+            if (param->fire_rate < 2) {
+                obj->load->position_pid.ref = obj->load->real_position;
+            } else {
+                obj->load->position_pid.ref = obj->load->real_position - load_delta_pos;
+                obj->cooldown_start = time_now;
+                obj->cooldown_time = (int)(1000 / param->fire_rate);  //待测试
+            }
             break;
         case bullet_single:
             obj->load->config.motor_pid_model = POSITION_LOOP;
