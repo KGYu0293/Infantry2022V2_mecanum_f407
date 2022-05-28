@@ -100,7 +100,10 @@ Chassis *Chassis_Create() {
 // 对电流环进行限制 简易版功率限制
 void OutputmaxLimit(Chassis *obj) {
     float output_limit = 0;
-    if (obj->cmd_data->power.if_consume_supercap) {
+    // if (obj->cmd_data->power.if_consume_supercap)
+    // 若需要消耗电容
+    if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) || (obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) ||
+        (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly)) {
         if (obj->super_cap->cap_percent < 30) {
             output_limit = 2000;
         } else if (obj->super_cap->cap_percent < 50) {
@@ -127,13 +130,11 @@ void OutputmaxLimit(Chassis *obj) {
  */
 void ChassisAccelerationLimit(Chassis *obj, Cmd_chassis *param) {
     // double accMax = 15.0f * (double)param->power.power_limit;
-    // if (accMax < 170.0f)
-    //     accMax = 170.0f;
-    // else if (accMax > 270.0f)
-    //     accMax = 270.0f;
+    // if (accMax < 170.0f)     accMax = 170.0f;
+    // else if (accMax > 270.0f)    accMax = 270.0f;
 
     // 功率控制良好的情况下acc limit主要防打滑 不必与功率相关
-    double accMax = 1000;  // 1020-1620
+    float accMax = 1100;  // 1020-1620
     if (fabs(obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb) > accMax) obj->lf->speed_pid.ref = obj->lf->speed_pid.fdb + accMax * (obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb > 0 ? 1 : -1);
     if (fabs(obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb) > accMax) obj->lb->speed_pid.ref = obj->lb->speed_pid.fdb + accMax * (obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb > 0 ? 1 : -1);
     if (fabs(obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb) > accMax) obj->rf->speed_pid.ref = obj->rf->speed_pid.fdb + accMax * (obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb > 0 ? 1 : -1);
@@ -171,9 +172,9 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 float auto_rotate_param(Cmd_chassis *param) {
     static float rotate = 0;
     // 位置式变速
-    // float rotate_benchmark = 150 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
-    // float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;    // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
-    // rotate = rotate_benchmark + rotate_benchmark * 0.2 * sin(x);         // 变速函数&变速范围
+    float rotate_benchmark = 170 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
+    float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;    // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
+    rotate = rotate_benchmark + rotate_benchmark * 0.2 * sin(x);         // 变速函数&变速范围
 
     // 时间式变速
     // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
@@ -203,7 +204,7 @@ float auto_rotate_param(Cmd_chassis *param) {
     //     }
     // }
 
-    rotate = 150;
+    // rotate = 150;
     return rotate;
 }
 
@@ -224,8 +225,9 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
     // 功率控制
     OutputmaxLimit(obj);
     // 加速度限制
-    // if(不在爬坡模式)
-    // ChassisAccelerationLimit(obj, param);
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
+        ChassisAccelerationLimit(obj, param);
+    }
 }
 
 void Chassis_Update(Chassis *obj) {

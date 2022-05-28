@@ -7,18 +7,18 @@ void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!
 void pc_lost(void* obj) { printf_log("pc lost!\n"); }
 
 // cmd的private函数
-void stop_mode_update(gimbal_board_cmd* obj);       //机器人停止模式更新函数
-void remote_mode_update(gimbal_board_cmd* obj);     //机器人遥控器模式更新函数
-void mouse_key_mode_update(gimbal_board_cmd* obj);  //机器人键鼠模式更新函数
-void send_cmd_and_data(gimbal_board_cmd* obj);      //发布指令和板间通信
-void mousekey_GimbalChassis_default(gimbal_board_cmd* obj);
+void stop_mode_update(Gimbal_board_cmd* obj);       //机器人停止模式更新函数
+void remote_mode_update(Gimbal_board_cmd* obj);     //机器人遥控器模式更新函数
+void mouse_key_mode_update(Gimbal_board_cmd* obj);  //机器人键鼠模式更新函数
+void send_cmd_and_data(Gimbal_board_cmd* obj);      //发布指令和板间通信
+void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj);
 // 其他功能函数
 float get_offset_angle(short init_forward, short now_encoder);  // 获取云台朝向与底盘正前的夹角
 
-gimbal_board_cmd* Gimbal_board_CMD_Create() {
+Gimbal_board_cmd* Gimbal_board_CMD_Create() {
     // 创建实例
-    gimbal_board_cmd* obj = (gimbal_board_cmd*)malloc(sizeof(gimbal_board_cmd));
-    memset(obj, 0, sizeof(gimbal_board_cmd));
+    Gimbal_board_cmd* obj = (Gimbal_board_cmd*)malloc(sizeof(Gimbal_board_cmd));
+    memset(obj, 0, sizeof(Gimbal_board_cmd));
 
     // 板间通信配置
     can_send_config send_config;
@@ -69,18 +69,13 @@ gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // memset 0
     obj->mode = robot_stop;
-    memset(&(obj->pc_send_data), 0, sizeof(pc_send));
-    memset(&(obj->gimbal_control), 0, sizeof(Cmd_gimbal));
-    memset(&(obj->shoot_control), 0, sizeof(Cmd_shoot));
-    memset(&(obj->send_data), 0, sizeof(Gimbal_board_send_data));
-    obj->send_data.if_consume_supercap = 0;  //默认关闭电容输出
     obj->robot_ready = 0;
-    obj->chassis_climb_mode = 0;
     obj->autoaim_mode = auto_aim_off;
+
     return obj;
 }
 
-void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
+void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
     // 判断机器人工作模式
     //初始化为RUN
     obj->mode = robot_run;
@@ -90,9 +85,11 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
         obj->mode = robot_stop;
         obj->pc_send_data.robot_id = 0;
         obj->pc_send_data.bullet_speed = 0;
+        obj->gimbal_control.rotate_feedforward = 0;
     } else {
         obj->pc_send_data.robot_id = obj->recv_data->robot_id;
         obj->pc_send_data.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;
+        obj->gimbal_control.rotate_feedforward = obj->recv_data->gyro_yaw;
     }
     // 判断云台IMU是否上线
     publish_data gimbal_data_fdb = obj->gimbal_upload_suber->getdata(obj->gimbal_upload_suber);
@@ -153,30 +150,31 @@ void Gimbal_board_CMD_Update(gimbal_board_cmd* obj) {
     send_cmd_and_data(obj);
 }
 
-void mousekey_GimbalChassis_default(gimbal_board_cmd* obj) {
+void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj) {
     obj->gimbal_control.mode = gimbal_run;
     obj->send_data.chassis_mode = chassis_run_follow_offset;
+    obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_8192_real;
     obj->gimbal_control.pitch = obj->gimbal_upload_data->gimbal_imu->euler_8192[PITCH_AXIS];
 }
 
-void stop_mode_update(gimbal_board_cmd* obj) {
+void stop_mode_update(Gimbal_board_cmd* obj) {
     obj->send_data.now_robot_mode = robot_stop;
     obj->send_data.chassis_mode = chassis_stop;
     obj->gimbal_control.mode = gimbal_stop;
     obj->shoot_control.mode = shoot_stop;
 }
 
-void remote_mode_update(gimbal_board_cmd* obj) {
+void remote_mode_update(Gimbal_board_cmd* obj) {
     // 云台控制参数
     obj->gimbal_control.mode = gimbal_run;
     obj->gimbal_control.yaw -= 0.04f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
     obj->gimbal_control.pitch = -1.0f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
-    obj->gimbal_control.rotate_feedforward = 0;  // 目前没有使用小陀螺前馈
 
     // 底盘控制参数
     // 拨杆确定底盘模式与控制量
-    obj->send_data.if_consume_supercap = 0;  //遥控器模式不消耗超级电容
+    // obj->send_data.if_consume_supercap = 0;  //遥控器模式不消耗超级电容
+    obj->send_data.chassis_dispatch_mode = chassis_dispatch_without_acc_limit;  // 遥控器模式不消耗电容 不限制加速度
     obj->send_data.chassis_target.vy = 16.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
     obj->send_data.chassis_target.vx = 16.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
     if (obj->remote->data.rc.s1 == 2) {
@@ -209,7 +207,7 @@ void remote_mode_update(gimbal_board_cmd* obj) {
     }
 }
 
-void mouse_key_mode_update(gimbal_board_cmd* obj) {
+void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     // 云台-底盘运动模式
     // 按一下r:小陀螺
     if (obj->remote->data.key_single_press_cnt.r != obj->remote->last_data.key_single_press_cnt.r) {
@@ -234,13 +232,19 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         if (obj->gimbal_control.mode != gimbal_middle || obj->send_data.chassis_mode != chassis_run) {
             obj->gimbal_control.mode = gimbal_middle;
             obj->send_data.chassis_mode = chassis_run;
+            obj->send_data.chassis_dispatch_mode = chassis_dispatch_fly;
         } else {
             mousekey_GimbalChassis_default(obj);
         }
     }
-    // z:底盘超限模式
+    // z:爬坡模式
     if (obj->remote->data.key_single_press_cnt.z != obj->remote->last_data.key_single_press_cnt.z) {
-        obj->chassis_climb_mode ^= 1;  //反转状态
+        // obj->chassis_climb_mode ^= 1;  //反转状态
+        if (obj->send_data.chassis_dispatch_mode != chassis_dispatch_climb) {
+            obj->send_data.chassis_dispatch_mode = chassis_dispatch_climb;
+        } else {
+            mousekey_GimbalChassis_default(obj);
+        }
     }
 
     // 自瞄模式
@@ -268,7 +272,8 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
 
     // 底盘控制参数
-    obj->send_data.if_consume_supercap = 0;  //默认不要消耗电容电量
+    // obj->send_data.if_consume_supercap = 0;  //默认不要消耗电容电量
+    // obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     obj->send_data.chassis_target.vx = 0;
     obj->send_data.chassis_target.vy = 0;
     obj->send_data.chassis_target.rotate = 0;
@@ -283,14 +288,15 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
         obj->send_data.chassis_target.vy /= 2.0;
     }
     // 按住shift加速/飞坡模式加速
-    if (obj->remote->data.key_down.shift || obj->chassis_climb_mode) {
+    if (obj->remote->data.key_down.shift /*|| obj->chassis_climb_mode*/) {
         obj->send_data.chassis_target.vx *= 2.0;
         obj->send_data.chassis_target.vy *= 2.0;
-        if (obj->chassis_climb_mode) {
-            obj->send_data.chassis_target.vx *= 2.0;
-            obj->send_data.chassis_target.vy *= 2.0;
-        }
-        obj->send_data.if_consume_supercap = 1;
+        // if (obj->chassis_climb_mode) {
+        //     obj->send_data.chassis_target.vx *= 2.0;
+        //     obj->send_data.chassis_target.vy *= 2.0;
+        // }
+        // obj->send_data.if_consume_supercap = 1;
+        obj->send_data.chassis_dispatch_mode = chassis_dispatch_shift;
     }
 
     // q/e:底盘转向
@@ -310,6 +316,9 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     }
 
     // 云台控制参数
+    if (obj->gimbal_control.mode == gimbal_middle) {
+        obj->send_data.chassis_target.rotate -= 1.0f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));  // 云台跟随底盘
+    }
     if (obj->gimbal_control.mode == gimbal_run) {
         if (obj->autoaim_mode == auto_aim_off) {
             obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
@@ -390,7 +399,7 @@ void mouse_key_mode_update(gimbal_board_cmd* obj) {
     }
 }
 
-void send_cmd_and_data(gimbal_board_cmd* obj) {
+void send_cmd_and_data(Gimbal_board_cmd* obj) {
     CanPC_Send(obj->pc, &obj->pc_send_data);               // 小电脑通信
     CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));  // 板间通信
     // 子模块pub_sub

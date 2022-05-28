@@ -30,7 +30,7 @@ chassis_board_cmd* Chassis_board_CMD_Create() {
 
     //蜂鸣器配置
     buzzer_config internal_buzzer_config;
-    uint32_t music_id = 3;
+    uint32_t music_id = 5;
     internal_buzzer_config.music = musics[music_id];
     internal_buzzer_config.len = music_lens[music_id];
     internal_buzzer_config.bsp_pwm_index = PWM_BUZZER_PORT;
@@ -132,7 +132,8 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
     } else {
         obj->chassis_control.mode = obj->recv_data->chassis_mode;
         obj->chassis_control.target = obj->recv_data->chassis_target;
-        obj->chassis_control.power.if_consume_supercap = obj->recv_data->if_consume_supercap;
+        // obj->chassis_control.power.if_consume_supercap = obj->recv_data->if_consume_supercap;
+        obj->chassis_control.power.dispatch_mode = obj->recv_data->chassis_dispatch_mode;
         obj->chassis_control.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
         obj->chassis_control.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
         obj->chassis_control.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;

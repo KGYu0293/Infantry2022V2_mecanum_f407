@@ -21,7 +21,7 @@ typedef struct Gimbal_board_cmd_t {
     // 机器人启动好标志量
     uint8_t robot_ready;
     // 底盘爬坡/飞坡模式
-    uint8_t chassis_climb_mode;
+    // uint8_t chassis_climb_mode;
     // 板间通信
     can_recv *recv;
     can_send *send;
@@ -41,9 +41,9 @@ typedef struct Gimbal_board_cmd_t {
     Subscriber *gimbal_upload_suber;
     Upload_gimbal *gimbal_upload_data;
 
-} gimbal_board_cmd;
+} Gimbal_board_cmd;
 
-gimbal_board_cmd *Gimbal_board_CMD_Create(void);
-void Gimbal_board_CMD_Update(gimbal_board_cmd *obj);
+Gimbal_board_cmd *Gimbal_board_CMD_Create(void);
+void Gimbal_board_CMD_Update(Gimbal_board_cmd *obj);
 
 #endif
