@@ -198,8 +198,12 @@ void remote_mode_update(gimbal_board_cmd* obj) {
         if (obj->remote->data.rc.ch4 < CHx_BIAS - 400) obj->shoot_control.mag_mode = magazine_close;
     } else {
         obj->shoot_control.mode = shoot_run;
-        obj->shoot_control.bullet_mode = bullet_continuous;
-        obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
+        if (obj->remote->data.rc.ch4 < CHx_BIAS - 400)
+            obj->shoot_control.bullet_mode = bullet_reverse;
+        else {
+            obj->shoot_control.bullet_mode = bullet_continuous;
+            obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
+        }
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;
     }
