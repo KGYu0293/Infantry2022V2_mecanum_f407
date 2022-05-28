@@ -71,6 +71,7 @@ Gimbal_board_cmd* Gimbal_board_CMD_Create() {
     obj->mode = robot_stop;
     obj->robot_ready = 0;
     obj->autoaim_mode = auto_aim_off;
+    // obj->chassis_climb_on = 0;
 
     return obj;
 }
@@ -208,8 +209,6 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
 }
 
 void mouse_key_mode_update(Gimbal_board_cmd* obj) {
-    // 云台-底盘运动模式
-    obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     // 按一下r:小陀螺
     if (obj->remote->data.key_single_press_cnt.r != obj->remote->last_data.key_single_press_cnt.r) {
         if (obj->send_data.chassis_mode != chassis_rotate_run) {
@@ -240,7 +239,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     }
     // z:爬坡模式
     if (obj->remote->data.key_single_press_cnt.z != obj->remote->last_data.key_single_press_cnt.z) {
-        // obj->chassis_climb_mode ^= 1;  //反转状态
         if (obj->send_data.chassis_dispatch_mode != chassis_dispatch_climb) {
             obj->send_data.chassis_dispatch_mode = chassis_dispatch_climb;
         } else {
@@ -273,8 +271,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
 
     // 底盘控制参数
-    // obj->send_data.if_consume_supercap = 0;  //默认不要消耗电容电量
-    // obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     obj->send_data.chassis_target.vx = 0;
     obj->send_data.chassis_target.vy = 0;
     obj->send_data.chassis_target.rotate = 0;
@@ -288,16 +284,23 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         obj->send_data.chassis_target.vx /= 2.0;
         obj->send_data.chassis_target.vy /= 2.0;
     }
+    // 先前为遥控器模式，切换到mild
+    if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_without_acc_limit){
+        obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
+    }
     // 按住shift加速/飞坡模式加速
-    if (obj->remote->data.key_down.shift /*|| obj->chassis_climb_mode*/) {
+    if (obj->remote->data.key_down.shift) {
         obj->send_data.chassis_target.vx *= 2.0;
         obj->send_data.chassis_target.vy *= 2.0;
-        // if (obj->chassis_climb_mode) {
-        //     obj->send_data.chassis_target.vx *= 2.0;
-        //     obj->send_data.chassis_target.vy *= 2.0;
-        // }
-        // obj->send_data.if_consume_supercap = 1;
-        obj->send_data.chassis_dispatch_mode = chassis_dispatch_shift;
+        if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_mild) obj->send_data.chassis_dispatch_mode = chassis_dispatch_shift;
+    } else if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_shift) {
+        obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
+    }
+
+    // 飞坡模式加速
+    if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_fly) {
+        obj->send_data.chassis_target.vx *= 2.0;
+        obj->send_data.chassis_target.vy *= 2.0;
     }
 
     // q/e:底盘转向
