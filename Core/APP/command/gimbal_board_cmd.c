@@ -335,7 +335,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                 *obj->pc->data_updated = 0;
                 // 自瞄开
                 // 计算真实yaw值
-                if (obj->pc->pc_recv_data->fire_flag != VISUAL_LOST) {
+                if (obj->pc->pc_recv_data->vitual_mode != VISUAL_LOST) {
                     float yaw_target = obj->pc->pc_recv_data->yaw * 8192.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 8192.0;
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 8192;
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 8192;
@@ -398,7 +398,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             obj->shoot_control.heat_limit_remain = 200;
         } else if (!obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 只按右键 反转防卡弹
             obj->shoot_control.bullet_mode = bullet_reverse;
-        } else if (obj->pc->pc_recv_data->fire_flag == VISUAL_FIRE_SINGLE) {  //  视觉控制发射(打符)
+        } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE) {  //  视觉控制发射(打符)
             obj->shoot_control.bullet_mode = bullet_single;
         } else {
             obj->shoot_control.bullet_mode = bullet_holdon;

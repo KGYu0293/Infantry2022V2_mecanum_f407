@@ -19,7 +19,7 @@ typedef struct pc_recv_t {
     float pitch;
     float roll;
     float yaw;
-    uint8_t fire_flag;  // 开火延迟时间
+    uint8_t vitual_mode;
 } pc_recv;
 #pragma pack()
 
