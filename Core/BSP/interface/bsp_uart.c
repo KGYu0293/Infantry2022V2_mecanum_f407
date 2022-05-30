@@ -48,15 +48,15 @@ void BSP_UART_RegisterRxCallback(uint8_t uart_index, uart_rx_callback func) { cv
 
 //三种模式的发送函数(仅简单封装)
 void BSP_UART_Send_blocking(uint8_t uart_index, uint8_t *data, uint16_t len) {
-    if(uart_ports[uart_index].queue_send_enable) return;
+    if (uart_ports[uart_index].queue_send_enable) return;
     HAL_UART_Transmit(uart_ports[uart_index].port, data, len, 20);
 }
 void BSP_UART_Send_IT(uint8_t uart_index, uint8_t *data, uint16_t len) {
-    if(uart_ports[uart_index].queue_send_enable) return;
+    if (uart_ports[uart_index].queue_send_enable) return;
     HAL_UART_Transmit_IT(uart_ports[uart_index].port, data, len);
 }
 void BSP_UART_Send_DMA(uint8_t uart_index, uint8_t *data, uint16_t len) {
-    if(uart_ports[uart_index].queue_send_enable) return;
+    if (uart_ports[uart_index].queue_send_enable) return;
     HAL_UART_Transmit_DMA(uart_ports[uart_index].port, data, len);
 }
 void BSP_UART_Send_queue(uint8_t uart_index, uint8_t *data, uint16_t len) {
@@ -70,7 +70,8 @@ void BSP_UART_Send_queue(uint8_t uart_index, uint8_t *data, uint16_t len) {
     //第一次发送
     if (uart_ports[uart_index].send_packs->cq_len == 1) {
         BSP_UART_Send_Pack *now_pack = circular_queue_front(uart_ports[uart_index].send_packs);
-        HAL_UART_Transmit_DMA(uart_ports[uart_index].port, now_pack->buffer, (uint16_t)now_pack->len);
+        // printf_log("send len:%d\n",now_pack->len);
+        HAL_UART_Transmit_IT(uart_ports[uart_index].port, now_pack->buffer, now_pack->len);
     }
 }
 // 空闲中断
@@ -91,9 +92,9 @@ void BSP_UART_IDLECallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
 }
 
 //发送完成回调函数
-void BSP_UART_TxCpltCallback(int uart_index, UART_HandleTypeDef *huart) {
+void BSP_UART_TxCpltCallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
+    printf_log("tx cplt:%d\n", uart_index);
     if (!uart_ports[uart_index].queue_send_enable) return;
-    HAL_UART_DMAStop(huart);
     // POP掉之前的数据
     if (uart_ports[uart_index].send_packs->cq_len > 0) {
         circular_queue_pop(uart_ports[uart_index].send_packs);
@@ -102,7 +103,8 @@ void BSP_UART_TxCpltCallback(int uart_index, UART_HandleTypeDef *huart) {
     if (uart_ports[uart_index].send_packs->cq_len > 0) {
         BSP_UART_Send_Pack *now_pack = circular_queue_front(uart_ports[uart_index].send_packs);
         //再次发送
-        HAL_UART_Transmit_DMA(uart_ports[uart_index].port, now_pack->buffer, (uint16_t)now_pack->len);
+        printf_log("queue send len:%d\n",now_pack->len);
+        HAL_UART_Transmit_IT(uart_ports[uart_index].port, now_pack->buffer, now_pack->len);
     }
 }
 
@@ -130,3 +132,14 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
         BSP_UART_TxCpltCallback(1, huart);
     }
 }
+
+// void BSP_UART_DMAHandler(DMA_HandleTypeDef *dma) {
+//     if (dma == uart_ports[0].port->hdmatx) {
+//         BSP_UART_TxCpltCallback(0, dma);
+//     }
+//     if (dma == uart_ports[1].port->hdmatx) {
+//         BSP_UART_TxCpltCallback(1, dma);
+//     }
+// }
+
+// HAL_DMA_FULL_TRANSFER

@@ -25,9 +25,9 @@ typedef enum Graphic_type_t {
     circle,     //圆S
     oval,       //椭圆
     arc,        //圆弧
-    float_t,    //浮点数
-    int_t,      //整型数
-    char_t,     //字符
+    Float_t,    //浮点数
+    Int_t,      //整型数
+    Char_t,     //字符
 } Graphic_type;
 
 //图形数据  字体大小与线宽比例推荐为10：1

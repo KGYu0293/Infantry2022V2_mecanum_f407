@@ -6,7 +6,7 @@
 #include <string.h>
 #define REPEAT(x) for(int i = 0;i < 4;++i) {x}
 // 2s刷新一次
-#define UI_REFRESH_INTERVAL 2000
+#define UI_REFRESH_INTERVAL 5000
 
 void strset(char* buffer, char* s) {
     memset(buffer, 0, UI_TEXT_BUFFER_SIZE);
@@ -116,16 +116,16 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     obj->vision_frame.color = obj->data.vision_has_taget ? Green: White;
 
     modifiy_graphic(obj->ui_sender, &obj->vision_frame);
-    modifiy_graphic(obj->ui_sender, &obj->fri_circle);
-    modifiy_graphic(obj->ui_sender, &obj->mag_circle);
-    modifiy_graphic(obj->ui_sender, &obj->gimbal_circle);
-    modifiy_graphic(obj->ui_sender, &obj->chassis_circle);
-    modifiy_graphic(obj->ui_sender, &obj->autoaim_circle);
-    modifiy_text(obj->ui_sender, &obj->fri_text, obj->fri_str, 20);
-    modifiy_text(obj->ui_sender, &obj->mag_text, obj->mag_str, 20);
-    modifiy_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);
-    modifiy_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);
-    modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);
+    if(obj->data.fri_mode != obj->last_data.fri_mode) modifiy_graphic(obj->ui_sender, &obj->fri_circle);
+    if(obj->data.mag_mode != obj->last_data.mag_mode) modifiy_graphic(obj->ui_sender, &obj->mag_circle);
+    if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) modifiy_graphic(obj->ui_sender, &obj->gimbal_circle);
+    if(obj->data.chassis_mode != obj->last_data.chassis_mode) modifiy_graphic(obj->ui_sender, &obj->chassis_circle);
+    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode) modifiy_graphic(obj->ui_sender, &obj->autoaim_circle);
+    if(obj->data.fri_mode != obj->last_data.fri_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->fri_text, obj->fri_str, 20);)
+    if(obj->data.mag_mode != obj->last_data.mag_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->mag_text, obj->mag_str, 20);)
+    if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);)
+    if(obj->data.chassis_mode != obj->last_data.chassis_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);)
+    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);)
     obj->last_data = obj->data;
 }
 
