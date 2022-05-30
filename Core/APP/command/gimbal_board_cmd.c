@@ -285,7 +285,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         obj->send_data.chassis_target.vy /= 2.0;
     }
     // 先前为遥控器模式，切换到mild
-    if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_without_acc_limit){
+    if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_without_acc_limit) {
         obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     }
     // 按住shift加速/飞坡模式加速
@@ -320,9 +320,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     }
 
     // 云台控制参数
-    if (obj->gimbal_control.mode == gimbal_middle) {
-        obj->send_data.chassis_target.rotate -= 1.0f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));  // 云台跟随底盘
-    }
     if (obj->gimbal_control.mode == gimbal_run) {
         if (obj->autoaim_mode == auto_aim_off) {
             obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
@@ -338,7 +335,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                 *obj->pc->data_updated = 0;
                 // 自瞄开
                 // 计算真实yaw值
-                if (obj->pc->pc_recv_data->wait_time >= 0) {
+                if (obj->pc->pc_recv_data->fire_flag != VISUAL_LOST) {
                     float yaw_target = obj->pc->pc_recv_data->yaw * 8192.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 8192.0;
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 8192;
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 8192;
@@ -368,6 +365,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         }
     } else if (obj->gimbal_control.mode == gimbal_middle) {
         // 云台跟随底盘模式
+        obj->send_data.chassis_target.rotate -= 1.0f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));  // 云台跟随底盘
     }
 
     // c:开关弹仓
@@ -388,15 +386,20 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限
         obj->shoot_control.fire_rate = 10;                                                            // 固定射频
-        if (obj->remote->data.mouse.press_l) {
+        if (obj->remote->data.mouse.press_l && !obj->remote->data.mouse.press_r) {                    // 只按左键 发射
             //按住20ms以上
             if (obj->remote->data.mouse.press_l_cnt > 10) {
                 obj->shoot_control.bullet_mode = bullet_continuous;
             } else {
                 obj->shoot_control.bullet_mode = bullet_single;
             }
-        } else if (obj->remote->data.mouse.press_r) {
+        } else if (obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 同时按左右键 卖血发射
+            obj->shoot_control.bullet_mode = bullet_continuous;
+            obj->shoot_control.heat_limit_remain = 200;
+        } else if (!obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 只按右键 反转防卡弹
             obj->shoot_control.bullet_mode = bullet_reverse;
+        } else if (obj->pc->pc_recv_data->fire_flag == VISUAL_FIRE_SINGLE) {  //  视觉控制发射(打符)
+            obj->shoot_control.bullet_mode = bullet_single;
         } else {
             obj->shoot_control.bullet_mode = bullet_holdon;
         }
