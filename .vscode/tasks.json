@@ -14,6 +14,18 @@
 			"label": "启动调试下载器",
 			"type": "shell",
 			"command": "openocd -f interface/jlink.cfg -c 'transport select swd' -f target/stm32f4x.cfg"
+		},
+		{
+			"label": "同步框架修改（上）",
+			"type": "shell",
+			"command": "try{git checkout -b to_be_pull; git pull other master} catch{$error[0]; break}"
+			// 先执行git remote add other [目标仓库的地址]
+		},
+		{
+			"label": "同步框架修改（下）",
+			"type": "shell",
+			"command": "try{git checkout master; git merge to_be_pull; git branch -d to_be_pull} catch{$error[0]; break}"
+			// 先执行git remote add other [目标仓库的地址]
 		}
 	]
 }
