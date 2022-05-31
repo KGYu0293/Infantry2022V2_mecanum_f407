@@ -7,6 +7,7 @@
 #include "bsp_pwm.h"
 #include "bsp_spi.h"
 #include "bsp_uart.h"
+#include "bsp_supervise.h"
 #include "stdint.h"
 
 void BSP_Layer_Init();

@@ -233,6 +233,7 @@ void StartImuTask(void *argument)
     portTickType currentTimeImu;
     currentTimeImu = xTaskGetTickCount();
     for (;;) {
+        FrameRateStatistics(&task_frameRate.FPS_IMU);
         HAL_Imu_Loop();
         vTaskDelayUntil(&currentTimeImu, 2);
     }
@@ -272,6 +273,7 @@ void StartMotorTask(void *argument)
     currentTimeMotor = xTaskGetTickCount();
     /* Infinite loop */
     for (;;) {
+        FrameRateStatistics(&task_frameRate.FPS_controller);
         HAL_Motor_Calc_Loop();
         vTaskDelayUntil(&currentTimeMotor, 1);
     }
@@ -312,6 +314,7 @@ void StartRobotCMDTask(void *argument)
     portTickType currentTimeRobotCMD;
     currentTimeRobotCMD = xTaskGetTickCount();
     for (;;) {
+        FrameRateStatistics(&task_frameRate.FPS_RobotCMD);
         APP_Loop();
         vTaskDelayUntil(&currentTimeRobotCMD, 2);
     }
@@ -332,6 +335,7 @@ void StartCapTask(void *argument)
     portTickType currentTimeSuperCap;
     currentTimeSuperCap = xTaskGetTickCount();
     for (;;) {
+        FrameRateStatistics(&task_frameRate.FPS_Cap);
         HAL_Super_cap_wuli_Loop();
         vTaskDelayUntil(&currentTimeSuperCap, 2);
     }
@@ -352,6 +356,7 @@ void StartRefereeTask(void *argument)
     currentTimeReferee = xTaskGetTickCount();
     /* Infinite loop */
     for (;;) {
+        FrameRateStatistics(&task_frameRate.FPS_Judge);
         HAL_Referee_Recv_Loop();
         vTaskDelayUntil(&currentTimeReferee, 10);
     }
@@ -370,6 +375,7 @@ void StartRefereeSendTask(void *argument)
   /* USER CODE BEGIN StartRefereeSendTask */
     /* Infinite loop */
     for (;;) {
+        FrameRateStatistics(&task_frameRate.FPS_JudgeSend);
         HAL_Referee_Send_Loop();
         osDelay(50);
     }
