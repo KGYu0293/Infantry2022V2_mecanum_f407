@@ -4,7 +4,7 @@
 #include <robot_def.h>
 #include <robot_ui.h>
 #include <string.h>
-#define REPEAT(x) for(int i = 0;i < 4;++i) {x}
+#define REPEAT(x) for(int i = 0;i < 1;++i) {x}
 // 2s刷新一次
 #define UI_REFRESH_INTERVAL 3000
 
@@ -141,13 +141,13 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     if(obj->data.mag_mode != obj->last_data.mag_mode) modifiy_graphic(obj->ui_sender, &obj->mag_circle);
     if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) modifiy_graphic(obj->ui_sender, &obj->gimbal_circle);
     if(obj->data.chassis_mode != obj->last_data.chassis_mode) modifiy_graphic(obj->ui_sender, &obj->chassis_circle);
-    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode) modifiy_graphic(obj->ui_sender, &obj->autoaim_circle);
+    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode || obj->data.pc_online != obj->last_data.pc_online) modifiy_graphic(obj->ui_sender, &obj->autoaim_circle);
     if(obj->data.power_mode != obj->last_data.power_mode) modifiy_graphic(obj->ui_sender, &obj->power_circle);
     if(obj->data.fri_mode != obj->last_data.fri_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->fri_text, obj->fri_str, 20);)
     if(obj->data.mag_mode != obj->last_data.mag_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->mag_text, obj->mag_str, 20);)
     if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);)
     if(obj->data.chassis_mode != obj->last_data.chassis_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);)
-    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);)
+    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode || obj->data.pc_online != obj->last_data.pc_online) REPEAT(modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);)
     if(obj->data.power_mode != obj->last_data.power_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->power_text, obj->power_str, 20);)
     obj->last_data = obj->data;
 }

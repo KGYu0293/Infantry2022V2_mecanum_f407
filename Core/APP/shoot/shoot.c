@@ -72,8 +72,8 @@ Shoot *Shoot_Create(void) {
     magazine_config.initial_angle = 100;
     obj->mag_lid = Servo_Create(&magazine_config);
 
-    // 打开红点激光
-    BSP_GPIO_Set(GPIO_5V_OUTPUT, 1);
+    // 关闭红点激光
+    BSP_GPIO_Set(GPIO_5V_OUTPUT, 0);
 
     obj->shoot_cmd_suber = register_sub("cmd_shoot", 1);
     obj->cmd_data = NULL;

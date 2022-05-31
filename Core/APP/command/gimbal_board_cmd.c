@@ -333,7 +333,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     if (obj->gimbal_control.mode == gimbal_run) {
         if (obj->autoaim_mode == auto_aim_off) {
             obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-            obj->gimbal_control.pitch += 0.0239f * ((float)obj->remote->data.mouse.y);
+            obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
             obj->send_data.vision_has_target = 0;
             //不管开没开自瞄，都更新pc接收数据的状态
             if (*obj->pc->data_updated) {
@@ -356,7 +356,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                     // 没有目标
                     //使用鼠标控制云台
                     obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    obj->gimbal_control.pitch += 0.0239f * ((float)obj->remote->data.mouse.y);
+                    obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
                     obj->send_data.vision_has_target = 0;
                 }
 
@@ -368,7 +368,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                     pc_lost_cnt = 0;
                     //使用鼠标控制云台
                     obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    obj->gimbal_control.pitch += 0.0239f * ((float)obj->remote->data.mouse.y);
+                    obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
                     obj->send_data.vision_has_target = 0;
                 }
             }
