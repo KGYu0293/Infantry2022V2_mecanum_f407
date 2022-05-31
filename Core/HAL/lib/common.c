@@ -15,5 +15,5 @@ int sgn(int x){
 }
 
 int fsgn(float x) {
-    return (x != 0.0f ? (x < 0.0f ? -1.0f : 1.0f) : 0.0f);
+    return (x != 0.0f ? (x < 0.0f ? -1 : 1) : 0);
 }
