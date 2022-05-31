@@ -6,7 +6,7 @@
 #include <string.h>
 #define REPEAT(x) for(int i = 0;i < 4;++i) {x}
 // 2s刷新一次
-#define UI_REFRESH_INTERVAL 5000
+#define UI_REFRESH_INTERVAL 3000
 
 void strset(char* buffer, char* s) {
     memset(buffer, 0, UI_TEXT_BUFFER_SIZE);
@@ -26,12 +26,14 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->gimbal_circle);
     add_graphic(obj->ui_sender, &obj->chassis_circle);
     add_graphic(obj->ui_sender, &obj->autoaim_circle);
+    add_graphic(obj->ui_sender, &obj->power_circle);
     //文字
-    add_text(obj->ui_sender, &obj->fri_text, obj->fri_str, 20);
-    add_text(obj->ui_sender, &obj->mag_text, obj->mag_str, 20);
-    add_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);
-    add_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);
-    add_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);
+    add_text(obj->ui_sender, &obj->fri_text, obj->fri_str, UI_TEXT_BUFFER_SIZE);
+    add_text(obj->ui_sender, &obj->mag_text, obj->mag_str, UI_TEXT_BUFFER_SIZE);
+    add_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, UI_TEXT_BUFFER_SIZE);
+    add_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, UI_TEXT_BUFFER_SIZE);
+    add_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, UI_TEXT_BUFFER_SIZE);
+    add_text(obj->ui_sender, &obj->power_text, obj->power_str, UI_TEXT_BUFFER_SIZE);
 }
 
 //改变图形元素
@@ -91,6 +93,25 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
         strset(obj->chassis_str, "CHASSIS:ROT");
     }
 
+    // 功率模式
+    if (obj->data.power_mode == chassis_dispatch_mild){
+        obj->power_circle.color = Green;
+        strset(obj->power_str, "POWER:MILD");
+    } else if (obj->data.power_mode == chassis_dispatch_shift){
+        obj->power_circle.color = Orange;
+        strset(obj->power_str, "POWER:SHIFT");
+    } else if (obj->data.power_mode == chassis_dispatch_climb){
+        obj->power_circle.color = Orange;
+        strset(obj->power_str, "POWER:CLIMB");
+    } else if (obj->data.power_mode == chassis_dispatch_fly){
+        obj->power_circle.color = Purplish_Red;
+        strset(obj->power_str, "POWER:FLY");
+    } else if (obj->data.power_mode == chassis_dispatch_without_acc_limit){
+        obj->power_circle.color = Cyan;
+        strset(obj->power_str, "POWER:ACC");
+    }
+
+
     //自瞄模式
     if (!obj->data.pc_online) {
         obj->autoaim_circle.color = Orange;
@@ -121,11 +142,13 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) modifiy_graphic(obj->ui_sender, &obj->gimbal_circle);
     if(obj->data.chassis_mode != obj->last_data.chassis_mode) modifiy_graphic(obj->ui_sender, &obj->chassis_circle);
     if(obj->data.autoaim_mode != obj->last_data.autoaim_mode) modifiy_graphic(obj->ui_sender, &obj->autoaim_circle);
+    if(obj->data.power_mode != obj->last_data.power_mode) modifiy_graphic(obj->ui_sender, &obj->power_circle);
     if(obj->data.fri_mode != obj->last_data.fri_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->fri_text, obj->fri_str, 20);)
     if(obj->data.mag_mode != obj->last_data.mag_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->mag_text, obj->mag_str, 20);)
     if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);)
     if(obj->data.chassis_mode != obj->last_data.chassis_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);)
     if(obj->data.autoaim_mode != obj->last_data.autoaim_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);)
+    if(obj->data.power_mode != obj->last_data.power_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->power_text, obj->power_str, 20);)
     obj->last_data = obj->data;
 }
 
@@ -172,6 +195,11 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->autoaim_circle = Circle(13, 0, Green, 8, 150, 531, 10);
     obj->autoaim_text = Char(14, 0, White, 3, 20, 20, 180, 540);
     strset(obj->autoaim_str, "AUTOAIM:OFF");
+
+    //功率
+    obj->power_circle = Circle(15, 0, Green, 8, 1550, 731, 10);
+    obj->power_text = Char(16, 0, White, 3, 20, 20, 1580, 740);
+    strset(obj->power_str, "POWER:MILD");
     //初始化percent
     obj->data.cap_percent = 0.0;
     obj->data.bat_voltage = 0.0;

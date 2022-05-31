@@ -103,7 +103,7 @@ void OutputmaxLimit(Chassis *obj) {
     // if (obj->cmd_data->power.if_consume_supercap)
     // 若需要消耗电容
     if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) || (obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) ||
-        (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly || obj->cmd_data->power.dispatch_mode == chassis_dispatch_without_acc_limit)) {
+        (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly)) {
         if (obj->super_cap->cap_percent < 30) {
             output_limit = 2000;
         } else if (obj->super_cap->cap_percent < 50) {
