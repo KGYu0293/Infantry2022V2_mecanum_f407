@@ -6,7 +6,7 @@
 			"type": "shell",
 			"command": "make",
 			"args": [
-				"-j8"
+				"-j8"// 使用8个线程进行编译
 			],
 			"problemMatcher": []
 		},
@@ -14,6 +14,21 @@
 			"label": "启动调试下载器",
 			"type": "shell",
 			"command": "openocd -f interface/jlink.cfg -c 'transport select swd' -f target/stm32f4x.cfg"
+			// 目前有点问题 希望有人尝试修复
+		},
+		{
+			"label": "同步框架修改1",
+			"type": "shell",
+			"command": "try{git checkout -b to_be_pull; git pull other master} catch{$error[0]; break}"
+			// 先执行git remote add other [需要拉取更改的原仓库的地址]
+			// [需要拉取更改的原仓库的地址]可能为framework或其他相关联的仓库（例如二代麦轮步兵添加的是一代麦轮步兵的地址）
+			// 若成功，代码会切换到一个叫to_be_pull的新分支，并报[需要拉取更改的原仓库的地址]与本仓库master分支的冲突。在vscode中解决冲突后保存提交后再进行后面的操作。
+		},
+		{
+			"label": "同步框架修改2",
+			"type": "shell",
+			"command": "try{git checkout master; git merge to_be_pull; git branch -d to_be_pull} catch{$error[0]; break}"
+			// 该操作会将上面操作产生的to_be_pull合并进本仓库的master分支
 		}
 	]
 }
