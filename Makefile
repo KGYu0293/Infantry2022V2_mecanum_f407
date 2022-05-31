@@ -138,7 +138,8 @@ Core/HAL/lib/circular_queue.c \
 Core/HAL/lib/controller/adrc.c \
 Core/HAL/lib/controller/lqr.c \
 Core/HAL/lib/controller/mrac.c \
-Core/HAL/lib/controller/pid.c\
+Core/HAL/lib/controller/pid.c \
+Core/HAL/lib/controller/controller.c \
 Core/HAL/monitor/monitor.c \
 Core/HAL/hal.c \
 Core/HAL/pub_sub.c \
