@@ -233,5 +233,5 @@ void referee_recv_loop() {
 
 void referee_send_ext(Referee *obj, ext_robot_interact_frame *frame) {
     uint16_t send_len = REFEREE_PACK_LEN_HEADER + REFEREE_PACK_LEN_CMD_ID + REFEREE_PACK_LEN_TAIL + frame->header.data_length;
-    BSP_UART_Send_DMA(obj->config.bsp_uart_index, (uint8_t *)frame, send_len);
+    BSP_UART_Send_queue(obj->config.bsp_uart_index, (uint8_t *)frame, send_len);
 }

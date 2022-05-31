@@ -101,7 +101,7 @@ graphic_data Float(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, u
     gd.layer = layer;
     gd.color = color;
     gd.width = width;
-    gd.graphic_tpye = float_t;
+    gd.graphic_tpye = Float_t;
     gd.start_x = start_x;
     gd.start_y = start_y;
     gd.start_angle = fontSize;
@@ -119,7 +119,7 @@ graphic_data Int(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, uin
     gd.layer = layer;
     gd.color = color;
     gd.width = width;
-    gd.graphic_tpye = int_t;
+    gd.graphic_tpye = Int_t;
     gd.start_angle = fontSize;
     gd.start_x = start_x;
     gd.start_y = start_y;
@@ -136,7 +136,7 @@ graphic_data Char(uint8_t id, uint32_t layer, uint32_t color, uint32_t width, ui
     gd.layer = layer;
     gd.color = color;
     gd.width = width;
-    gd.graphic_tpye = char_t;
+    gd.graphic_tpye = Char_t;
     gd.start_angle = fontSize;
     gd.end_angle = ChLength;
     gd.start_x = start_x;
@@ -292,7 +292,7 @@ void Referee_UI_Loop() {
                 referee_send_ext(obj->config.referee, &obj->send_frame);
                 circular_queue_pop(obj->elements);
                 break;
-            } else if (now_cmd->data.graphic_tpye == char_t) {  //字符特殊处理
+            } else if (now_cmd->data.graphic_tpye == Char_t) {  //字符特殊处理
                 //如果之前有已经存入send_frame的图片，那就先发送完图片
                 if (graphic_num > 0) break;
                 obj->send_frame.header.data_length = 6 + 45;

@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "stdint.h"
 #include "stdlib.h"
@@ -37,6 +37,15 @@ typedef enum Chassis_mode_e {
     chassis_rotate_run,        // 小陀螺模式
     chassis_run_follow_offset  // 底盘跟随云台模式
 } Chassis_mode;
+
+// 底盘调度模式
+typedef enum Chassis_dispatch_mode_e {
+    chassis_dispatch_mild = 0,           // 限制加速度 不消耗电容
+    chassis_dispatch_without_acc_limit,  // 无加速度限制 不消耗电容
+    chassis_dispatch_shift,              // 无加速度限制 耗电容
+    chassis_dispatch_climb,              // 爬坡
+    chassis_dispatch_fly                 // 飞坡
+} Chassis_dispatch_mode;
 
 // 拨弹轮运行模式
 typedef enum Bullet_mode_e {
@@ -91,7 +100,8 @@ typedef struct Cmd_chassis_speed_t {
 
 // 对底盘功率的控制量
 typedef struct Cmd_chassis_power_t {
-    uint8_t if_consume_supercap;  //是否消耗电容
+    // uint8_t if_consume_supercap;  //是否消耗电容
+    Chassis_dispatch_mode dispatch_mode;
     uint8_t power_limit;
     float power_now;
     uint16_t power_buffer;  // 缓冲功率
@@ -141,16 +151,16 @@ typedef struct Upload_chassis_t {
 // 板间通信定义
 // 云台->底盘数据包
 typedef struct Gimbal_board_send_t {
-    uint8_t if_consume_supercap;       // 是否消耗电容
     uint8_t now_robot_mode;            // 遥控器在云台主控 包含stop模式与云台重要模块掉线
     uint8_t chassis_mode;              // 底盘模式
+    uint8_t chassis_dispatch_mode;     // 底盘功率模式
+    Cmd_chassis_speed chassis_target;  // 底盘速度控制
     uint8_t autoaim_mode;              // UI所需自瞄数据
     uint8_t pc_online;                 // UI所需PC是否在线
     uint8_t gimbal_mode;               // UI所需云台数据
     uint8_t mag_mode;                  // UI所需弹仓盖数据
     uint8_t fri_mode;                  // UI所需摩擦轮数据
     uint8_t vision_has_target;         // 自瞄是否检测到目标
-    Cmd_chassis_speed chassis_target;  // 底盘速度控制
 } Gimbal_board_send_data;
 
 // 云台<-底盘数据包

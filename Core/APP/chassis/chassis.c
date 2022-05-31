@@ -49,8 +49,8 @@ Chassis *Chassis_Create() {
     lf_config.speed_fdb_model = MOTOR_FDB;
     lf_config.output_model = MOTOR_OUTPUT_NORMAL;
     lf_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&lf_config.config_speed, 5, 0, 10, 0, 10000);
+    PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 0);
+    PID_SetConfig(&lf_config.config_speed, 5, 0, 10, 0, 15000);
     obj->lf = Can_Motor_Create(&lf_config);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
@@ -60,8 +60,8 @@ Chassis *Chassis_Create() {
     rf_config.speed_fdb_model = MOTOR_FDB;
     rf_config.output_model = MOTOR_OUTPUT_NORMAL;
     rf_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&rf_config.config_speed, 5, 0, 10, 0, 10000);
+    PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 0);
+    PID_SetConfig(&rf_config.config_speed, 5, 0, 10, 0, 15000);
     obj->rf = Can_Motor_Create(&rf_config);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
@@ -71,8 +71,8 @@ Chassis *Chassis_Create() {
     lb_config.speed_fdb_model = MOTOR_FDB;
     lb_config.output_model = MOTOR_OUTPUT_NORMAL;
     lb_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&lb_config.config_speed, 5, 0, 10, 0, 10000);
+    PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 0);
+    PID_SetConfig(&lb_config.config_speed, 5, 0, 10, 0, 15000);
     obj->lb = Can_Motor_Create(&lb_config);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
@@ -82,8 +82,8 @@ Chassis *Chassis_Create() {
     rb_config.speed_fdb_model = MOTOR_FDB;
     rb_config.output_model = MOTOR_OUTPUT_NORMAL;
     rb_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&rb_config.config_speed, 5, 0, 10, 0, 10000);
+    PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 0);
+    PID_SetConfig(&rb_config.config_speed, 5, 0, 10, 0, 15000);
     obj->rb = Can_Motor_Create(&rb_config);
 
     // 定义pub
@@ -100,7 +100,10 @@ Chassis *Chassis_Create() {
 // 对电流环进行限制 简易版功率限制
 void OutputmaxLimit(Chassis *obj) {
     float output_limit = 0;
-    if (obj->cmd_data->power.if_consume_supercap) {
+    // if (obj->cmd_data->power.if_consume_supercap)
+    // 若需要消耗电容
+    if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) || (obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) ||
+        (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly)) {
         if (obj->super_cap->cap_percent < 30) {
             output_limit = 2000;
         } else if (obj->super_cap->cap_percent < 50) {
@@ -126,12 +129,12 @@ void OutputmaxLimit(Chassis *obj) {
  * @retval None
  */
 void ChassisAccelerationLimit(Chassis *obj, Cmd_chassis *param) {
-    double accMax = 15.0f * (double)param->power.power_limit;
-    if (accMax < 170.0f)
-        accMax = 170.0f;
-    else if (accMax > 270.0f)
-        accMax = 270.0f;
+    // double accMax = 15.0f * (double)param->power.power_limit;
+    // if (accMax < 170.0f)     accMax = 170.0f;
+    // else if (accMax > 270.0f)    accMax = 270.0f;
 
+    // 功率控制良好的情况下acc limit主要防打滑 不必与功率相关
+    float accMax = 1100;  // 1020-1620
     if (fabs(obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb) > accMax) obj->lf->speed_pid.ref = obj->lf->speed_pid.fdb + accMax * (obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb > 0 ? 1 : -1);
     if (fabs(obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb) > accMax) obj->lb->speed_pid.ref = obj->lb->speed_pid.fdb + accMax * (obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb > 0 ? 1 : -1);
     if (fabs(obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb) > accMax) obj->rf->speed_pid.ref = obj->rf->speed_pid.fdb + accMax * (obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb > 0 ? 1 : -1);
@@ -168,12 +171,15 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 // 小陀螺情况下的旋转速度控制函数
 float auto_rotate_param(Cmd_chassis *param) {
     static float rotate = 0;
-    // 位置函数
+    // 位置式变速
+    float rotate_benchmark = 170 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
+    float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;    // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
+    rotate = rotate_benchmark + rotate_benchmark * 0.2 * sin(x);         // 变速函数&变速范围
 
-    // 时间函数
+    // 时间式变速
     // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
     // // 基准转速 = 最低转速 + 高功率下加速旋转
-    // float rotate_benchmark = 150 + (param->power.power_limit - 30) * 1;
+    // float rotate_benchmark = 150 + (param->power.power_limit - 45) * 2;
     // if (spin_speed_change == 0) {
     //     // 定速
     //     rotate = rotate_benchmark;
@@ -184,7 +190,7 @@ float auto_rotate_param(Cmd_chassis *param) {
     //     if (rotate < rotate_min) rotate = rotate_min;
     //     if (rotate > rotate_max) rotate = rotate_max;
     //     if (spin_speed_change == 1) {
-    //         // 加速
+    //         // 加速（目前为线性）
     //         rotate += 0.0005;
     //         if (rotate > rotate_max){
     //             spin_speed_change = 2;
@@ -198,7 +204,7 @@ float auto_rotate_param(Cmd_chassis *param) {
     //     }
     // }
 
-    rotate = 150;
+    // rotate = 150;
     return rotate;
 }
 
@@ -219,8 +225,9 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
     // 功率控制
     OutputmaxLimit(obj);
     // 加速度限制
-    // if(不在爬坡模式)
-    // ChassisAccelerationLimit(obj, param);
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
+        ChassisAccelerationLimit(obj, param);
+    }
 }
 
 void Chassis_Update(Chassis *obj) {
