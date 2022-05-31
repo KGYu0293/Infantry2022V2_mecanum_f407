@@ -1,22 +1,23 @@
 
-
-Breakpoint=D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/driver/com/can_recv.c:38, State=BP_STATE_ON
-OpenDocument="bsp_delay.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/BSP/lib/bsp_delay.c", Line=0
-OpenDocument="startup_stm32f407xx.s", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=49
-OpenDocument="main.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=76
-OpenDocument="stm32f4xx_hal_uart.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c", Line=1387
-OpenDocument="referee_ui.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/HAL/driver/referee/referee_ui.c", Line=262
-OpenDocument="bsp_uart.c", FilePath="D:/STM32Projects/Infantry2022V1_mecanum_F407/Core/BSP/interface/bsp_uart.c", Line=50
+OpenDocument="main.c", FilePath="C:/Users/chenxun/Desktop/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=68
+OpenDocument="startup_stm32f407xx.s", FilePath="C:/Users/chenxun/Desktop/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=47
+OpenDocument="", FilePath="", Line=0
+OpenDocument="gimbal_board_cmd.c", FilePath="C:/Users/chenxun/Desktop/Infantry2022V1_mecanum_F407/Core/APP/command/gimbal_board_cmd.c", Line=76
+OpenDocument="app.c", FilePath="C:/Users/chenxun/Desktop/Infantry2022V1_mecanum_F407/Core/APP/app.c", Line=0
+OpenDocument="", FilePath="", Line=0
+OpenDocument="main.c", FilePath="C:/Users/chenxun/Desktop/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=68
+OpenDocument="startup_stm32f407xx.s", FilePath="C:/Users/chenxun/Desktop/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=47
+OpenDocument="", FilePath="", Line=0
+OpenDocument="", FilePath="", Line=0
+OpenDocument="", FilePath="", Line=0
 OpenToolbar="Debug", Floating=0, x=0, y=0
-OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=745, h=387, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=710, h=273, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=349, h=869, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=1, w=745, h=481, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=1, w=710, h=595, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=1920, h=85, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[162;119;134;100;168;100]
 TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;992]
 TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
-TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[365;100;100;180]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[365;181;100;100]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
 TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;571]
-WatchedExpression="cmd", Window=Watched Data 1
-WatchedExpression="uart_ports", RefreshRate=5, Window=Watched Data 1

@@ -10,34 +10,11 @@
 
 #include "mrac.h"
 
-#include "math.h"
 #include "common.h"
+#include "math.h"
 
-struct ramp_t {
-    int count;
-    int scale;
-    float out;
-    void (*init)(struct ramp_t *ramp, int scale);
-    float (*calc)(struct ramp_t *ramp);
-};
-
-// int ssgn(float x);
 float sat(float x, float lower_bound, float upper_bound);
-float sgn_like(float x, float d);
-void RampInit(struct ramp_t *ramp, int scale);
-float RampCalc(struct ramp_t *ramp);
-float FlickFunc(int period, float scale, unsigned char mode);
-float TriangularWave(float max, float speed);
-float mrac_index(float a, float b);
-
-// int ssgn(float x) {
-//     if (x > 0)
-//         return 1;
-//     else if (x < 0)
-//         return -1;
-//     else
-//         return 0;
-// }
+void MTDFunction(MTD_t *ptd, float aim);
 
 float sat(float x, float lower_bound, float upper_bound) {
     if (lower_bound > upper_bound) return 0;
@@ -50,78 +27,69 @@ float sat(float x, float lower_bound, float upper_bound) {
 }
 
 
-float sgn_like(float x, float d) {
-    if (fabs(x) >= d)
-        return fsgn(x);
+void MTDFunction(MTD_t *ptd, float aim) {
+    float d, d0, y, k0, k, a = 0.0f;
+    ptd->aim = aim;
+    ptd->x = ptd->x1 - ptd->aim;
+    d = ptd->h * ptd->r;
+    d0 = d * ptd->h;
+    y = ptd->x + ptd->h * ptd->x2;
+    k0 = (1 + sqrt(1 + 8 * fabs(y) / d0)) / 2.0f;
+    k = fsgn(k0 - floor(k0)) + floor(k0);
+    if (fabs(y) > d0)
+        a = ptd->r * sat((1 - k / 2.0f) * fsgn(y) - (ptd->x + k * ptd->h * ptd->x2) / ((k - 1) * d0), -1.0f, 1.0f);
     else
-        return x / d;
+        a = -ptd->r * sat((ptd->x2 + y / ptd->h) / d, -1.0f, 1.0f);
+    ptd->x1 += ptd->dt * ptd->x2;
+    ptd->x2 += ptd->dt * a;
 }
 
+/**
+ * @brief MRAC calculate
+ * @param mrac struct, ref, all fdb
+ * @retval None
+ */
+void mrac_2d_calc(mrac_2d *mrac, float ref, float x1_fdb, float x2_fdb, unsigned char enable) {
+    if (enable == 1) {
+        float cosx, sinx;
+        cosx = cos(x1_fdb * M_PI / 180.0f);
+        sinx = sin(x1_fdb * M_PI / 180.0f);
+        mrac->x1_fdb = x1_fdb;
+        mrac->x2_fdb = x2_fdb;
+        MTDFunction(&mrac->x1_td, ref);
+        mrac->x1_ref = mrac->x1_td.x1;
+        mrac->x1_err = mrac->x1_ref - mrac->x1_fdb;
 
-void RampInit(struct ramp_t *ramp, int scale) {
-    ramp->count = 0;      
-    ramp->scale = scale; 
-    ramp->out = 0; 
-}
+        mrac->integrator.sum_err += mrac->x1_err;
+        mrac->integrator.sum_err = sat(mrac->integrator.sum_err, -mrac->integrator.sum_err_max, mrac->integrator.sum_err_max);
 
+        mrac->x2_ref = mrac->k1 * mrac->x1_err + mrac->x1_td.x2;
+        mrac->x2_err = mrac->x2_ref - mrac->x2_fdb;
+        MTDFunction(&mrac->x2_td, mrac->x2_ref);
 
-float RampCalc(struct ramp_t *ramp) {
-    if (ramp->scale <= 0)
-        return 0;
-    ramp->count++; 
-    if (ramp->count >= ramp->scale)
-        ramp->count = ramp->scale; 
+        mrac->output = mrac->k2 * mrac->x2_err +
+                       mrac->alpha1 * mrac->x2_td.x2 +
+                       mrac->alpha2 * cosx +
+                       mrac->alpha3 * sinx +
+                       mrac->alpha4 * sgn_like(mrac->x2_fdb, 0.5) +
+                       mrac->integrator.ki * mrac->integrator.sum_err;
+        mrac->output = sat(mrac->output, -mrac->output_max, mrac->output_max);
 
-    ramp->out = ramp->count / ((float)ramp->scale);  
-    return ramp->out;
-}
-
-
-float FlickFunc(int period, float scale, unsigned char mode) {
-    static int flick_time = 0;
-    if (mode == 0) {
-        flick_time = 0;
-        return 0;
-    }
-    if (flick_time > period || flick_time < 0)  
-        flick_time = 0;
-    else
-        flick_time++;
-
-    if (flick_time >= 0 && flick_time < period / 2)
-        return (scale - 4.0f * flick_time * scale / period);
-    else if (flick_time >= period / 2 && flick_time < period)
-        return (4.0f * flick_time * scale / period - 3.0f * scale);
-    else
-        return 0;
-}
-
-
-float TriangularWave(float max, float speed) {
-    static int i, x = 0; 
-    if (i == max)
-        x = 1;
-    else if (i == -max)
-        x = 0;
-    if (i < max && x == 0)
-        i += speed;
-    else if (x == 1 && i > -max)
-        i -= speed;
-    return i;
-}
-
-float mrac_index(float a, float b) {
-    float number = 1.0;
-
-    if (b == 0)
-        return 1;
-    else if (b < 0) {
-        for (int i = 0; i < -b; i++)
-            number *= a;
-        return 1 / number;
+        mrac->alpha1 += mrac->dt * mrac->gamma1 * mrac->x2_err * mrac->x2_td.x2;
+        mrac->alpha2 += mrac->dt * mrac->gamma2 * mrac->x2_err * cosx;
+        mrac->alpha3 += mrac->dt * mrac->gamma3 * mrac->x2_err * sinx;
+        mrac->alpha4 += mrac->dt * mrac->gamma4 * mrac->x2_err * fsgn(mrac->x2_fdb);
     } else {
-        for (int i = 0; i < b; i++)
-            number *= a;
-        return number;
+        mrac->x1_td.aim = x1_fdb;
+        mrac->x1_td.x1 = x1_fdb;
+        mrac->x1_td.x2 = 0;
+        mrac->x1_ref = x1_fdb;
+        mrac->x1_err = 0;
+        mrac->x2_td.aim = x2_fdb;
+        mrac->x2_td.x1 = x2_fdb;
+        mrac->x2_td.x2 = 0;
+        mrac->x2_ref = x2_fdb;
+        mrac->x2_err = 0;
+        mrac->output = 0;
     }
 }

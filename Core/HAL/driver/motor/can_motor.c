@@ -61,19 +61,17 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
         default:
             break;
     }
-    if (obj->config.speed_pid_fdb == NULL) {
-        obj->config.speed_pid_fdb = &obj->velocity;
+    if (obj->config.speed_fdb == NULL) {
+        obj->config.speed_fdb = &obj->velocity;
     }
-    if (obj->config.position_pid_fdb == NULL) {
-        obj->config.position_pid_fdb = &obj->real_position;
+    if (obj->config.position_fdb == NULL) {
+        obj->config.position_fdb = &obj->real_position;
     }
-    PID_Init(&obj->speed_pid, &obj->config.config_speed);
-    PID_Init(&obj->position_pid, &obj->config.config_position);
+    obj->motor_controller = create_controller(&obj->config.motor_controller_config);
     obj->monitor = Monitor_Register(obj->config.lost_callback, 5, obj);
 
     obj->enable = MOTOR_STOP;
     return obj;
-    // cvector_pushback(motor_instances, &obj);
 }
 
 void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uint32_t len) {
@@ -104,10 +102,11 @@ void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
         obj->round--;
     else if (obj->fdbPosition - obj->last_fdbPosition < -4096)
         obj->round++;
-    obj->last_real_position = obj->real_position;
-    obj->real_position = obj->fdbPosition + obj->round * 8192;
+    obj->last_real_position_8192 = obj->real_position_8192;
+    obj->real_position_8192 = obj->fdbPosition + obj->round * 8192;
+    obj->real_position = obj->real_position_8192 * 360.0 / 8192.0;
 
-    float position_delta = obj->real_position - obj->last_real_position;
+    float position_delta = obj->real_position_8192 - obj->last_real_position_8192;
     if (obj->position_queue->cq_len == VELOCITY_WINDOW) {
         float *now = circular_queue_pop(obj->position_queue);
         obj->position_sum -= *now;
@@ -130,27 +129,19 @@ void Can_Motor_Calc_Send() {
                 //电机掉线判断，如果同一个包内的所有的电机都掉线，那么这个包将不会发出
                 if (is_Offline(obj->monitor)) continue;
                 identifier_send = 1;
-                if (obj->config.motor_pid_model == POSITION_LOOP) {
-                    if (obj->config.position_fdb_model == OTHER_FDB) {
-                        obj->position_pid.fdb = *obj->config.position_pid_fdb;
-                    }
-                    if (obj->config.position_fdb_model == MOTOR_FDB) {
-                        obj->position_pid.fdb = obj->real_position;
-                    }
-                    PID_Calc(&obj->position_pid);
-                    obj->speed_pid.ref = obj->position_pid.output;
+                if (obj->config.position_fdb_model == OTHER_FDB){
+                    obj->motor_controller->fdb_position = *obj->config.position_fdb;
+                } else {
+                    obj->motor_controller->fdb_position = obj->real_position;
                 }
-                if (obj->config.motor_pid_model >= SPEED_LOOP) {
-                    if (obj->config.speed_fdb_model == OTHER_FDB) {
-                        obj->speed_pid.fdb = *obj->config.speed_pid_fdb;
-                    }
-                    if (obj->config.speed_fdb_model == MOTOR_FDB) {
-                        obj->speed_pid.fdb = obj->velocity;
-                    }
-                    PID_Calc(&obj->speed_pid);
-                    obj->current_output = obj->speed_pid.output;
+                if(obj->config.speed_fdb_model == OTHER_FDB){
+                    obj->motor_controller->fdb_speed = *obj->config.speed_fdb;
+                } else {
+                    obj->motor_controller->fdb_speed = obj->velocity;
                 }
-                buf[id] = obj->current_output;
+
+                controller_calc(obj->motor_controller);
+                buf[id] = (short)obj->motor_controller->output;
                 if (obj->config.output_model == MOTOR_OUTPUT_REVERSE) buf[id] *= -1;
                 if (obj->enable == MOTOR_STOP) {
                     buf[id] = 0;

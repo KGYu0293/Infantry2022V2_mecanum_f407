@@ -165,6 +165,7 @@ void BMI088_Update(BMI088_imu *obj) {
     if ((obj->data.euler_8192[2] - last_yaw) > 4096) obj->data.round--;
     if ((obj->data.euler_8192[2] - last_yaw) < -4096) obj->data.round++;
     obj->data.yaw_8192_real = obj->data.euler_8192[2] + obj->data.round * 8192;
+    obj->data.yaw_deg_real = obj->data.yaw_8192_real * 360.0 / 8192;
     last_yaw = obj->data.euler_8192[2];
     // MadgwickAHRS_update(&obj->madgwick_solver, obj->data.gyro[0],
     // obj->data.gyro[1], obj->data.gyro[2], obj->data.accel[0],

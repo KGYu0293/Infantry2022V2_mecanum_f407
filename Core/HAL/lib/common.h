@@ -8,4 +8,5 @@
 float invSqrt(float x);
 int sgn(int x);
 int fsgn(float x);
+float sgn_like(float x, float d);
 #endif
