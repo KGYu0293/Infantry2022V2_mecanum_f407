@@ -6,6 +6,7 @@
 #include "string.h"
 
 #define VELOCITY_WINDOW 5
+#define FDB_INIT_VALUE (-10000)
 
 can_motor *motor_instances[2][3][4];  // motor_instances用于存放can_motor*类型的指向电机实体的指针，在每个电机初始化时被填充
 uint8_t motors_id[2][3][8];           // motors_id
@@ -30,6 +31,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
     obj->position_queue = create_circular_queue(sizeof(float), VELOCITY_WINDOW);
     obj->config = *config;
     obj->position_sum = 0;
+    obj->fdbPosition = FDB_INIT_VALUE;
     motors_id[obj->config.bsp_can_index][obj->config.motor_model][obj->config.motor_set_id - 1] = 1;
     switch (config->motor_model) {
         case MODEL_2006:
@@ -90,6 +92,7 @@ void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uin
 void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
     obj->last_fdbPosition = obj->fdbPosition;
     obj->fdbPosition = ((short)data[0]) << 8 | data[1];
+    if(obj->last_fdbPosition == FDB_INIT_VALUE) obj->last_fdbPosition = obj->fdbPosition;
     obj->fdbSpeed = ((short)data[2]) << 8 | data[3];
     obj->electric_current = ((short)data[4]) << 8 | data[5];
     if (obj->config.motor_model == MODEL_2006) {

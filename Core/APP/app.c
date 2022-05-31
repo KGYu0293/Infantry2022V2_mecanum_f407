@@ -11,7 +11,7 @@
 
 #ifdef GIMBAL_BOARD
 // 重要模块
-gimbal_board_cmd* cmd;
+Gimbal_board_cmd* cmd;
 Gimbal* gimbal;
 Shoot* shoot;
 void APP_Layer_Init(){

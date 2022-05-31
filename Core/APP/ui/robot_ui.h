@@ -13,7 +13,8 @@ typedef struct ui_status_t {
     uint8_t mag_mode;          // UI所需弹仓盖数据
     uint8_t fri_mode;          // UI所需摩擦轮数据
     uint8_t chassis_mode;      // UI所需底盘数据
-    uint8_t vision_has_taget;  //找到目标
+    uint8_t power_mode;        // 底盘功率模式
+    uint8_t vision_has_taget;  // 找到目标
     float cap_percent;
     float bat_voltage;
 } ui_status;
@@ -54,11 +55,17 @@ typedef struct robot_ui_t {
     graphic_data autoaim_text;
     char autoaim_str[UI_TEXT_BUFFER_SIZE];
 
+    //功率模式
+    graphic_data power_circle;
+    graphic_data power_text;
+    char power_str[UI_TEXT_BUFFER_SIZE];
+
     //自瞄指示框
     graphic_data vision_frame;
     int cap_line_len;
 
     ui_status data;
+    ui_status last_data;
     // UI刷新时间戳
     uint32_t time_refresh;
 } robot_ui;
