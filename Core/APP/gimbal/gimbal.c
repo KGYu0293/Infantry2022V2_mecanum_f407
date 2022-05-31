@@ -29,7 +29,6 @@ Gimbal *Gimbal_Create() {
     yaw_controller_config.control_depth = POS_CONTROL;
     PID_SetConfig(&yaw_controller_config.position_pid_config, 36.4, 0.32, 2.28, 141, 5000);
     PID_SetConfig(&yaw_controller_config.speed_pid_config, 235, 3, 10, 2000, 22000);
-
     can_motor_config yaw_config;
     yaw_config.motor_controller_config = yaw_controller_config;
     yaw_config.motor_model = MODEL_6020;
@@ -48,7 +47,6 @@ Gimbal *Gimbal_Create() {
     pitch_controller_config.control_depth = POS_CONTROL;
     PID_SetConfig(&pitch_controller_config.position_pid_config, 31.86, 0.068, 36.41, 109.9, 5000);
     PID_SetConfig(&pitch_controller_config.speed_pid_config, 170, 0.7, 1, 5000, 25000);
-
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
     pitch_config.bsp_can_index = 0;
@@ -137,6 +135,7 @@ void Gimbal_Update(Gimbal *gimbal) {
             // gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.speed_fdb = &(gimbal->imu->data.gyro_deg_reverse[PITCH_AXIS]);
+            //将编码器值remap到0-360
             gimbal->yaw->motor_controller->ref_position = YAW_MOTOR_ENCORDER_BIAS * 360.0 / 8192 + gimbal->yaw->round * 360;
             gimbal->pitch->motor_controller->ref_position = PITCH_MOTOR_ENCORDER_BIAS * 360.0 / 8192;
             gimbal->pitch->config.output_model = MOTOR_OUTPUT_NORMAL;

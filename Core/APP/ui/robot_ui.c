@@ -68,7 +68,7 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
 
     //云台模式
     if (obj->data.gimbal_mode == gimbal_middle) {
-        obj->gimbal_circle.color = Orange;
+        obj->gimbal_circle.color = Pink;
         strset(obj->gimbal_str, "GIMBAL:MIDDLE");
     } else if (obj->data.gimbal_mode == gimbal_stop) {
         obj->gimbal_circle.color = White;
@@ -86,7 +86,7 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
         obj->chassis_circle.color = Green;
         strset(obj->chassis_str, "CHASSIS:FOLLOW");
     } else if (obj->data.chassis_mode == chassis_run) {
-        obj->chassis_circle.color = Orange;
+        obj->chassis_circle.color = Pink;
         strset(obj->chassis_str, "CHASSIS:IND");
     } else {
         obj->chassis_circle.color = Purplish_Red;
