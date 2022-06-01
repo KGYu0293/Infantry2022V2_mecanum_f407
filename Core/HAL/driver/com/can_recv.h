@@ -1,6 +1,7 @@
 #ifndef _CAN_RECV_H
 #define _CAN_RECV_H
 #include "datatypes.h"
+#include "bsp_supervise.h"
 #include "stdint.h"
 #include "monitor.h"
 
@@ -27,6 +28,7 @@ struct can_recv_t {
     uint8_t data_updated;
     uint8_t* rxbuf;
     monitor_item* monitor;
+    FPS_t fps;
 };
 
 void CanRecv_Driver_Init();

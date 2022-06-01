@@ -1,5 +1,5 @@
 #include "gimbal_board_cmd.h"
-
+#include "bsp_supervise.h"
 #include "bsp_def.h"
 
 // monitor处理函数

@@ -15,8 +15,6 @@ typedef struct {
     FPS_t FPS_RobotCMD;
     FPS_t FPS_IMU;
     FPS_t FPS_controller;
-    FPS_t FPS_PC;
-    FPS_t FPS_board;
     FPS_t FPS_Judge;
     FPS_t FPS_JudgeSend;
 } FrameRate;

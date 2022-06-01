@@ -1,5 +1,5 @@
 #include "bsp_supervise.h"
-
+#include "main.h"
 #include "string.h"
 FrameRate task_frameRate;
 void FrameRateStatistics(FPS_t *FPS) {
