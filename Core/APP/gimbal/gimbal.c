@@ -23,33 +23,41 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.imu_axis_convert[2] = 1;
     obj->imu = BMI088_Create(&internal_imu_config);
 
+    
+    controller_config yaw_controller_config;
+    yaw_controller_config.control_type = PID_MODEL;
+    yaw_controller_config.control_depth = POS_CONTROL;
+    PID_SetConfig(&yaw_controller_config.position_pid_config, 36.4, 0.32, 2.28, 141, 5000);
+    PID_SetConfig(&yaw_controller_config.speed_pid_config, 235, 3, 10, 2000, 22000);
     can_motor_config yaw_config;
+    yaw_config.motor_controller_config = yaw_controller_config;
     yaw_config.motor_model = MODEL_6020;
     yaw_config.bsp_can_index = 1;
     yaw_config.motor_set_id = 1;
-    yaw_config.motor_pid_model = POSITION_LOOP;
     yaw_config.position_fdb_model = OTHER_FDB;
-    yaw_config.position_pid_fdb = &(obj->imu->data.yaw_8192_real);  // 此处使用陀螺仪yaw轴Z
+    yaw_config.position_fdb = &(obj->imu->data.yaw_deg_real);  // 此处使用陀螺仪yaw轴Z
     yaw_config.speed_fdb_model = OTHER_FDB;
-    yaw_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[YAW_AXIS]);
+    yaw_config.speed_fdb = &(obj->imu->data.gyro_deg[YAW_AXIS]);
     yaw_config.output_model = MOTOR_OUTPUT_NORMAL;
     yaw_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&yaw_config.config_position, 1.6, 0.014, 0.1, 3200, 5000);
-    PID_SetConfig(&yaw_config.config_speed, 235, 3, 10, 2000, 22000);
     obj->yaw = Can_Motor_Create(&yaw_config);
+
+    controller_config pitch_controller_config;
+    pitch_controller_config.control_type = PID_MODEL;
+    pitch_controller_config.control_depth = POS_CONTROL;
+    PID_SetConfig(&pitch_controller_config.position_pid_config, 31.86, 0.068, 36.41, 109.9, 5000);
+    PID_SetConfig(&pitch_controller_config.speed_pid_config, 170, 0.7, 1, 5000, 25000);
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
     pitch_config.bsp_can_index = 0;
     pitch_config.motor_set_id = 1;
-    pitch_config.motor_pid_model = POSITION_LOOP;
+    pitch_config.motor_controller_config = pitch_controller_config;
     pitch_config.position_fdb_model = OTHER_FDB;
-    pitch_config.position_pid_fdb = &(obj->imu->data.euler_8192[PITCH_AXIS]);  // 此处使用陀螺仪pitch轴X
+    pitch_config.position_fdb = &(obj->imu->data.euler_deg[PITCH_AXIS]);  // 此处使用陀螺仪pitch轴X
     pitch_config.speed_fdb_model = OTHER_FDB;
-    pitch_config.speed_pid_fdb = &(obj->imu->data.gyro_deg[PITCH_AXIS]);
+    pitch_config.speed_fdb = &(obj->imu->data.gyro_deg[PITCH_AXIS]);
     pitch_config.output_model = MOTOR_OUTPUT_REVERSE;
     pitch_config.lost_callback = gimbal_motor_lost;
-    PID_SetConfig(&pitch_config.config_position, 1.4, 0.003, 1.6, 2500, 5000);
-    PID_SetConfig(&pitch_config.config_speed, 170, 0.7, 1, 5000, 25000);
     obj->pitch = Can_Motor_Create(&pitch_config);
 
     // 定义sub、pub
@@ -84,8 +92,8 @@ void Gimbal_Update(Gimbal *gimbal) {
     gimbal->gimbal_upload_pub->publish(gimbal->gimbal_upload_pub, gimbal_upload);
 
     // p轴限位值获取
-    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * (gimbal->imu->data.euler_8192[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST));
-    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_8192[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition));
+    gimbal->pitch_limit_down = 0.2f * gimbal->pitch_limit_down + 0.8f * (gimbal->imu->data.euler_deg[1] + (gimbal->pitch->fdbPosition - PITCH_ENCORDER_LOWEST) * 360.0 / 8192);
+    gimbal->pitch_limit_up = 0.2f * gimbal->pitch_limit_up + 0.8f * (gimbal->imu->data.euler_deg[1] - (PITCH_ENCORDER_HIGHEST - gimbal->pitch->fdbPosition) * 360.0 / 8192);
 
     // 模块控制
     switch (gimbal->cmd_data->mode) {
@@ -103,25 +111,16 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.speed_fdb_model = OTHER_FDB;
             gimbal->yaw->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.speed_fdb_model = OTHER_FDB;
-            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg[PITCH_AXIS]);
+            gimbal->pitch->config.speed_fdb = &(gimbal->imu->data.gyro_deg[PITCH_AXIS]);
             gimbal->pitch->config.position_fdb_model = OTHER_FDB;
             gimbal->pitch->config.output_model = MOTOR_OUTPUT_REVERSE;
             // yaw轴
-            float yaw_ref;
-            yaw_ref = gimbal->cmd_data->yaw;
-            // 防止连续旋转 优化空间较大
-            while ((yaw_ref - gimbal->imu->data.yaw_8192_real) > 4096) {
-                yaw_ref -= 8192;
-            }
-            while ((yaw_ref - gimbal->imu->data.yaw_8192_real) < -4096) {
-                yaw_ref += 8192;
-            }
-            gimbal->yaw->position_pid.ref = yaw_ref;
+            gimbal->yaw->motor_controller->ref_position = gimbal->cmd_data->yaw;
             // pitch轴
-            gimbal->pitch->position_pid.ref = gimbal->cmd_data->pitch;
+            gimbal->pitch->motor_controller->ref_position = gimbal->cmd_data->pitch;
             // p轴软件限位
-            if (gimbal->pitch->position_pid.ref < gimbal->pitch_limit_up) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_up;
-            if (gimbal->pitch->position_pid.ref > gimbal->pitch_limit_down) gimbal->pitch->position_pid.ref = gimbal->pitch_limit_down;
+            if (gimbal->pitch->motor_controller->ref_position < gimbal->pitch_limit_up) gimbal->pitch->motor_controller->ref_position = gimbal->pitch_limit_up;
+            if (gimbal->pitch->motor_controller->ref_position > gimbal->pitch_limit_down) gimbal->pitch->motor_controller->ref_position = gimbal->pitch_limit_down;
             break;
         // 跟随底盘
         case gimbal_middle:
@@ -135,9 +134,10 @@ void Gimbal_Update(Gimbal *gimbal) {
             gimbal->yaw->config.position_fdb_model = MOTOR_FDB;
             // gimbal->pitch->config.speed_fdb_model = MOTOR_FDB;
             gimbal->pitch->config.position_fdb_model = MOTOR_FDB;
-            gimbal->pitch->config.speed_pid_fdb = &(gimbal->imu->data.gyro_deg_reverse[PITCH_AXIS]);
-            gimbal->yaw->position_pid.ref = YAW_MOTOR_ENCORDER_BIAS + gimbal->yaw->round * 8192;
-            gimbal->pitch->position_pid.ref = PITCH_MOTOR_ENCORDER_BIAS;
+            gimbal->pitch->config.speed_fdb = &(gimbal->imu->data.gyro_deg_reverse[PITCH_AXIS]);
+            //将编码器值remap到0-360
+            gimbal->yaw->motor_controller->ref_position = YAW_MOTOR_ENCORDER_BIAS * 360.0 / 8192 + gimbal->yaw->round * 360;
+            gimbal->pitch->motor_controller->ref_position = PITCH_MOTOR_ENCORDER_BIAS * 360.0 / 8192;
             gimbal->pitch->config.output_model = MOTOR_OUTPUT_NORMAL;
             break;
     }

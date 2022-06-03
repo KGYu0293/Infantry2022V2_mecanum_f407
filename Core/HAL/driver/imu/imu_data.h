@@ -15,6 +15,7 @@ typedef struct imu_data_t {
 
     int round;
     float yaw_8192_real;
+    float yaw_deg_real;
 } imu_data;
 
 #endif

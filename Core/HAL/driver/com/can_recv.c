@@ -53,6 +53,7 @@ void CanRecv_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t* data, uint
                         now->recv_status = 0;
                         now->recv_len = 0;
                         now->data_updated = 1;
+                        FrameRateStatistics(&now->fps);
                         now->monitor->reset(now->monitor);
                         if (now->config.notify_func != NULL) {
                             now->config.notify_func(now);

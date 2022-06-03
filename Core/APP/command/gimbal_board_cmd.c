@@ -1,5 +1,5 @@
 #include "gimbal_board_cmd.h"
-
+#include "bsp_supervise.h"
 #include "bsp_def.h"
 
 // monitor处理函数
@@ -69,6 +69,7 @@ Gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // memset 0
     obj->mode = robot_stop;
+    obj->last_mode = robot_stop; 
     obj->robot_ready = 0;
     obj->autoaim_mode = auto_aim_off;
     // obj->chassis_climb_on = 0;
@@ -149,14 +150,15 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
     obj->send_data.pc_online = !is_Offline(obj->pc->recv->monitor);
     // 发布控制结果和通信
     send_cmd_and_data(obj);
+    obj->last_mode = obj->mode;
 }
 
 void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj) {
     obj->gimbal_control.mode = gimbal_run;
     obj->send_data.chassis_mode = chassis_run_follow_offset;
     obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
-    obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_8192_real;
-    obj->gimbal_control.pitch = obj->gimbal_upload_data->gimbal_imu->euler_8192[PITCH_AXIS];
+    obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_deg_real;
+    obj->gimbal_control.pitch = obj->gimbal_upload_data->gimbal_imu->euler_deg[PITCH_AXIS];
 }
 
 void stop_mode_update(Gimbal_board_cmd* obj) {
@@ -167,10 +169,14 @@ void stop_mode_update(Gimbal_board_cmd* obj) {
 }
 
 void remote_mode_update(Gimbal_board_cmd* obj) {
+    // 云台切换模式优化
+    if(obj->last_mode == robot_stop){
+        obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_deg_real;
+    }
     // 云台控制参数
     obj->gimbal_control.mode = gimbal_run;
-    obj->gimbal_control.yaw -= 0.04f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
-    obj->gimbal_control.pitch = -1.0f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
+    obj->gimbal_control.yaw -= 0.00176f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
+    obj->gimbal_control.pitch = -0.044f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
 
     // 底盘控制参数
     // 拨杆确定底盘模式与控制量
@@ -209,6 +215,10 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
 }
 
 void mouse_key_mode_update(Gimbal_board_cmd* obj) {
+    // 云台切换模式优化
+    if(obj->last_mode == robot_stop){
+        obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_deg_real;
+    }
     // 按一下r:小陀螺
     if (obj->remote->data.key_single_press_cnt.r != obj->remote->last_data.key_single_press_cnt.r) {
         if (obj->send_data.chassis_mode != chassis_rotate_run) {
@@ -308,22 +318,22 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         if (obj->send_data.chassis_mode == chassis_run) {
             obj->send_data.chassis_target.rotate = +60;
         } else if (obj->send_data.chassis_mode == chassis_run_follow_offset) {
-            obj->gimbal_control.yaw += 7;
+            obj->gimbal_control.yaw += 0.307;
         }
     }
     if (obj->remote->data.key_down.e) {
         if (obj->send_data.chassis_mode == chassis_run) {
             obj->send_data.chassis_target.rotate = -60;
         } else if (obj->send_data.chassis_mode == chassis_run_follow_offset) {
-            obj->gimbal_control.yaw -= 7;
+            obj->gimbal_control.yaw -= 0.307;
         }
     }
 
     // 云台控制参数
     if (obj->gimbal_control.mode == gimbal_run) {
         if (obj->autoaim_mode == auto_aim_off) {
-            obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-            obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
+            obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+            obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
             obj->send_data.vision_has_target = 0;
             //不管开没开自瞄，都更新pc接收数据的状态
             if (*obj->pc->data_updated) {
@@ -336,17 +346,17 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                 // 自瞄开
                 // 计算真实yaw值
                 if (obj->pc->pc_recv_data->vitual_mode != VISUAL_LOST) {
-                    float yaw_target = obj->pc->pc_recv_data->yaw * 8192.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 8192.0;
-                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 8192;
-                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 8192;
+                    float yaw_target = obj->pc->pc_recv_data->yaw * 360.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 360.0;
+                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 360.0;
+                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 360.0;
                     obj->gimbal_control.yaw = yaw_target;
-                    obj->gimbal_control.pitch = obj->pc->pc_recv_data->roll * 8192.0 / 2 / pi;  // 根据当前情况决定，pitch轴反馈为陀螺仪roll
+                    obj->gimbal_control.pitch = obj->pc->pc_recv_data->roll * 360.0 / 2 / pi;  // 根据当前情况决定，pitch轴反馈为陀螺仪roll
                     obj->send_data.vision_has_target = 1;
                 } else {
                     // 没有目标
                     //使用鼠标控制云台
-                    obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
+                    obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+                    obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
                     obj->send_data.vision_has_target = 0;
                 }
 
@@ -357,8 +367,8 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                 if (pc_lost_cnt <= 0) {
                     pc_lost_cnt = 0;
                     //使用鼠标控制云台
-                    obj->gimbal_control.yaw -= 0.3f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    obj->gimbal_control.pitch += 0.1f * ((float)obj->remote->data.mouse.y);
+                    obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+                    obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
                     obj->send_data.vision_has_target = 0;
                 }
             }
@@ -382,7 +392,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         obj->shoot_control.mode = shoot_stop;
     } else {
         obj->shoot_control.mode = shoot_run;
-        // 发弹控制，单发，双发, 射频和小电脑控制待完善
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;        // 下板传回的子弹速度上限
         obj->shoot_control.fire_rate = 10;                                                            // 固定射频

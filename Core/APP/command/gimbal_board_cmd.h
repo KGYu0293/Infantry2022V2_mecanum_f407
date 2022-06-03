@@ -17,6 +17,7 @@
 typedef struct Gimbal_board_cmd_t {
     // 标志量
     Robot_mode mode;
+    Robot_mode last_mode;
     AutoAim_mode autoaim_mode;
     // 机器人启动好标志量
     uint8_t robot_ready;

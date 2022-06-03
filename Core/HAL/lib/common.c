@@ -1,5 +1,5 @@
 #include <common.h>
-
+#include <math.h>
 float invSqrt(float x) {
     float halfx = 0.5f * x;
     float y = x;
@@ -16,4 +16,11 @@ int sgn(int x){
 
 int fsgn(float x) {
     return (x != 0.0f ? (x < 0.0f ? -1 : 1) : 0);
+}
+
+float sgn_like(float x, float d) {
+    if (fabs(x) >= d)
+        return fsgn(x);
+    else
+        return x / d;
 }

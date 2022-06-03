@@ -132,14 +132,3 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
         BSP_UART_TxCpltCallback(1, huart);
     }
 }
-
-// void BSP_UART_DMAHandler(DMA_HandleTypeDef *dma) {
-//     if (dma == uart_ports[0].port->hdmatx) {
-//         BSP_UART_TxCpltCallback(0, dma);
-//     }
-//     if (dma == uart_ports[1].port->hdmatx) {
-//         BSP_UART_TxCpltCallback(1, dma);
-//     }
-// }
-
-// HAL_DMA_FULL_TRANSFER

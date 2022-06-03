@@ -41,49 +41,69 @@ Chassis *Chassis_Create() {
     can_motor_config rf_config;
     can_motor_config lb_config;
     can_motor_config rb_config;
+    controller_config lf_controller_config;
+    controller_config rf_controller_config;
+    controller_config lb_controller_config;
+    controller_config rb_controller_config;
+
+    // lf
+    lf_controller_config.control_type = PID_MODEL;
+    lf_controller_config.control_depth = SPEED_CONTROL;
+    PID_SetConfig(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     lf_config.motor_model = MODEL_3508;
     lf_config.bsp_can_index = 0;
     lf_config.motor_set_id = 2;
-    lf_config.motor_pid_model = SPEED_LOOP;
+    lf_config.motor_controller_config = lf_controller_config;
     lf_config.position_fdb_model = MOTOR_FDB;
     lf_config.speed_fdb_model = MOTOR_FDB;
     lf_config.output_model = MOTOR_OUTPUT_NORMAL;
     lf_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&lf_config.config_position, 0, 0, 0, 0, 0);
-    PID_SetConfig(&lf_config.config_speed, 5, 0, 10, 0, 15000);
     obj->lf = Can_Motor_Create(&lf_config);
+
+    // rf
+    rf_controller_config.control_type = PID_MODEL;
+    rf_controller_config.control_depth = SPEED_CONTROL;
+    PID_SetConfig(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
     rf_config.motor_set_id = 1;
-    rf_config.motor_pid_model = SPEED_LOOP;
+    rf_config.motor_controller_config = rf_controller_config;
     rf_config.position_fdb_model = MOTOR_FDB;
     rf_config.speed_fdb_model = MOTOR_FDB;
     rf_config.output_model = MOTOR_OUTPUT_NORMAL;
     rf_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&rf_config.config_position, 0, 0, 0, 0, 0);
-    PID_SetConfig(&rf_config.config_speed, 5, 0, 10, 0, 15000);
     obj->rf = Can_Motor_Create(&rf_config);
+
+    // lb
+    lb_controller_config.control_type = PID_MODEL;
+    lb_controller_config.control_depth = SPEED_CONTROL;
+    PID_SetConfig(&lb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
     lb_config.motor_set_id = 3;
-    lb_config.motor_pid_model = SPEED_LOOP;
+    lb_config.motor_controller_config = lb_controller_config;
     lb_config.position_fdb_model = MOTOR_FDB;
     lb_config.speed_fdb_model = MOTOR_FDB;
     lb_config.output_model = MOTOR_OUTPUT_NORMAL;
     lb_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&lb_config.config_position, 0, 0, 0, 0, 0);
-    PID_SetConfig(&lb_config.config_speed, 5, 0, 10, 0, 15000);
     obj->lb = Can_Motor_Create(&lb_config);
+
+    // rb
+    rb_controller_config.control_type = PID_MODEL;
+    rb_controller_config.control_depth = SPEED_CONTROL;
+    PID_SetConfig(&rb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
     rb_config.motor_set_id = 4;
-    rb_config.motor_pid_model = SPEED_LOOP;
+    rb_config.motor_controller_config = rb_controller_config;
     rb_config.position_fdb_model = MOTOR_FDB;
     rb_config.speed_fdb_model = MOTOR_FDB;
     rb_config.output_model = MOTOR_OUTPUT_NORMAL;
     rb_config.lost_callback = chassis_motor_lost;
-    PID_SetConfig(&rb_config.config_position, 0, 0, 0, 0, 0);
-    PID_SetConfig(&rb_config.config_speed, 5, 0, 10, 0, 15000);
     obj->rb = Can_Motor_Create(&rb_config);
 
     // 定义pub
@@ -117,10 +137,10 @@ void OutputmaxLimit(Chassis *obj) {
         if (output_limit > 8000) output_limit = 8000;
         if (obj->super_cap->cap_percent < 30) output_limit = 2000;
     }
-    obj->lf->speed_pid.config.outputMax = output_limit;
-    obj->rf->speed_pid.config.outputMax = output_limit;
-    obj->lb->speed_pid.config.outputMax = output_limit;
-    obj->rb->speed_pid.config.outputMax = output_limit;
+    obj->lf->motor_controller->pid_speed_data.config.outputMax = output_limit;
+    obj->rf->motor_controller->pid_speed_data.config.outputMax = output_limit;
+    obj->lb->motor_controller->pid_speed_data.config.outputMax = output_limit;
+    obj->rb->motor_controller->pid_speed_data.config.outputMax = output_limit;
 }
 
 /**
@@ -135,10 +155,18 @@ void ChassisAccelerationLimit(Chassis *obj, Cmd_chassis *param) {
 
     // 功率控制良好的情况下acc limit主要防打滑 不必与功率相关
     float accMax = 1100;  // 1020-1620
-    if (fabs(obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb) > accMax) obj->lf->speed_pid.ref = obj->lf->speed_pid.fdb + accMax * (obj->lf->speed_pid.ref - obj->lf->speed_pid.fdb > 0 ? 1 : -1);
-    if (fabs(obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb) > accMax) obj->lb->speed_pid.ref = obj->lb->speed_pid.fdb + accMax * (obj->lb->speed_pid.ref - obj->lb->speed_pid.fdb > 0 ? 1 : -1);
-    if (fabs(obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb) > accMax) obj->rf->speed_pid.ref = obj->rf->speed_pid.fdb + accMax * (obj->rf->speed_pid.ref - obj->rf->speed_pid.fdb > 0 ? 1 : -1);
-    if (fabs(obj->rb->speed_pid.ref - obj->rb->speed_pid.fdb) > accMax) obj->rb->speed_pid.ref = obj->rb->speed_pid.fdb + accMax * (obj->rb->speed_pid.ref - obj->rb->speed_pid.fdb > 0 ? 1 : -1);
+    if (fabs(obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed) > accMax) {
+        obj->lf->motor_controller->ref_speed = obj->lf->motor_controller->fdb_speed + accMax * (obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed > 0 ? 1 : -1);
+    }
+    if (fabs(obj->lb->motor_controller->ref_speed - obj->lb->motor_controller->fdb_speed) > accMax) {
+        obj->lb->motor_controller->ref_speed = obj->lb->motor_controller->fdb_speed + accMax * (obj->lb->motor_controller->ref_speed - obj->lb->motor_controller->fdb_speed > 0 ? 1 : -1);
+    }
+    if (fabs(obj->rf->motor_controller->ref_speed - obj->rf->motor_controller->fdb_speed) > accMax) {
+        obj->rf->motor_controller->ref_speed = obj->rf->motor_controller->fdb_speed + accMax * (obj->rf->motor_controller->ref_speed - obj->rf->motor_controller->fdb_speed > 0 ? 1 : -1);
+    }
+    if (fabs(obj->rb->motor_controller->ref_speed - obj->rb->motor_controller->fdb_speed) > accMax) {
+        obj->rb->motor_controller->ref_speed = obj->rb->motor_controller->fdb_speed + accMax * (obj->rb->motor_controller->ref_speed - obj->rb->motor_controller->fdb_speed > 0 ? 1 : -1);
+    }
 }
 
 /**
@@ -162,10 +190,10 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
     r_y = CHASSIS_WHEELBASE / 2 + obj->offset_y;
     mecanum_speed[3] = -vx + vy - rotate * (r_x + r_y) / RADIAN_COEF;
 
-    obj->lf->speed_pid.ref = mecanum_speed[0] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
-    obj->rf->speed_pid.ref = mecanum_speed[1] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
-    obj->rb->speed_pid.ref = mecanum_speed[2] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
-    obj->lb->speed_pid.ref = mecanum_speed[3] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
+    obj->lf->motor_controller->ref_speed = mecanum_speed[0] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;  // rpm: *60  度/s: /360
+    obj->rf->motor_controller->ref_speed = mecanum_speed[1] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
+    obj->rb->motor_controller->ref_speed = mecanum_speed[2] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
+    obj->lb->motor_controller->ref_speed = mecanum_speed[3] / CHASSIS_PERIMETER * CHASSIS_MOTOR_DECELE_RATIO * 360;
 }
 
 // 小陀螺情况下的旋转速度控制函数
