@@ -85,7 +85,7 @@ void PID_Calc(struct PID_t* pid) {
     if (pid->output < -pid->config.outputMax) pid->output = -pid->config.outputMax;
 }
 
-void PID_SetConfig(struct PID_config_t* obj, float kp, float ki, float kd, float errormax, float outputmax) {
+void PID_SetConfig_Pos(struct PID_config_t* obj, float kp, float ki, float kd, float errormax, float outputmax) {
     obj->PID_Mode = PID_POSITION;
     obj->KP = kp;
     obj->KI = ki;

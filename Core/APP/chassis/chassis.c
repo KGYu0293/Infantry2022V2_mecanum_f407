@@ -49,8 +49,8 @@ Chassis *Chassis_Create() {
     // lf
     lf_controller_config.control_type = PID_MODEL;
     lf_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig_Pos(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     lf_config.motor_model = MODEL_3508;
     lf_config.bsp_can_index = 0;
     lf_config.motor_set_id = 2;
@@ -64,8 +64,8 @@ Chassis *Chassis_Create() {
     // rf
     rf_controller_config.control_type = PID_MODEL;
     rf_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig_Pos(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
     rf_config.motor_set_id = 1;
@@ -79,8 +79,8 @@ Chassis *Chassis_Create() {
     // lb
     lb_controller_config.control_type = PID_MODEL;
     lb_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig(&lb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&lb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig_Pos(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
     lb_config.motor_set_id = 3;
@@ -94,8 +94,8 @@ Chassis *Chassis_Create() {
     // rb
     rb_controller_config.control_type = PID_MODEL;
     rb_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig(&rb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&rb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    PID_SetConfig_Pos(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
     rb_config.motor_set_id = 4;
