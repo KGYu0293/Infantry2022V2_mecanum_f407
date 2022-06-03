@@ -18,8 +18,8 @@ Shoot *Shoot_Create(void) {
     controller_config friction_a_controller_config;
     friction_a_controller_config.control_type = PID_MODEL;
     friction_a_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_a_controller_config.speed_pid_config, 4, 0.015, 0.8, 2000, 15000);
+    PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
+    PID_SetConfig_Comp(&friction_a_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_a_config.motor_model = MODEL_3508;
     friction_a_config.bsp_can_index = 0;
     friction_a_config.motor_set_id = 1;
@@ -35,8 +35,8 @@ Shoot *Shoot_Create(void) {
     controller_config friction_b_controller_config;
     friction_b_controller_config.control_type = PID_MODEL;
     friction_b_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
-    PID_SetConfig(&friction_b_controller_config.speed_pid_config, 4, 0.015, 0.8, 2000, 15000);
+    PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
+    PID_SetConfig_Comp(&friction_b_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_b_config.motor_model = MODEL_3508;
     friction_b_config.bsp_can_index = 0;
     friction_b_config.motor_set_id = 2;
@@ -51,8 +51,8 @@ Shoot *Shoot_Create(void) {
     controller_config load_controller_config;
     load_controller_config.control_type = PID_MODEL;
     load_controller_config.control_depth = POS_CONTROL;
-    PID_SetConfig(&load_controller_config.position_pid_config, 34.13, 0, 0, 0, 15000);
-    PID_SetConfig(&load_controller_config.speed_pid_config, 2, 0.1, 0, 2000, 10000);
+    PID_SetConfig_Pos(&load_controller_config.position_pid_config, 34.13, 0, 0, 0, 15000);
+    PID_SetConfig_Pos(&load_controller_config.speed_pid_config, 2, 0.1, 0, 2000, 10000);
     load_config.motor_model = MODEL_2006;
     load_config.bsp_can_index = 0;
     load_config.motor_set_id = 3;

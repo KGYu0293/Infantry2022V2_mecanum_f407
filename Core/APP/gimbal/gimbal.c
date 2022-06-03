@@ -27,8 +27,8 @@ Gimbal *Gimbal_Create() {
     controller_config yaw_controller_config;
     yaw_controller_config.control_type = PID_MODEL;
     yaw_controller_config.control_depth = POS_CONTROL;
-    PID_SetConfig(&yaw_controller_config.position_pid_config, 36.4, 0.32, 2.28, 141, 5000);
-    PID_SetConfig(&yaw_controller_config.speed_pid_config, 235, 3, 10, 2000, 22000);
+    PID_SetConfig_Pos(&yaw_controller_config.position_pid_config, 36.4, 0.32, 2.28, 141, 5000);
+    PID_SetConfig_Pos(&yaw_controller_config.speed_pid_config, 235, 3, 10, 2000, 22000);
     can_motor_config yaw_config;
     yaw_config.motor_controller_config = yaw_controller_config;
     yaw_config.motor_model = MODEL_6020;
@@ -45,8 +45,8 @@ Gimbal *Gimbal_Create() {
     controller_config pitch_controller_config;
     pitch_controller_config.control_type = PID_MODEL;
     pitch_controller_config.control_depth = POS_CONTROL;
-    PID_SetConfig(&pitch_controller_config.position_pid_config, 31.86, 0.068, 36.41, 109.9, 5000);
-    PID_SetConfig(&pitch_controller_config.speed_pid_config, 170, 0.7, 1, 5000, 25000);
+    PID_SetConfig_Pos(&pitch_controller_config.position_pid_config, 31.86, 0.068, 36.41, 109.9, 5000);
+    PID_SetConfig_Pos(&pitch_controller_config.speed_pid_config, 170, 0.7, 1, 5000, 25000);
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
     pitch_config.bsp_can_index = 0;
