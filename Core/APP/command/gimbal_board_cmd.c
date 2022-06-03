@@ -182,8 +182,8 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
     // 拨杆确定底盘模式与控制量
     // obj->send_data.if_consume_supercap = 0;  //遥控器模式不消耗超级电容
     obj->send_data.chassis_dispatch_mode = chassis_dispatch_without_acc_limit;  // 遥控器模式不消耗电容 不限制加速度
-    obj->send_data.chassis_target.vy = 16.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
-    obj->send_data.chassis_target.vx = 16.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
+    obj->send_data.chassis_target.vy = 5.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
+    obj->send_data.chassis_target.vx = 5.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
     if (obj->remote->data.rc.s1 == 2) {
         // 小陀螺模式
         obj->send_data.chassis_mode = chassis_rotate_run;
