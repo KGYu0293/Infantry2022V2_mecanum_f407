@@ -96,7 +96,8 @@
         "indicator_led.h": "c",
         "bsp_gpio.h": "c",
         "bsp_def.h": "c",
-        "mrac.h": "c"
+        "mrac.h": "c",
+        "bsp_supervise.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }
