@@ -22,7 +22,6 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.imu_axis_convert[1] = 3;
     internal_imu_config.imu_axis_convert[2] = 1;
     obj->imu = BMI088_Create(&internal_imu_config);
-
     
     controller_config yaw_controller_config;
     yaw_controller_config.control_type = PID_MODEL;

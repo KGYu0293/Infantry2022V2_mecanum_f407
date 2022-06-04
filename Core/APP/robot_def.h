@@ -102,7 +102,7 @@ typedef struct Cmd_chassis_speed_t {
 typedef struct Cmd_chassis_power_t {
     // uint8_t if_consume_supercap;  //是否消耗电容
     Chassis_dispatch_mode dispatch_mode;
-    uint8_t power_limit;
+    uint16_t power_limit;
     float power_now;
     uint16_t power_buffer;  // 缓冲功率
 } Cmd_chassis_power;

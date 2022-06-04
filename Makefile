@@ -151,17 +151,17 @@ Core/APP/shoot/shoot.c \
 Core/APP/gimbal/gimbal.c \
 Core/APP/ui/robot_ui.c \
 Core/BSP/bsp.c \
+Core/BSP/bsp_supervise.c \
+Core/BSP/lib/bsp_random.c \
+Core/BSP/lib/bsp_delay.c \
+Core/BSP/lib/bsp_log.c \
 Core/BSP/interface/bsp_spi.c \
 Core/BSP/interface/bsp_gpio.c \
 Core/BSP/interface/bsp_can.c \
 Core/BSP/interface/bsp_uart.c \
 Core/BSP/interface/bsp_pwm.c \
-Core/BSP/lib/bsp_random.c \
-Core/BSP/lib/bsp_delay.c \
-Core/BSP/lib/bsp_log.c \
-Core/BSP/lib/bsp_reset.c \
-Core/BSP/lib/bsp_time.c \
-Core/BSP/lib/bsp_supervise.c \
+Core/BSP/interface/bsp_reset.c \
+Core/BSP/interface/bsp_time.c \
 Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT_printf.c \
 Middlewares/Third_Party/SEGGER/RTT/SEGGER_RTT.c
 # ASM sources
