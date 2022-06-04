@@ -16,8 +16,8 @@ typedef struct pc_send_t {
 } pc_send;
 
 typedef struct pc_recv_t {
-    float pitch;
     float roll;
+    float pitch;
     float yaw;
     uint8_t vitual_mode;
 } pc_recv;
