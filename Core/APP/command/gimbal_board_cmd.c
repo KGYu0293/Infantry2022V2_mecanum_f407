@@ -1,6 +1,7 @@
 #include "gimbal_board_cmd.h"
-#include "bsp_supervise.h"
+
 #include "bsp_def.h"
+#include "bsp_supervise.h"
 
 // monitor处理函数
 void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!robot stopped for security.\n"); }
@@ -69,7 +70,7 @@ Gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // memset 0
     obj->mode = robot_stop;
-    obj->last_mode = robot_stop; 
+    obj->last_mode = robot_stop;
     obj->robot_ready = 0;
     obj->autoaim_mode = auto_aim_off;
     // obj->chassis_climb_on = 0;
@@ -170,7 +171,7 @@ void stop_mode_update(Gimbal_board_cmd* obj) {
 
 void remote_mode_update(Gimbal_board_cmd* obj) {
     // 云台切换模式优化
-    if(obj->last_mode == robot_stop){
+    if (obj->last_mode == robot_stop) {
         obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_deg_real;
     }
     // 云台控制参数
@@ -216,7 +217,7 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
 
 void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     // 云台切换模式优化
-    if(obj->last_mode == robot_stop){
+    if (obj->last_mode == robot_stop) {
         obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_deg_real;
     }
     // 按一下r:小陀螺
@@ -327,6 +328,20 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         } else if (obj->send_data.chassis_mode == chassis_run_follow_offset) {
             obj->gimbal_control.yaw -= 0.307;
         }
+    }
+
+    // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试用
+    if (obj->remote->data.rc.s1 == 2) {
+        if (obj->autoaim_mode == auto_aim_off) {
+            obj->autoaim_mode = auto_aim_normal;
+        }
+        obj->gimbal_control.yaw -= 0.001f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
+        obj->gimbal_control.pitch -= 0.001f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
+        if((float)obj->remote->data.rc.ch0 - CHx_BIAS > 400) obj->autoaim_mode = auto_aim_normal;
+        if((float)obj->remote->data.rc.ch1 - CHx_BIAS > 400) obj->autoaim_mode = auto_aim_buff_big;
+        if((float)obj->remote->data.rc.ch1 - CHx_BIAS < -400) obj->autoaim_mode = auto_aim_buff_small;
+    } else if(obj->remote->last_data.rc.s1 == 2){
+        obj->autoaim_mode = auto_aim_off;
     }
 
     // 云台控制参数
