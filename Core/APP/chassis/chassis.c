@@ -242,18 +242,23 @@ float auto_rotate_param(Cmd_chassis *param) {
 void Chassis_calculate(Chassis *obj) {
     // 获取直线速度
     float v_benchmark = 1500 + (obj->cmd_data->power.power_limit - 45) * 60;  // 基准直线速度
+    printf_log("v:%lf\n",v_benchmark);
     float ratio = sqrt(obj->cmd_data->target.vx * obj->cmd_data->target.vx + obj->cmd_data->target.vy * obj->cmd_data->target.vy);
     if (ratio > 4) ratio = 4;   // 最大爆发速度倍率限制
-    v_benchmark *= (int)ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
+    v_benchmark *= ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
 
     // 最大速度限制
     if (v_benchmark > 9000) v_benchmark = 9000;
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
         v_benchmark = 6000;  //飞坡模式速度上限 6m/s
     }
-
-    float target_vx = v_benchmark * obj->cmd_data->target.vx / ratio;
-    float target_vy = v_benchmark * obj->cmd_data->target.vy / ratio;
+    float target_vx, target_vy;
+    if (ratio == 0) {
+        target_vx = target_vy = 0;
+    } else {
+        target_vx = v_benchmark * obj->cmd_data->target.vx / ratio;
+        target_vy = v_benchmark * obj->cmd_data->target.vy / ratio;
+    }
 
     // 计算旋转速度
     float w = obj->cmd_data->target.rotate;
@@ -262,17 +267,17 @@ void Chassis_calculate(Chassis *obj) {
     } else if (obj->cmd_data->mode == chassis_run_follow_offset) {
         w = 0.11f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
         //飞坡模式要求底盘跟随云台更加紧密
-        if(obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly){
+        if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
             w *= 1.5;
         }
     }
 
     // 边旋转边平移的功率分配
-    if (obj->cmd_data->mode == chassis_rotate_run) {
-        target_vx *= 0.5;
-        target_vy *= 0.5;
-        w *= 0.75;
-    }
+    // if (obj->cmd_data->mode == chassis_rotate_run) {
+    //     target_vx *= 0.75;
+    //     target_vy *= 0.75;
+    //     w *= 0.5;
+    // }
 
     // 麦轮解算
     float chassis_vx = target_vx * cos(obj->cmd_data->target.offset_angle * DEG2RAD) - target_vy * sin(obj->cmd_data->target.offset_angle * DEG2RAD);

@@ -240,7 +240,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     }
     // x: 飞坡模式 暂时去掉云台跟随底盘
     if (obj->remote->data.key_single_press_cnt.x != obj->remote->last_data.key_single_press_cnt.x) {
-        if (obj->gimbal_control.mode != gimbal_middle || obj->send_data.chassis_mode != chassis_run) {
+        if (obj->send_data.chassis_dispatch_mode != chassis_dispatch_fly) {
             // obj->gimbal_control.mode = gimbal_middle;
             // obj->send_data.chassis_mode = chassis_run;
             obj->send_data.chassis_dispatch_mode = chassis_dispatch_fly;
