@@ -47,10 +47,13 @@ Chassis *Chassis_Create() {
     controller_config rb_controller_config;
 
     // lf
-    lf_controller_config.control_type = PID_MODEL;
+    // lf_controller_config.control_type = PID_MODEL;
+    lf_controller_config.control_type = ADRC_MODEL;
     lf_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    ADRC_SetConfig(&lf_controller_config.pos_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&lf_controller_config.speed_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    // PID_SetConfig_Pos(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    // PID_SetConfig_Pos(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
     lf_config.motor_model = MODEL_3508;
     lf_config.bsp_can_index = 0;
     lf_config.motor_set_id = 2;
@@ -62,10 +65,13 @@ Chassis *Chassis_Create() {
     obj->lf = Can_Motor_Create(&lf_config);
 
     // rf
-    rf_controller_config.control_type = PID_MODEL;
+    // rf_controller_config.control_type = PID_MODEL;
+    rf_controller_config.control_type = ADRC_MODEL;
     rf_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    // PID_SetConfig_Pos(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    // PID_SetConfig_Pos(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    ADRC_SetConfig(&lf_controller_config.pos_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&lf_controller_config.speed_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
     rf_config.motor_set_id = 1;
@@ -77,10 +83,12 @@ Chassis *Chassis_Create() {
     obj->rf = Can_Motor_Create(&rf_config);
 
     // lb
-    lb_controller_config.control_type = PID_MODEL;
+    lb_controller_config.control_type = ADRC_MODEL;
     lb_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&lb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    // PID_SetConfig_Pos(&lb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    // PID_SetConfig_Pos(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    ADRC_SetConfig(&lf_controller_config.pos_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&lf_controller_config.speed_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
     lb_config.motor_set_id = 3;
@@ -92,10 +100,12 @@ Chassis *Chassis_Create() {
     obj->lb = Can_Motor_Create(&lb_config);
 
     // rb
-    rb_controller_config.control_type = PID_MODEL;
+    rb_controller_config.control_type = ADRC_MODEL;
     rb_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&rb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    // PID_SetConfig_Pos(&rb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    // PID_SetConfig_Pos(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    ADRC_SetConfig(&lf_controller_config.pos_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ADRC_SetConfig(&lf_controller_config.speed_adrc_config, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
     rb_config.motor_set_id = 4;
@@ -251,11 +261,11 @@ void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
     }
 
     // 功率控制
-    OutputmaxLimit(obj);
+    // OutputmaxLimit(obj);
     // 加速度限制
-    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
-        ChassisAccelerationLimit(obj, param);
-    }
+    // if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
+    //     ChassisAccelerationLimit(obj, param);
+    // }
 }
 
 void Chassis_Update(Chassis *obj) {
