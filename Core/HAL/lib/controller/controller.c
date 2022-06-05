@@ -46,6 +46,8 @@ controller* create_controller(controller_config* _config) {
     if(obj->config.control_type == ADRC_MODEL){
         obj->adrc_pos_data.adrc_config = obj->config.pos_adrc_config;
         obj->adrc_speed_data.adrc_config = obj->config.speed_adrc_config;
+        //memset(&obj->adrc_speed_data, 0, sizeof(obj->adrc_speed_data));
+        //memset(&obj->adrc_pos_data, 0, sizeof(obj->adrc_pos_data));
     }
     return obj;
 }
