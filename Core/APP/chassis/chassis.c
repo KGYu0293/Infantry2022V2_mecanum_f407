@@ -156,7 +156,7 @@ void ChassisAccelerationLimit(Chassis *obj) {
     // else if (accMax > 270.0f)    accMax = 270.0f;
 
     // 功率控制良好的情况下acc limit主要防打滑 不必与功率相关
-    float accMax = 1100;  // 1020-1620
+    float accMax = 1300;  // 1020-1620
     if (fabs(obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed) > accMax) {
         obj->lf->motor_controller->ref_speed = obj->lf->motor_controller->fdb_speed + accMax * (obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed > 0 ? 1 : -1);
     }
@@ -245,15 +245,26 @@ void Chassis_calculate(Chassis *obj) {
     float ratio = sqrt(obj->cmd_data->target.vx * obj->cmd_data->target.vx + obj->cmd_data->target.vy * obj->cmd_data->target.vy);
     if (ratio > 4) ratio = 4;   // 最大爆发速度倍率限制
     v_benchmark *= (int)ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
+
+    // 最大速度限制
+    if (v_benchmark > 9000) v_benchmark = 9000;
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
+        v_benchmark = 6000;  //飞坡模式速度上限 6m/s
+    }
+
     float target_vx = v_benchmark * obj->cmd_data->target.vx / ratio;
     float target_vy = v_benchmark * obj->cmd_data->target.vy / ratio;
 
-    // 获取旋转速度
+    // 计算旋转速度
     float w = obj->cmd_data->target.rotate;
     if (obj->cmd_data->mode == chassis_rotate_run) {
         w = auto_rotate_param(obj->cmd_data);
     } else if (obj->cmd_data->mode == chassis_run_follow_offset) {
         w = 0.11f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
+        //飞坡模式要求底盘跟随云台更加紧密
+        if(obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly){
+            w *= 1.5;
+        }
     }
 
     // 边旋转边平移的功率分配

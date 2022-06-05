@@ -238,11 +238,11 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             mousekey_GimbalChassis_default(obj);
         }
     }
-    // x:云台跟随底盘
+    // x: 飞坡模式 暂时去掉云台跟随底盘
     if (obj->remote->data.key_single_press_cnt.x != obj->remote->last_data.key_single_press_cnt.x) {
         if (obj->gimbal_control.mode != gimbal_middle || obj->send_data.chassis_mode != chassis_run) {
-            obj->gimbal_control.mode = gimbal_middle;
-            obj->send_data.chassis_mode = chassis_run;
+            // obj->gimbal_control.mode = gimbal_middle;
+            // obj->send_data.chassis_mode = chassis_run;
             obj->send_data.chassis_dispatch_mode = chassis_dispatch_fly;
         } else {
             mousekey_GimbalChassis_default(obj);
@@ -308,11 +308,11 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     }
 
-    // 飞坡模式加速
-    if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_fly) {
-        obj->send_data.chassis_target.vx *= 2.0;
-        obj->send_data.chassis_target.vy *= 2.0;
-    }
+    // 飞坡模式加速 （现在改为在底盘进行速度加速，飞坡模式固定速度
+    // if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_fly) {
+    //     obj->send_data.chassis_target.vx *= 2.0;
+    //     obj->send_data.chassis_target.vy *= 2.0;
+    // }
 
     // q/e:底盘转向
     if (obj->remote->data.key_down.q) {
