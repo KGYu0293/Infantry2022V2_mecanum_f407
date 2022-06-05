@@ -10,10 +10,10 @@
 
 #include "adrc.h"
 
-#include <string.h>
 #include <common.h>
-#include "math.h"
+#include <string.h>
 
+#include "math.h"
 
 float ConstrainFloat(float amt, float low, float high);
 int fsg(float x, float d);
@@ -23,9 +23,6 @@ void TDFunction(ADRC_t* adrc_data);
 void NLSEFFunction(ADRC_t* adrc_data);
 void ESOFunction(ADRC_t* adrc_data);
 void ADRCFunction(ADRC_t* adrc_data);
-
-
-
 
 /**
  * @brief      :浮点数限幅函数
@@ -156,6 +153,7 @@ void ADRCFunction(ADRC_t* adrc_data) {
     adrc_data->prog.e2 = adrc_data->prog.v2 - adrc_data->prog.z2;
     NLSEFFunction(adrc_data);
     adrc_data->prog.output = adrc_data->prog.u0 - adrc_data->prog.z3 / adrc_data->adrc_config.eso.b;
+    adrc_data->prog.output = ConstrainFloat(adrc_data->prog.output, -adrc_data->adrc_config.output_max, adrc_data->adrc_config.output_max);
 }
 
 /**
@@ -166,7 +164,7 @@ void ADRCFunction(ADRC_t* adrc_data) {
 void ADRC_SetConfig(ADRC_Config_t* adrc_config,
                     float r, float h, float h0,
                     float Kp, float Kd, float alpha1, float alpha2, float delta,
-                    float beta1, float beta2, float beta3, float b) {
+                    float beta1, float beta2, float beta3, float b, float output_max) {
     adrc_config->td.r = r;
     adrc_config->td.h = h;
     adrc_config->td.h0 = h0;
@@ -179,6 +177,7 @@ void ADRC_SetConfig(ADRC_Config_t* adrc_config,
     adrc_config->eso.beta2 = beta2;
     adrc_config->eso.beta3 = beta3;
     adrc_config->eso.b = b;
+    adrc_config->output_max = output_max;
 }
 
 /**

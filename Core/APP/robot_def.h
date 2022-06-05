@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-#define GIMBAL_BOARD
-// #define CHASSIS_BOARD
+// #define GIMBAL_BOARD
+#define CHASSIS_BOARD
 
 #include "stdint.h"
 #include "stdlib.h"
@@ -102,7 +102,7 @@ typedef struct Cmd_chassis_speed_t {
 typedef struct Cmd_chassis_power_t {
     // uint8_t if_consume_supercap;  //是否消耗电容
     Chassis_dispatch_mode dispatch_mode;
-    uint8_t power_limit;
+    uint16_t power_limit;
     float power_now;
     uint16_t power_buffer;  // 缓冲功率
 } Cmd_chassis_power;

@@ -47,6 +47,7 @@ Chassis *Chassis_Create() {
     controller_config rb_controller_config;
 
     // lf
+    // lf_controller_config.control_type = PID_MODEL;
     lf_controller_config.control_type = PID_MODEL;
     lf_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
@@ -62,6 +63,7 @@ Chassis *Chassis_Create() {
     obj->lf = Can_Motor_Create(&lf_config);
 
     // rf
+    // rf_controller_config.control_type = PID_MODEL;
     rf_controller_config.control_type = PID_MODEL;
     rf_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);

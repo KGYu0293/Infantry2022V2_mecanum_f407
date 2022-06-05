@@ -330,6 +330,20 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         }
     }
 
+    // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试用
+    if (obj->remote->data.rc.s1 == 2) {
+        if (obj->autoaim_mode == auto_aim_off) {
+            obj->autoaim_mode = auto_aim_normal;
+        }
+        obj->gimbal_control.yaw -= 0.001f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
+        obj->gimbal_control.pitch -= 0.001f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
+        if ((float)obj->remote->data.rc.ch0 > CHx_BIAS + 300) obj->autoaim_mode = auto_aim_normal;
+        if ((float)obj->remote->data.rc.ch1 > CHx_BIAS + 300) obj->autoaim_mode = auto_aim_buff_big;
+        if ((float)obj->remote->data.rc.ch1 < CHx_BIAS - 300) obj->autoaim_mode = auto_aim_buff_small;
+    } else if (obj->remote->last_data.rc.s1 == 2) {
+        obj->autoaim_mode = auto_aim_off;
+    }
+
     // 云台控制参数
     if (obj->gimbal_control.mode == gimbal_run) {
         if (obj->autoaim_mode == auto_aim_off) {
@@ -351,7 +365,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 360.0;
                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 360.0;
                     obj->gimbal_control.yaw = yaw_target;
-                    obj->gimbal_control.pitch = obj->pc->pc_recv_data->roll * 360.0 / 2 / pi;  // 根据当前情况决定，pitch轴反馈为陀螺仪roll
+                    obj->gimbal_control.pitch = obj->pc->pc_recv_data->pitch * 360.0 / 2 / pi;
                     obj->send_data.vision_has_target = 1;
                 } else {
                     // 没有目标
@@ -410,6 +424,9 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             obj->shoot_control.bullet_mode = bullet_reverse;
         } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE) {  //  视觉控制发射(打符)
             obj->shoot_control.bullet_mode = bullet_single;
+        } else if ((obj->remote->data.rc.s1 == 3) || (obj->remote->data.rc.ch4 > CHx_BIAS + 400)) {  // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试时测试弹道用
+            obj->shoot_control.bullet_mode = bullet_continuous;
+            obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
         } else {
             obj->shoot_control.bullet_mode = bullet_holdon;
         }
