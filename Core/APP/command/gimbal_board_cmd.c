@@ -1,6 +1,7 @@
 #include "gimbal_board_cmd.h"
-#include "bsp_supervise.h"
+
 #include "bsp_def.h"
+#include "bsp_supervise.h"
 
 // monitor处理函数
 void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!robot stopped for security.\n"); }
@@ -69,7 +70,7 @@ Gimbal_board_cmd* Gimbal_board_CMD_Create() {
 
     // memset 0
     obj->mode = robot_stop;
-    obj->last_mode = robot_stop; 
+    obj->last_mode = robot_stop;
     obj->robot_ready = 0;
     obj->autoaim_mode = auto_aim_off;
     // obj->chassis_climb_on = 0;
@@ -170,7 +171,7 @@ void stop_mode_update(Gimbal_board_cmd* obj) {
 
 void remote_mode_update(Gimbal_board_cmd* obj) {
     // 云台切换模式优化
-    if(obj->last_mode == robot_stop){
+    if (obj->last_mode == robot_stop) {
         obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_deg_real;
     }
     // 云台控制参数
@@ -182,8 +183,8 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
     // 拨杆确定底盘模式与控制量
     // obj->send_data.if_consume_supercap = 0;  //遥控器模式不消耗超级电容
     obj->send_data.chassis_dispatch_mode = chassis_dispatch_without_acc_limit;  // 遥控器模式不消耗电容 不限制加速度
-    obj->send_data.chassis_target.vy = 16.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
-    obj->send_data.chassis_target.vx = 16.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
+    obj->send_data.chassis_target.vy = (float)(obj->remote->data.rc.ch1 - CHx_BIAS) / 600;
+    obj->send_data.chassis_target.vx = (float)(obj->remote->data.rc.ch0 - CHx_BIAS) / 600;
     if (obj->remote->data.rc.s1 == 2) {
         // 小陀螺模式
         obj->send_data.chassis_mode = chassis_rotate_run;
@@ -216,7 +217,7 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
 
 void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     // 云台切换模式优化
-    if(obj->last_mode == robot_stop){
+    if (obj->last_mode == robot_stop) {
         obj->gimbal_control.yaw = obj->gimbal_upload_data->gimbal_imu->yaw_deg_real;
     }
     // 按一下r:小陀螺
@@ -285,10 +286,10 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     obj->send_data.chassis_target.vy = 0;
     obj->send_data.chassis_target.rotate = 0;
     // 平移
-    if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 1500;
-    if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -1500;
-    if (obj->remote->data.key_down.d) obj->send_data.chassis_target.vx = -1500;
-    if (obj->remote->data.key_down.a) obj->send_data.chassis_target.vx = 1500;
+    if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 1;
+    if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -1;
+    if (obj->remote->data.key_down.d) obj->send_data.chassis_target.vx = -1;
+    if (obj->remote->data.key_down.a) obj->send_data.chassis_target.vx = 1;
     // 按住ctrl减速
     if (obj->remote->data.key_down.ctrl) {
         obj->send_data.chassis_target.vx /= 2.0;
@@ -298,7 +299,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_without_acc_limit) {
         obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     }
-    // 按住shift加速/飞坡模式加速
+    // 按住shift加速
     if (obj->remote->data.key_down.shift) {
         obj->send_data.chassis_target.vx *= 2.0;
         obj->send_data.chassis_target.vy *= 2.0;

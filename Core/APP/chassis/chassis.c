@@ -50,7 +50,7 @@ Chassis *Chassis_Create() {
     lf_controller_config.control_type = PID_MODEL;
     lf_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
     lf_config.motor_model = MODEL_3508;
     lf_config.bsp_can_index = 0;
     lf_config.motor_set_id = 2;
@@ -65,7 +65,7 @@ Chassis *Chassis_Create() {
     rf_controller_config.control_type = PID_MODEL;
     rf_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
     rf_config.motor_set_id = 1;
@@ -80,7 +80,7 @@ Chassis *Chassis_Create() {
     lb_controller_config.control_type = PID_MODEL;
     lb_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&lb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
     lb_config.motor_set_id = 3;
@@ -95,7 +95,7 @@ Chassis *Chassis_Create() {
     rb_controller_config.control_type = PID_MODEL;
     rb_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&rb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 15000);
+    PID_SetConfig_Pos(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
     rb_config.motor_set_id = 4;
@@ -148,7 +148,7 @@ void OutputmaxLimit(Chassis *obj) {
  * @param None
  * @retval None
  */
-void ChassisAccelerationLimit(Chassis *obj, Cmd_chassis *param) {
+void ChassisAccelerationLimit(Chassis *obj) {
     // double accMax = 15.0f * (double)param->power.power_limit;
     // if (accMax < 170.0f)     accMax = 170.0f;
     // else if (accMax > 270.0f)    accMax = 270.0f;
@@ -237,25 +237,40 @@ float auto_rotate_param(Cmd_chassis *param) {
 }
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
-void Chassis_calculate(Chassis *obj, Cmd_chassis *param) {
-    float vx = param->target.vx * cos(param->target.offset_angle * DEG2RAD) - param->target.vy * sin(param->target.offset_angle * DEG2RAD);
-    float vy = param->target.vx * sin(param->target.offset_angle * DEG2RAD) + param->target.vy * cos(param->target.offset_angle * DEG2RAD);
-    if (param->mode == chassis_run)
-        mecanum_calculate(obj, vx, vy, param->target.rotate);
-    else if (param->mode == chassis_rotate_run) {
-        float w = auto_rotate_param(param);
-        mecanum_calculate(obj, vx, vy, w);
-    } else if (param->mode == chassis_run_follow_offset) {
-        float w = 0.11f * (param->target.offset_angle) * fabs(param->target.offset_angle);  // 采用二次函数
-        mecanum_calculate(obj, vx, vy, w);
+void Chassis_calculate(Chassis *obj) {
+    // 获取直线速度
+    float v_benchmark = 1500 + (obj->cmd_data->power.power_limit - 45) * 60;  // 基准直线速度
+    float ratio = sqrt(obj->cmd_data->target.vx * obj->cmd_data->target.vx + obj->cmd_data->target.vy * obj->cmd_data->target.vy);
+    if (ratio > 4) ratio = 4;   // 最大爆发速度倍率限制
+    v_benchmark *= (int)ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
+    float target_vx = v_benchmark * obj->cmd_data->target.vx / ratio;
+    float target_vy = v_benchmark * obj->cmd_data->target.vy / ratio;
+
+    // 获取旋转速度
+    float w = obj->cmd_data->target.rotate;
+    if (obj->cmd_data->mode == chassis_rotate_run) {
+        w = auto_rotate_param(obj->cmd_data);
+    } else if (obj->cmd_data->mode == chassis_run_follow_offset) {
+        w = 0.11f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
     }
 
-    // 功率控制
-    OutputmaxLimit(obj);
+    // 边旋转边平移的功率分配
+    if (obj->cmd_data->mode == chassis_rotate_run) {
+        target_vx *= 0.5;
+        target_vy *= 0.5;
+        w *= 0.75;
+    }
+
+    // 麦轮解算
+    float chassis_vx = target_vx * cos(obj->cmd_data->target.offset_angle * DEG2RAD) - target_vy * sin(obj->cmd_data->target.offset_angle * DEG2RAD);
+    float chassis_vy = target_vx * sin(obj->cmd_data->target.offset_angle * DEG2RAD) + target_vy * cos(obj->cmd_data->target.offset_angle * DEG2RAD);
+    mecanum_calculate(obj, chassis_vx, chassis_vy, w);
     // 加速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
-        ChassisAccelerationLimit(obj, param);
+        ChassisAccelerationLimit(obj);
     }
+    // 功率控制
+    OutputmaxLimit(obj);
 }
 
 void Chassis_Update(Chassis *obj) {
@@ -298,6 +313,6 @@ void Chassis_Update(Chassis *obj) {
         obj->lb->enable = MOTOR_ENABLE;
         obj->rf->enable = MOTOR_ENABLE;
         obj->rb->enable = MOTOR_ENABLE;
-        Chassis_calculate(obj, obj->cmd_data);
+        Chassis_calculate(obj);
     }
 }

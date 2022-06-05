@@ -92,8 +92,8 @@ typedef enum AutoAim_mode_e {
  * 小陀螺模式下，rotate参数失效，旋转速度由模块内部设定
  */
 typedef struct Cmd_chassis_speed_t {
-    float vx;            // 单位 mm/s
-    float vy;            // 单位 mm/s
+    float vx;            // 单位 基准速度的倍率（基准速度由底盘模块根据功率自动计算）
+    float vy;            // 单位 基准速度的倍率
     float rotate;        // 单位 度每秒
     float offset_angle;  // vy与底盘正前方的夹角，范围-180 +180度，方向顺时针，即底盘y方向旋转该角度到达vy方向
 } Cmd_chassis_speed;
