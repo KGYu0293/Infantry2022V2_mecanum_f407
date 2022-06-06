@@ -235,7 +235,7 @@ void StartImuTask(void *argument)
     for (;;) {
         FrameRateStatistics(&task_frameRate.FPS_IMU);
         HAL_Imu_Loop();
-        vTaskDelayUntil(&currentTimeImu, 2);
+        vTaskDelayUntil(&currentTimeImu, 1);
     }
   /* USER CODE END StartImuTask */
 }

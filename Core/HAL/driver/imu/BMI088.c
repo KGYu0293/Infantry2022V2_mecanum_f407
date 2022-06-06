@@ -26,7 +26,7 @@
 // BMI088加速度计配置数组
 static uint8_t BMI088_accel_config[BMI088_WRITE_ACCEL_REG_NUM][3] = {{BMI088_ACC_PWR_CTRL, BMI088_ACC_ENABLE_ACC_ON, BMI088_ACC_PWR_CTRL_ERROR},
                                                                      {BMI088_ACC_PWR_CONF, BMI088_ACC_PWR_ACTIVE_MODE, BMI088_ACC_PWR_CONF_ERROR},
-                                                                     {BMI088_ACC_CONF, BMI088_ACC_NORMAL | BMI088_ACC_800_HZ | BMI088_ACC_CONF_MUST_Set, BMI088_ACC_CONF_ERROR},
+                                                                     {BMI088_ACC_CONF, BMI088_ACC_NORMAL | BMI088_ACC_1600_HZ | BMI088_ACC_CONF_MUST_Set, BMI088_ACC_CONF_ERROR},
                                                                      {BMI088_ACC_RANGE, BMI088_ACC_RANGE_3G, BMI088_ACC_RANGE_ERROR},
                                                                      {BMI088_INT1_IO_CTRL, BMI088_ACC_INT1_IO_ENABLE | BMI088_ACC_INT1_GPIO_PP | BMI088_ACC_INT1_GPIO_LOW, BMI088_INT1_IO_CTRL_ERROR},
                                                                      {BMI088_INT_MAP_DATA, BMI088_ACC_INT1_DRDY_INTERRUPT, BMI088_INT_MAP_DATA_ERROR}
@@ -105,8 +105,8 @@ uint8_t BMI088_init(BMI088_imu *obj) {
     BMI088_gyro_init(obj);
     BMI088_heat_init(obj);
     memset(obj->gyrobias, 0, sizeof(float) * 3);
-    MahonyAHRS_init(&obj->mahony_solver, 2 * 0.1, 2 * 0, 500.0f);
-    MadgwickAHRS_init(&obj->madgwick_solver, 0.00, 500.0f);
+    MahonyAHRS_init(&obj->mahony_solver, 2 * 0.1, 2 * 0, 1000.0f);
+    MadgwickAHRS_init(&obj->madgwick_solver, 0.00, 1000.0f);
     obj->data.round = 0;
     return obj->init_error;
 }

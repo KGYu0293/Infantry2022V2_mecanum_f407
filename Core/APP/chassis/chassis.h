@@ -31,6 +31,9 @@ typedef struct Chassis_t {
 
     float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
     float offset_y;
+    float proc_target_vx; //过程量
+    float proc_target_vy; //过程量
+    float proc_v_base; //过程量
 
     // sub_pub
     Subscriber *chassis_cmd_suber;

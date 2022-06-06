@@ -93,7 +93,7 @@ void BSP_UART_IDLECallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
 
 //发送完成回调函数
 void BSP_UART_TxCpltCallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
-    printf_log("tx cplt:%d\n", uart_index);
+    // printf_log("tx cplt:%d\n", uart_index);
     if (!uart_ports[uart_index].queue_send_enable) return;
     // POP掉之前的数据
     if (uart_ports[uart_index].send_packs->cq_len > 0) {
@@ -103,7 +103,7 @@ void BSP_UART_TxCpltCallback(uint8_t uart_index, UART_HandleTypeDef *huart) {
     if (uart_ports[uart_index].send_packs->cq_len > 0) {
         BSP_UART_Send_Pack *now_pack = circular_queue_front(uart_ports[uart_index].send_packs);
         //再次发送
-        printf_log("queue send len:%d\n",now_pack->len);
+        //printf_log("queue send len:%d\n",now_pack->len);
         HAL_UART_Transmit_IT(uart_ports[uart_index].port, now_pack->buffer, now_pack->len);
     }
 }
