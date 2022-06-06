@@ -188,8 +188,8 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
     if (obj->remote->data.rc.s1 == 2) {
         // 小陀螺模式
         obj->send_data.chassis_mode = chassis_rotate_run;
-        obj->send_data.chassis_target.vy *= 0.60f;
-        obj->send_data.chassis_target.vx *= 0.60f;
+        // obj->send_data.chassis_target.vy *= 0.60f;
+        // obj->send_data.chassis_target.vx *= 0.60f;
     } else {
         // 底盘跟随模式
         obj->send_data.chassis_mode = chassis_run_follow_offset;
