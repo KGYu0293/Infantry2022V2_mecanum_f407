@@ -26,7 +26,7 @@ Gimbal *Gimbal_Create() {
     controller_config yaw_controller_config;
     yaw_controller_config.control_type = PID_MODEL;
     yaw_controller_config.control_depth = POS_CONTROL;
-    PID_SetConfig_Pos(&yaw_controller_config.position_pid_config, 17.6, 0.1, 3, 141, 5000);
+    PID_SetConfig_Pos(&yaw_controller_config.position_pid_config, 17.6, 0.1, 6, 141, 5000);
     PID_SetConfig_Pos(&yaw_controller_config.speed_pid_config, 235, 3, 10, 2000, 25000);
     can_motor_config yaw_config;
     yaw_config.motor_controller_config = yaw_controller_config;
