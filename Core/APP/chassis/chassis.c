@@ -1,8 +1,10 @@
 #include "chassis.h"
 
+#include <arm_math.h>
 #include <math.h>
 
 #include "bsp.h"
+#include "common.h"
 
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 void chassis_imu_lost(void *motor) { printf_log("chassis IMU lost!!\n"); }
@@ -134,10 +136,39 @@ void OutputmaxLimit(Chassis *obj) {
             output_limit = 8000;
         }
     } else {
-        output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
-        if (output_limit < 3000) output_limit = 3000;
+        // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
+        switch (obj->cmd_data->power.power_limit) {
+            case 45:
+                output_limit = 3000;
+                break;
+            case 50:
+                output_limit = 3200;
+                break;
+            case 55:
+                output_limit = 3500;
+                break;
+            case 60:
+                output_limit = 3800;
+                break;
+            case 70:
+                output_limit = 4200;
+                break;
+            case 80:
+                output_limit = 4700;
+                break;
+            case 100:
+                output_limit = 5300;
+                break;
+            case 120:
+                output_limit = 5500;
+                break;
+            default:
+                output_limit = 3000;  // 和最小（45w）时保持一致
+                break;
+        }
+        if (output_limit < 2000) output_limit = 2000;
         if (output_limit > 8000) output_limit = 8000;
-        if (obj->super_cap->cap_percent < 30) output_limit = 2000;
+        if (obj->super_cap->cap_percent < 30) output_limit = 1500;
     }
     obj->lf->motor_controller->pid_speed_data.config.outputMax = output_limit;
     obj->rf->motor_controller->pid_speed_data.config.outputMax = output_limit;
@@ -156,7 +187,7 @@ void ChassisAccelerationLimit(Chassis *obj) {
     // else if (accMax > 270.0f)    accMax = 270.0f;
 
     // 功率控制良好的情况下acc limit主要防打滑 不必与功率相关
-    float accMax = 1300;  // 1020-1620
+    float accMax = 1200;  // 1020-1620
     if (fabs(obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed) > accMax) {
         obj->lf->motor_controller->ref_speed = obj->lf->motor_controller->fdb_speed + accMax * (obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed > 0 ? 1 : -1);
     }
@@ -202,10 +233,41 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 float auto_rotate_param(Cmd_chassis *param) {
     static float rotate = 0;
     // 位置式变速
-    float rotate_benchmark = 170 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
-    float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;    // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
-    rotate = rotate_benchmark + rotate_benchmark * 0.2 * sin(x);         // 变速函数&变速范围
+    float rotate_baseline = 170 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
+    // 还是单独测吧（
+    switch (param->power.power_limit) {
+        case 45:
+            rotate_baseline = 250;
+            break;
+        case 50:
+            rotate_baseline = 260;
+            break;
+        case 55:
+            rotate_baseline = 280;
+            break;
+        case 60:
+            rotate_baseline = 310;
+            break;
+        case 70:
+            rotate_baseline = 330;
+            break;
+        case 80:
+            rotate_baseline = 350;
+            break;
+        case 100:
+            rotate_baseline = 350;
+            break;
+        case 120:
+            rotate_baseline = 360;
+            break;
+        default:
+            rotate_baseline = 240;  // 和最小（45w）时保持一致
+            break;
+    }
 
+    // float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;  // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
+    // rotate = rotate_baseline + rotate_baseline * 0.2 * sin(x);       // 变速函数&变速范围
+    rotate = rotate_baseline;
     // 时间式变速
     // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
     // // 基准转速 = 最低转速 + 高功率下加速旋转
@@ -240,43 +302,88 @@ float auto_rotate_param(Cmd_chassis *param) {
 
 // 将基于offset的速度映射到实际底盘坐标系的方向上
 void Chassis_calculate(Chassis *obj) {
-    // 获取直线速度
-    float v_benchmark = 1500 + (obj->cmd_data->power.power_limit - 45) * 60;  // 基准直线速度
-    float ratio = sqrt(obj->cmd_data->target.vx * obj->cmd_data->target.vx + obj->cmd_data->target.vy * obj->cmd_data->target.vy);
-    if (ratio > 4) ratio = 4;   // 最大爆发速度倍率限制
-    v_benchmark *= (int)ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
+    // 基准直线速度
+    obj->proc_v_base = 1500 + ((float)obj->cmd_data->power.power_limit - 45) * 60;
+    switch (obj->cmd_data->power.power_limit) {
+        case 45:
+            obj->proc_v_base = 2700;
+            break;
+        case 50:
+            obj->proc_v_base = 3000;
+            break;
+        case 55:
+            obj->proc_v_base = 3200;
+            break;
+        case 60:
+            obj->proc_v_base = 3500;
+            break;
+        case 70:
+            obj->proc_v_base = 3700;
+        case 80:
+            obj->proc_v_base = 3900;
+            break;
+        case 100:
+            obj->proc_v_base = 4100;
+            break;
+        case 120:
+            obj->proc_v_base = 4200;
+            break;
+        default:
+            obj->proc_v_base = 1500;  // 和最小（45w）时保持一致
+            break;
+    }
+    //同时按住前后和平移
+    if(fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5){
+        obj->cmd_data->target.vx *= 0.6; //平移减速
+    }
+    float a = ((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy));
+    float ratio;
+    arm_sqrt_f32(a, &ratio);                      // 使用armmath库代替c语言库的sqrt加快速度
+    if (ratio > 4) ratio = 4;                     // 最大爆发速度倍率限制
+    obj->proc_v_base = obj->proc_v_base * ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
 
-    // 最大速度限制
-    if (v_benchmark > 9000) v_benchmark = 9000;
+    if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
-        v_benchmark = 6000;  //飞坡模式速度上限 6m/s
+        obj->proc_v_base = 6000;  // 飞坡模式速度设定 6m/s
     }
 
-    float target_vx = v_benchmark * obj->cmd_data->target.vx / ratio;
-    float target_vy = v_benchmark * obj->cmd_data->target.vy / ratio;
+    // float target_vx, target_vy;
+    if (fabs(ratio) < 1e-5) {
+        obj->proc_target_vx = obj->proc_target_vy = 0;
+    } else {
+        obj->proc_target_vx = obj->proc_v_base * obj->cmd_data->target.vx / ratio;
+        obj->proc_target_vy = obj->proc_v_base * obj->cmd_data->target.vy / ratio;
+    }
 
     // 计算旋转速度
     float w = obj->cmd_data->target.rotate;
     if (obj->cmd_data->mode == chassis_rotate_run) {
         w = auto_rotate_param(obj->cmd_data);
     } else if (obj->cmd_data->mode == chassis_run_follow_offset) {
-        w = 0.11f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
+        w = 0.20f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
         //飞坡模式要求底盘跟随云台更加紧密
-        if(obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly){
+        if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
             w *= 1.5;
         }
     }
 
-    // 边旋转边平移的功率分配
-    if (obj->cmd_data->mode == chassis_rotate_run) {
-        target_vx *= 0.5;
-        target_vy *= 0.5;
-        w *= 0.75;
+    //小陀螺加速
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift && obj->cmd_data->mode == chassis_rotate_run) {
+        w *= 1.5;
     }
 
+    // 边旋转边平移的功率分配
+    if (obj->cmd_data->mode == chassis_rotate_run && fabs(ratio) > 1e-5) {
+        obj->proc_target_vx *= 0.3;
+        obj->proc_target_vy *= 0.3;
+        w *= 0.7;
+    }
+
+
+
     // 麦轮解算
-    float chassis_vx = target_vx * cos(obj->cmd_data->target.offset_angle * DEG2RAD) - target_vy * sin(obj->cmd_data->target.offset_angle * DEG2RAD);
-    float chassis_vy = target_vx * sin(obj->cmd_data->target.offset_angle * DEG2RAD) + target_vy * cos(obj->cmd_data->target.offset_angle * DEG2RAD);
+    float chassis_vx = obj->proc_target_vx * cos(obj->cmd_data->target.offset_angle * DEG2RAD) - obj->proc_target_vy * sin(obj->cmd_data->target.offset_angle * DEG2RAD);
+    float chassis_vy = obj->proc_target_vx * sin(obj->cmd_data->target.offset_angle * DEG2RAD) + obj->proc_target_vy * cos(obj->cmd_data->target.offset_angle * DEG2RAD);
     mecanum_calculate(obj, chassis_vx, chassis_vy, w);
     // 加速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
