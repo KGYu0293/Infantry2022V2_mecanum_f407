@@ -19,7 +19,6 @@ Shoot *Shoot_Create(void) {
     friction_a_controller_config.control_type = PID_MODEL;
     friction_a_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
-    // PID_SetConfig(&friction_a_controller_config.speed_pid_config, 4, 0.015, 0.8, 2000, 15000);
     PID_SetConfig_Comp(&friction_a_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_a_config.motor_model = MODEL_3508;
     friction_a_config.bsp_can_index = 0;
@@ -37,7 +36,6 @@ Shoot *Shoot_Create(void) {
     friction_b_controller_config.control_type = PID_MODEL;
     friction_b_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
-    // PID_SetConfig(&friction_b_controller_config.speed_pid_config, 4, 0.015, 0.8, 2000, 15000);
     PID_SetConfig_Comp(&friction_b_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_b_config.motor_model = MODEL_3508;
     friction_b_config.bsp_can_index = 0;
@@ -171,8 +169,8 @@ void Shoot_Update(Shoot *obj) {
                     obj->friction_b->motor_controller->ref_speed = 0;
                 default:
                     //待实测
-                    obj->friction_a->motor_controller->ref_speed = 27500;
-                    obj->friction_b->motor_controller->ref_speed = -27500;
+                    obj->friction_a->motor_controller->ref_speed = 26300;
+                    obj->friction_b->motor_controller->ref_speed = -26300;
                     break;
             }
             Shoot_load_Update(obj, obj->cmd_data);

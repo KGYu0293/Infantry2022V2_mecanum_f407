@@ -106,6 +106,7 @@ typedef struct ADRC_Config_t {
     TD_t td;
     NLSEF_t nlsef;
     ESO_t eso;
+    float output_max;
 } ADRC_Config_t;
 
 // ADRC总结构体
@@ -118,7 +119,7 @@ typedef struct ADRC_t {
 void ADRC_SetConfig(ADRC_Config_t* adrc_config,
                     float r, float h, float h0,
                     float Kp, float Kd, float alpha1, float alpha2, float delta,
-                    float beta1, float beta2, float beta3, float b);
+                    float beta1, float beta2, float beta3, float b,float output_max);
 void ADRC_Init(ADRC_t* adrc_data, ADRC_Config_t* adrc_config);
-
+void ADRCFunction(ADRC_t* adrc_data);
 #endif

@@ -183,13 +183,13 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
     // 拨杆确定底盘模式与控制量
     // obj->send_data.if_consume_supercap = 0;  //遥控器模式不消耗超级电容
     obj->send_data.chassis_dispatch_mode = chassis_dispatch_without_acc_limit;  // 遥控器模式不消耗电容 不限制加速度
-    obj->send_data.chassis_target.vy = 5.0f * (float)(obj->remote->data.rc.ch1 - CHx_BIAS);
-    obj->send_data.chassis_target.vx = 5.0f * (float)(obj->remote->data.rc.ch0 - CHx_BIAS);
+    obj->send_data.chassis_target.vy = (float)(obj->remote->data.rc.ch1 - CHx_BIAS) / 600;
+    obj->send_data.chassis_target.vx = (float)(obj->remote->data.rc.ch0 - CHx_BIAS) / 600;
     if (obj->remote->data.rc.s1 == 2) {
         // 小陀螺模式
         obj->send_data.chassis_mode = chassis_rotate_run;
-        obj->send_data.chassis_target.vy *= 0.60f;
-        obj->send_data.chassis_target.vx *= 0.60f;
+        // obj->send_data.chassis_target.vy *= 0.60f;
+        // obj->send_data.chassis_target.vx *= 0.60f;
     } else {
         // 底盘跟随模式
         obj->send_data.chassis_mode = chassis_run_follow_offset;
@@ -238,11 +238,11 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             mousekey_GimbalChassis_default(obj);
         }
     }
-    // x:云台跟随底盘
+    // x: 飞坡模式 暂时去掉云台跟随底盘
     if (obj->remote->data.key_single_press_cnt.x != obj->remote->last_data.key_single_press_cnt.x) {
-        if (obj->gimbal_control.mode != gimbal_middle || obj->send_data.chassis_mode != chassis_run) {
-            obj->gimbal_control.mode = gimbal_middle;
-            obj->send_data.chassis_mode = chassis_run;
+        if (obj->send_data.chassis_dispatch_mode != chassis_dispatch_fly) {
+            // obj->gimbal_control.mode = gimbal_middle;
+            // obj->send_data.chassis_mode = chassis_run;
             obj->send_data.chassis_dispatch_mode = chassis_dispatch_fly;
         } else {
             mousekey_GimbalChassis_default(obj);
@@ -286,10 +286,10 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     obj->send_data.chassis_target.vy = 0;
     obj->send_data.chassis_target.rotate = 0;
     // 平移
-    if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 1500;
-    if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -1500;
-    if (obj->remote->data.key_down.d) obj->send_data.chassis_target.vx = -1500;
-    if (obj->remote->data.key_down.a) obj->send_data.chassis_target.vx = 1500;
+    if (obj->remote->data.key_down.w) obj->send_data.chassis_target.vy = 1;
+    if (obj->remote->data.key_down.s) obj->send_data.chassis_target.vy = -1;
+    if (obj->remote->data.key_down.d) obj->send_data.chassis_target.vx = -1;
+    if (obj->remote->data.key_down.a) obj->send_data.chassis_target.vx = 1;
     // 按住ctrl减速
     if (obj->remote->data.key_down.ctrl) {
         obj->send_data.chassis_target.vx /= 2.0;
@@ -299,7 +299,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_without_acc_limit) {
         obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     }
-    // 按住shift加速/飞坡模式加速
+    // 按住shift加速
     if (obj->remote->data.key_down.shift) {
         obj->send_data.chassis_target.vx *= 2.0;
         obj->send_data.chassis_target.vy *= 2.0;
@@ -308,11 +308,11 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
     }
 
-    // 飞坡模式加速
-    if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_fly) {
-        obj->send_data.chassis_target.vx *= 2.0;
-        obj->send_data.chassis_target.vy *= 2.0;
-    }
+    // 飞坡模式加速 （现在改为在底盘进行速度加速，飞坡模式固定速度
+    // if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_fly) {
+    //     obj->send_data.chassis_target.vx *= 2.0;
+    //     obj->send_data.chassis_target.vy *= 2.0;
+    // }
 
     // q/e:底盘转向
     if (obj->remote->data.key_down.q) {
@@ -337,10 +337,10 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         }
         obj->gimbal_control.yaw -= 0.001f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
         obj->gimbal_control.pitch -= 0.001f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
-        if((float)obj->remote->data.rc.ch0 - CHx_BIAS > 400) obj->autoaim_mode = auto_aim_normal;
-        if((float)obj->remote->data.rc.ch1 - CHx_BIAS > 400) obj->autoaim_mode = auto_aim_buff_big;
-        if((float)obj->remote->data.rc.ch1 - CHx_BIAS < -400) obj->autoaim_mode = auto_aim_buff_small;
-    } else if(obj->remote->last_data.rc.s1 == 2){
+        if ((float)obj->remote->data.rc.ch0 > CHx_BIAS + 300) obj->autoaim_mode = auto_aim_normal;
+        if ((float)obj->remote->data.rc.ch1 > CHx_BIAS + 300) obj->autoaim_mode = auto_aim_buff_big;
+        if ((float)obj->remote->data.rc.ch1 < CHx_BIAS - 300) obj->autoaim_mode = auto_aim_buff_small;
+    } else if (obj->remote->last_data.rc.s1 == 2) {
         obj->autoaim_mode = auto_aim_off;
     }
 

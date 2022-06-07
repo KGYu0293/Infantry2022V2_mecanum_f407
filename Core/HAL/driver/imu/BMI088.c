@@ -105,8 +105,8 @@ uint8_t BMI088_init(BMI088_imu *obj) {
     BMI088_gyro_init(obj);
     BMI088_heat_init(obj);
     memset(obj->gyrobias, 0, sizeof(float) * 3);
-    MahonyAHRS_init(&obj->mahony_solver, 2 * 0.1, 2 * 0, 500.0f);
-    MadgwickAHRS_init(&obj->madgwick_solver, 0.00, 500.0f);
+    MahonyAHRS_init(&obj->mahony_solver, 2 * 0.1, 2 * 0, 1000.0f);
+    MadgwickAHRS_init(&obj->madgwick_solver, 0.00, 1000.0f);
     obj->data.round = 0;
     return obj->init_error;
 }

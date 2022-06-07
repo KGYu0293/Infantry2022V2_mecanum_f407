@@ -2,9 +2,11 @@
 #define _CONTROLLER_H
 #include <mrac.h>
 #include <pid.h>
+#include <adrc.h>
 
 enum controller_type_e { PID_MODEL = 0,
-                         MRAC_MODEL };
+                         MRAC_MODEL,
+                         ADRC_MODEL };
 
 enum controller_depth { CURRENT_CONTROL = 0,
                         SPEED_CONTROL,
@@ -17,6 +19,9 @@ typedef struct controller_config_t {
     //使用PID控制时填写双环PID配置结构体
     struct PID_config_t speed_pid_config;
     struct PID_config_t position_pid_config;
+    //使用ADRC控制时填写ADRC配置结构体
+    ADRC_Config_t speed_adrc_config;
+    ADRC_Config_t pos_adrc_config;
 } controller_config;
 
 typedef struct controller_t {
@@ -24,6 +29,8 @@ typedef struct controller_t {
     mrac_2d mrac_2d_data;
     pid pid_speed_data;
     pid pid_pos_data;
+    ADRC_t adrc_speed_data;
+    ADRC_t adrc_pos_data;
     float output;
     float ref_speed;
     float ref_position;

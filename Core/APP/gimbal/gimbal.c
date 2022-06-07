@@ -44,7 +44,7 @@ Gimbal *Gimbal_Create() {
     controller_config pitch_controller_config;
     pitch_controller_config.control_type = PID_MODEL;
     pitch_controller_config.control_depth = POS_CONTROL;
-    PID_SetConfig_Pos(&pitch_controller_config.position_pid_config, 30, 0, 0, 109.9, 5000);
+    PID_SetConfig_Pos(&pitch_controller_config.position_pid_config, 31.86, 0.068, 36.41, 109.9, 5000);
     PID_SetConfig_Pos(&pitch_controller_config.speed_pid_config, 190, 0.7, 1, 5000, 25000);
     can_motor_config pitch_config;
     pitch_config.motor_model = MODEL_6020;
