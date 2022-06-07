@@ -19,6 +19,8 @@ typedef struct Gimbal_board_cmd_t {
     Robot_mode mode;
     Robot_mode last_mode;
     AutoAim_mode autoaim_mode;
+    uint8_t soft_reset_flag; //软重启状态量
+    int16_t soft_reset_cnt;
     // 机器人启动好标志量
     uint8_t robot_ready;
     // 板间通信

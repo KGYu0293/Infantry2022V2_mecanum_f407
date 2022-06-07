@@ -161,6 +161,7 @@ typedef struct Gimbal_board_send_t {
     uint8_t mag_mode;                  // UI所需弹仓盖数据
     uint8_t fri_mode;                  // UI所需摩擦轮数据
     uint8_t vision_has_target;         // 自瞄是否检测到目标
+    uint8_t soft_reset_flag;           // 软重启标志位
 } Gimbal_board_send_data;
 
 // 云台<-底盘数据包

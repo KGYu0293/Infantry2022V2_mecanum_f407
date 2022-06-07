@@ -151,8 +151,8 @@ void Shoot_Update(Shoot *obj) {
             switch (obj->cmd_data->bullet_speed) {
                 case 30:
                     // 弹速28.7-29+的实测ref
-                    obj->friction_a->motor_controller->ref_speed = 44800;
-                    obj->friction_b->motor_controller->ref_speed = -44800;
+                    obj->friction_a->motor_controller->ref_speed = 42300;
+                    obj->friction_b->motor_controller->ref_speed = -42300;
                     break;
                 case 18:
                     // 17.2
