@@ -142,19 +142,22 @@ void OutputmaxLimit(Chassis *obj) {
                 output_limit = 2300;
                 break;
             case 50:
-                output_limit = 2300;
-                break;
-            case 55:
-                output_limit = 2000;
-                break;
-            case 60:
                 output_limit = 2500;
                 break;
+            case 55:
+                output_limit = 2800;
+                break;
+            case 60:
+                output_limit = 3300;
+                break;
             case 80:
-                output_limit = 3000;
+                output_limit = 4000;
                 break;
             case 100:
-                output_limit = 3500;
+                output_limit = 4500;
+                break;
+            case 120:
+                output_limit = 5300;
                 break;
             default:
                 output_limit = 2300;  // 和最小（45w）时保持一致
@@ -227,34 +230,37 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 float auto_rotate_param(Cmd_chassis *param) {
     static float rotate = 0;
     // 位置式变速
-    float rotate_benchmark = 170 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
+    float rotate_baseline = 170 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
     // 还是单独测吧（
     switch (param->power.power_limit) {
         case 45:
-            rotate_benchmark = 170;
+            rotate_baseline = 170;
             break;
         case 50:
-            rotate_benchmark = 180;
+            rotate_baseline = 180;
             break;
         case 55:
-            rotate_benchmark = 190;
+            rotate_baseline = 190;
             break;
         case 60:
-            rotate_benchmark = 200;
+            rotate_baseline = 200;
             break;
         case 80:
-            rotate_benchmark = 230;
+            rotate_baseline = 230;
             break;
         case 100:
-            rotate_benchmark = 230;
+            rotate_baseline = 230;
+            break;
+        case 120:
+            rotate_baseline = 230;
             break;
         default:
-            rotate_benchmark = 170;  // 和最小（45w）时保持一致
+            rotate_baseline = 170;  // 和最小（45w）时保持一致
             break;
     }
 
     float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;  // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
-    rotate = rotate_benchmark + rotate_benchmark * 0.2 * sin(x);       // 变速函数&变速范围
+    rotate = rotate_baseline + rotate_baseline * 0.2 * sin(x);       // 变速函数&变速范围
 
     // 时间式变速
     // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
@@ -294,26 +300,33 @@ void Chassis_calculate(Chassis *obj) {
     obj->proc_v_base = 1500 + ((float)obj->cmd_data->power.power_limit - 45) * 60;
     switch (obj->cmd_data->power.power_limit) {
         case 45:
-            obj->proc_v_base = 6000;
+            obj->proc_v_base = 2700;
             break;
         case 50:
-            obj->proc_v_base = 6000;
+            obj->proc_v_base = 3000;
             break;
         case 55:
-            obj->proc_v_base = 6000;
+            obj->proc_v_base = 3200;
             break;
         case 60:
-            obj->proc_v_base = 6000;
+            obj->proc_v_base = 3500;
             break;
         case 80:
-            obj->proc_v_base = 6000;
+            obj->proc_v_base = 3800;
             break;
         case 100:
-            obj->proc_v_base = 6000;
+            obj->proc_v_base = 4000;
+            break;
+        case 120:
+            obj->proc_v_base = 4100;
             break;
         default:
             obj->proc_v_base = 1500;  // 和最小（45w）时保持一致
             break;
+    }
+    //同时按住前后和平移
+    if(fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5){
+        obj->cmd_data->target.vx *= 0.6; //平移减速
     }
     float a = ((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy));
     float ratio;
@@ -339,19 +352,26 @@ void Chassis_calculate(Chassis *obj) {
     if (obj->cmd_data->mode == chassis_rotate_run) {
         w = auto_rotate_param(obj->cmd_data);
     } else if (obj->cmd_data->mode == chassis_run_follow_offset) {
-        w = 0.15f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
+        w = 0.20f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
         //飞坡模式要求底盘跟随云台更加紧密
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
             w *= 1.5;
         }
     }
 
+    //小陀螺加速
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift && obj->cmd_data->mode == chassis_rotate_run) {
+        w *= 1.5;
+    }
+
     // 边旋转边平移的功率分配
-    if (obj->cmd_data->mode == chassis_rotate_run) {
+    if (obj->cmd_data->mode == chassis_rotate_run && fabs(ratio) > 1e-5) {
         obj->proc_target_vx *= 0.75;
         obj->proc_target_vy *= 0.75;
         w *= 0.5;
     }
+
+
 
     // 麦轮解算
     float chassis_vx = obj->proc_target_vx * cos(obj->cmd_data->target.offset_angle * DEG2RAD) - obj->proc_target_vy * sin(obj->cmd_data->target.offset_angle * DEG2RAD);
