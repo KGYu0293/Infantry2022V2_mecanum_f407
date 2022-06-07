@@ -139,28 +139,31 @@ void OutputmaxLimit(Chassis *obj) {
         // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
         switch (obj->cmd_data->power.power_limit) {
             case 45:
-                output_limit = 2300;
+                output_limit = 3000;
                 break;
             case 50:
-                output_limit = 2500;
+                output_limit = 3200;
                 break;
             case 55:
-                output_limit = 2800;
+                output_limit = 3500;
                 break;
             case 60:
-                output_limit = 3300;
+                output_limit = 3800;
+                break;
+            case 70:
+                output_limit = 4200;
                 break;
             case 80:
-                output_limit = 4000;
+                output_limit = 4700;
                 break;
             case 100:
-                output_limit = 4500;
-                break;
-            case 120:
                 output_limit = 5300;
                 break;
+            case 120:
+                output_limit = 5500;
+                break;
             default:
-                output_limit = 2300;  // 和最小（45w）时保持一致
+                output_limit = 3000;  // 和最小（45w）时保持一致
                 break;
         }
         if (output_limit < 2000) output_limit = 2000;
@@ -234,34 +237,37 @@ float auto_rotate_param(Cmd_chassis *param) {
     // 还是单独测吧（
     switch (param->power.power_limit) {
         case 45:
-            rotate_baseline = 170;
+            rotate_baseline = 250;
             break;
         case 50:
-            rotate_baseline = 180;
+            rotate_baseline = 260;
             break;
         case 55:
-            rotate_baseline = 190;
+            rotate_baseline = 280;
             break;
         case 60:
-            rotate_baseline = 200;
+            rotate_baseline = 310;
+            break;
+        case 70:
+            rotate_baseline = 330;
             break;
         case 80:
-            rotate_baseline = 230;
+            rotate_baseline = 350;
             break;
         case 100:
-            rotate_baseline = 230;
+            rotate_baseline = 350;
             break;
         case 120:
-            rotate_baseline = 230;
+            rotate_baseline = 360;
             break;
         default:
-            rotate_baseline = 170;  // 和最小（45w）时保持一致
+            rotate_baseline = 240;  // 和最小（45w）时保持一致
             break;
     }
 
-    float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;  // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
-    rotate = rotate_baseline + rotate_baseline * 0.2 * sin(x);       // 变速函数&变速范围
-
+    // float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;  // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
+    // rotate = rotate_baseline + rotate_baseline * 0.2 * sin(x);       // 变速函数&变速范围
+    rotate = rotate_baseline;
     // 时间式变速
     // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
     // // 基准转速 = 最低转速 + 高功率下加速旋转
@@ -311,14 +317,16 @@ void Chassis_calculate(Chassis *obj) {
         case 60:
             obj->proc_v_base = 3500;
             break;
+        case 70:
+            obj->proc_v_base = 3700;
         case 80:
-            obj->proc_v_base = 3800;
+            obj->proc_v_base = 3900;
             break;
         case 100:
-            obj->proc_v_base = 4000;
+            obj->proc_v_base = 4100;
             break;
         case 120:
-            obj->proc_v_base = 4100;
+            obj->proc_v_base = 4200;
             break;
         default:
             obj->proc_v_base = 1500;  // 和最小（45w）时保持一致
@@ -366,9 +374,9 @@ void Chassis_calculate(Chassis *obj) {
 
     // 边旋转边平移的功率分配
     if (obj->cmd_data->mode == chassis_rotate_run && fabs(ratio) > 1e-5) {
-        obj->proc_target_vx *= 0.75;
-        obj->proc_target_vy *= 0.75;
-        w *= 0.5;
+        obj->proc_target_vx *= 0.3;
+        obj->proc_target_vy *= 0.3;
+        w *= 0.7;
     }
 
 
@@ -379,7 +387,7 @@ void Chassis_calculate(Chassis *obj) {
     mecanum_calculate(obj, chassis_vx, chassis_vy, w);
     // 加速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
-        ChassisAccelerationLimit(obj);
+        // ChassisAccelerationLimit(obj);
     }
     // 功率控制
     OutputmaxLimit(obj);
