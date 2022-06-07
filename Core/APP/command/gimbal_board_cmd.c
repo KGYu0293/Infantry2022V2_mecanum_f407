@@ -398,13 +398,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                 // 自瞄开
                 // 计算真实yaw值
                 if (obj->pc->pc_recv_data->vitual_mode != VISUAL_LOST) {
-<<<<<<< HEAD
-                    float yaw_target = obj->pc->pc_recv_data->yaw * 360.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 360.0;
-                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 360.0;
-                    if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 360.0;
-                    obj->gimbal_control.yaw = yaw_target;
-                    obj->gimbal_control.pitch = obj->pc->pc_recv_data->pitch * 360.0 / 2 / pi;
-=======
                     if (obj->pc->pc_recv_data->yaw < pi && obj->pc->pc_recv_data->yaw > -pi && obj->pc->pc_recv_data->pitch < pi && obj->pc->pc_recv_data->pitch > -pi) {
                         float yaw_target = obj->pc->pc_recv_data->yaw * 360.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 360.0;
                         if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 360.0;
@@ -413,7 +406,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
                         obj->gimbal_control.pitch = obj->pc->pc_recv_data->pitch * 360.0 / 2 / pi;
                     }
 
->>>>>>> 63d96562916460b55ef9a370293f6b50a37976f2
                     obj->send_data.vision_has_target = 1;
                 } else {
                     // 没有目标
