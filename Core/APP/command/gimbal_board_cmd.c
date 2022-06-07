@@ -2,6 +2,7 @@
 
 #include "bsp_def.h"
 #include "bsp_supervise.h"
+#include "bsp_softreset.h"
 
 // monitor处理函数
 void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!robot stopped for security.\n"); }
@@ -73,6 +74,7 @@ Gimbal_board_cmd* Gimbal_board_CMD_Create() {
     obj->last_mode = robot_stop;
     obj->robot_ready = 0;
     obj->autoaim_mode = auto_aim_off;
+    obj->soft_reset_flag = 0;
     // obj->chassis_climb_on = 0;
 
     return obj;
@@ -123,6 +125,31 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
             obj->mode = robot_stop;
         }
     }
+
+    //已经进入soft_reset准备状态
+    if(obj->soft_reset_flag > 0){
+        obj->mode = robot_stop;
+    }
+
+    if(obj->soft_reset_flag == 1){
+        static int16_t soft_rest_robot_stop_wait_cnt = 0;
+        soft_rest_robot_stop_wait_cnt++;
+        //等待20ms使得电机全部下线
+        if(soft_rest_robot_stop_wait_cnt == 10) {
+            obj->soft_reset_flag = 2;
+            obj->send_data.soft_reset_flag = 1;
+        }
+    } else if(obj->soft_reset_flag == 2){
+        obj->soft_reset_flag = 3;
+    } else if(obj->soft_reset_flag == 3){
+        //等待10ms使得can通信完成
+        static int16_t soft_rest_can_wait_cnt = 0;
+        soft_rest_can_wait_cnt++;
+        if(soft_rest_can_wait_cnt == 10){
+            bsp_soft_rest();
+        }
+    }
+
     // 机器人控制
     if (obj->mode == robot_stop) {
         stop_mode_update(obj);
@@ -149,6 +176,7 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
     obj->send_data.gimbal_mode = obj->gimbal_control.mode;
     obj->send_data.autoaim_mode = obj->autoaim_mode;
     obj->send_data.pc_online = !is_Offline(obj->pc->recv->monitor);
+
     // 发布控制结果和通信
     send_cmd_and_data(obj);
     obj->last_mode = obj->mode;
@@ -279,6 +307,15 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         else
             obj->autoaim_mode = auto_aim_off;
     }
+    // Crtl+G软重启
+    if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g){
+        obj->soft_reset_cnt++;
+        //连续按住3秒
+        if(obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
+    } else {
+        obj->soft_reset_cnt = 0;
+    }
+
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
 
     // 底盘控制参数
@@ -435,7 +472,10 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
 
 void send_cmd_and_data(Gimbal_board_cmd* obj) {
     CanPC_Send(obj->pc, &obj->pc_send_data);               // 小电脑通信
-    CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));  // 板间通信
+    //发送RESET信号后不进行CAN通信
+    if(obj->soft_reset_flag != 3) {
+        CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));  // 板间通信
+    }
     // 子模块pub_sub
     publish_data gimbal_cmd;
     gimbal_cmd.data = (uint8_t*)&obj->gimbal_control;

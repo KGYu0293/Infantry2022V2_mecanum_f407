@@ -155,6 +155,7 @@ Core/BSP/bsp_supervise.c \
 Core/BSP/lib/bsp_random.c \
 Core/BSP/lib/bsp_delay.c \
 Core/BSP/lib/bsp_log.c \
+Core/BSP/lib/bsp_softreset.c \
 Core/BSP/interface/bsp_spi.c \
 Core/BSP/interface/bsp_gpio.c \
 Core/BSP/interface/bsp_can.c \
