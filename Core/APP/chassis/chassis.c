@@ -387,7 +387,7 @@ void Chassis_calculate(Chassis *obj) {
     mecanum_calculate(obj, chassis_vx, chassis_vy, w);
     // 加速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_mild) {
-        // ChassisAccelerationLimit(obj);
+        ChassisAccelerationLimit(obj);
     }
     // 功率控制
     OutputmaxLimit(obj);
