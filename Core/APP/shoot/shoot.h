@@ -15,9 +15,10 @@ typedef struct Shoot_t {
 
     Servo *mag_lid;
 
-    Cmd_shoot* cmd_data;
-
     Subscriber* shoot_cmd_suber;
+    Cmd_shoot *cmd_data;
+    Publisher* shoot_upload_puber;
+    Upload_shoot upload_data;
 
     //用于单/双/三发模式
     uint32_t cooldown_start;  //冷却起始时间点

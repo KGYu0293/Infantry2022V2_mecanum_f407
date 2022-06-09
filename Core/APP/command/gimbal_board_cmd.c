@@ -1,8 +1,8 @@
 #include "gimbal_board_cmd.h"
 
 #include "bsp_def.h"
-#include "bsp_supervise.h"
 #include "bsp_softreset.h"
+#include "bsp_supervise.h"
 
 // monitor处理函数
 void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!robot stopped for security.\n"); }
@@ -49,6 +49,9 @@ Gimbal_board_cmd* Gimbal_board_CMD_Create() {
     obj->gimbal_cmd_puber = register_pub("cmd_gimbal");
     obj->gimbal_upload_suber = register_sub("upload_gimbal", 1);
     obj->shoot_cmd_puber = register_pub("cmd_shoot");
+    obj->shoot_upload_suber = register_sub("upload_shoot", 1);
+    obj->gimbal_upload_data = NULL;
+    obj->shoot_upload_data = NULL;
 
     // 外设初始化
     buzzer_config internal_buzzer_config;
@@ -75,7 +78,6 @@ Gimbal_board_cmd* Gimbal_board_CMD_Create() {
     obj->robot_ready = 0;
     obj->autoaim_mode = auto_aim_off;
     obj->soft_reset_flag = 0;
-    // obj->chassis_climb_on = 0;
 
     return obj;
 }
@@ -93,7 +95,6 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
         obj->gimbal_control.rotate_feedforward = 0;
     } else {
         obj->pc_send_data.robot_id = obj->recv_data->robot_id;
-        obj->pc_send_data.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;
         obj->gimbal_control.rotate_feedforward = obj->recv_data->gyro_yaw;
     }
     // 判断云台IMU是否上线
@@ -127,27 +128,36 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
     }
 
     //已经进入soft_reset准备状态
-    if(obj->soft_reset_flag > 0){
+    if (obj->soft_reset_flag > 0) {
         obj->mode = robot_stop;
     }
 
-    if(obj->soft_reset_flag == 1){
+    if (obj->soft_reset_flag == 1) {
         static int16_t soft_rest_robot_stop_wait_cnt = 0;
         soft_rest_robot_stop_wait_cnt++;
         //等待20ms使得电机全部下线
-        if(soft_rest_robot_stop_wait_cnt == 10) {
+        if (soft_rest_robot_stop_wait_cnt == 10) {
             obj->soft_reset_flag = 2;
             obj->send_data.soft_reset_flag = 1;
         }
-    } else if(obj->soft_reset_flag == 2){
+    } else if (obj->soft_reset_flag == 2) {
         obj->soft_reset_flag = 3;
-    } else if(obj->soft_reset_flag == 3){
+    } else if (obj->soft_reset_flag == 3) {
         //等待10ms使得can通信完成
         static int16_t soft_rest_can_wait_cnt = 0;
         soft_rest_can_wait_cnt++;
-        if(soft_rest_can_wait_cnt == 10){
+        if (soft_rest_can_wait_cnt == 10) {
             bsp_soft_rest();
         }
+    }
+
+    // 获取实际弹速
+    publish_data shoot_data_fdb = obj->shoot_upload_suber->getdata(obj->shoot_upload_suber);
+    if (shoot_data_fdb.len == -1) {
+        obj->pc_send_data.bullet_speed = 0;
+    } else {
+        obj->shoot_upload_data = (Upload_shoot*)shoot_data_fdb.data;
+        obj->pc_send_data.bullet_speed = obj->shoot_upload_data->real_bullet_speed;
     }
 
     // 机器人控制
@@ -308,10 +318,10 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             obj->autoaim_mode = auto_aim_off;
     }
     // Crtl+G软重启
-    if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g){
+    if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
         obj->soft_reset_cnt++;
         //连续按住3秒
-        if(obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
+        if (obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
     } else {
         obj->soft_reset_cnt = 0;
     }
@@ -474,9 +484,9 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
 }
 
 void send_cmd_and_data(Gimbal_board_cmd* obj) {
-    CanPC_Send(obj->pc, &obj->pc_send_data);               // 小电脑通信
+    CanPC_Send(obj->pc, &obj->pc_send_data);  // 小电脑通信
     //发送RESET信号后不进行CAN通信
-    if(obj->soft_reset_flag != 3) {
+    if (obj->soft_reset_flag != 3) {
         CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));  // 板间通信
     }
     // 子模块pub_sub
