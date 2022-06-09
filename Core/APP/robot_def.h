@@ -148,6 +148,10 @@ typedef struct Upload_chassis_t {
     imu_data* chassis_imu;
 } Upload_chassis;
 
+typedef struct Upload_shoot_t{
+    float real_bullet_speed;
+}Upload_shoot;
+
 // 板间通信定义
 // 云台->底盘数据包
 typedef struct Gimbal_board_send_t {

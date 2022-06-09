@@ -37,6 +37,8 @@ typedef struct Gimbal_board_cmd_t {
 
     Publisher *shoot_cmd_puber;
     Cmd_shoot shoot_control;
+    Subscriber *shoot_upload_suber;
+    Upload_shoot *shoot_upload_data;
     Publisher *gimbal_cmd_puber;
     Cmd_gimbal gimbal_control;
     Subscriber *gimbal_upload_suber;

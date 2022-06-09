@@ -76,6 +76,7 @@ Shoot *Shoot_Create(void) {
     BSP_GPIO_Set(GPIO_5V_OUTPUT, 0);
 
     obj->shoot_cmd_suber = register_sub("cmd_shoot", 1);
+    obj->shoot_upload_puber = register_pub("upload_shoot");
     obj->cmd_data = NULL;
     obj->cooldown_start = obj->cooldown_time = 0;
     return obj;
@@ -158,19 +159,23 @@ void Shoot_Update(Shoot *obj) {
                     // 17.2
                     obj->friction_a->motor_controller->ref_speed = 28800;
                     obj->friction_b->motor_controller->ref_speed = -28800;
+                    obj->upload_data.real_bullet_speed = 17.2;
                     break;
                 case 15:
                     // 14.3
                     obj->friction_a->motor_controller->ref_speed = 26200;
                     obj->friction_b->motor_controller->ref_speed = -26200;
+                    obj->upload_data.real_bullet_speed = 14.3;// 此处填写该case下调得实际弹速的典型值
                     break;
                 case 0:  // 刹车
                     obj->friction_a->motor_controller->ref_speed = 0;
                     obj->friction_b->motor_controller->ref_speed = 0;
+                    obj->upload_data.real_bullet_speed = 0;
                 default:
                     //待实测
                     obj->friction_a->motor_controller->ref_speed = 26200;
                     obj->friction_b->motor_controller->ref_speed = -26200;
+                    obj->upload_data.real_bullet_speed = 14.3;
                     break;
             }
             Shoot_load_Update(obj, obj->cmd_data);
@@ -185,4 +190,10 @@ void Shoot_Update(Shoot *obj) {
             obj->mag_lid->pos_servo_control = 212;
             break;
     }
+
+    // 返回实际弹速
+    publish_data shoot_upload;
+    shoot_upload.data = (uint8_t *)&(obj->upload_data);
+    shoot_upload.len  = sizeof(Upload_shoot);
+    obj->shoot_upload_puber->publish(obj->shoot_upload_puber, shoot_upload);
 }
