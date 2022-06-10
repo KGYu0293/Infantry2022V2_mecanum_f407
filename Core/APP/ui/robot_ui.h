@@ -66,6 +66,17 @@ typedef struct robot_ui_t {
 
     ui_status data;
     ui_status last_data;
+
+    //刻度
+    graphic_data vertical_line;
+    graphic_data line1;
+    graphic_data line2;
+    graphic_data line3;
+    graphic_data line4;
+    graphic_data line5;
+    graphic_data line6;
+    
+
     // UI刷新时间戳
     uint32_t time_refresh;
 } robot_ui;
