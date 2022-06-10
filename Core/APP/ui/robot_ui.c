@@ -20,6 +20,7 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->cap_int);
     add_graphic(obj->ui_sender, &obj->bat_float);
     add_graphic(obj->ui_sender, &obj->vision_frame);
+    
     //指示灯
     add_graphic(obj->ui_sender, &obj->fri_circle);
     add_graphic(obj->ui_sender, &obj->mag_circle);
@@ -27,6 +28,8 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->chassis_circle);
     add_graphic(obj->ui_sender, &obj->autoaim_circle);
     add_graphic(obj->ui_sender, &obj->power_circle);
+    
+    
     //文字
     add_text(obj->ui_sender, &obj->fri_text, obj->fri_str, UI_TEXT_BUFFER_SIZE);
     add_text(obj->ui_sender, &obj->mag_text, obj->mag_str, UI_TEXT_BUFFER_SIZE);
@@ -34,6 +37,15 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, UI_TEXT_BUFFER_SIZE);
     add_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, UI_TEXT_BUFFER_SIZE);
     add_text(obj->ui_sender, &obj->power_text, obj->power_str, UI_TEXT_BUFFER_SIZE);
+
+    //刻度
+    add_graphic(obj->ui_sender, &obj->vertical_line);
+    add_graphic(obj->ui_sender,&obj->line1);
+    add_graphic(obj->ui_sender, &obj->line2);
+    add_graphic(obj->ui_sender, &obj->line3);
+    add_graphic(obj->ui_sender,&obj->line4);
+    add_graphic(obj->ui_sender, &obj->line5);
+    add_graphic(obj->ui_sender, &obj->line6);
 }
 
 //改变图形元素
@@ -195,11 +207,23 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->autoaim_circle = Circle(13, 0, Green, 8, 150, 531, 10);
     obj->autoaim_text = Char(14, 0, White, 3, 20, 20, 180, 540);
     strset(obj->autoaim_str, "AUTOAIM:OFF");
-
     //功率
     obj->power_circle = Circle(15, 0, Green, 8, 1550, 731, 10);
     obj->power_text = Char(16, 0, White, 3, 20, 20, 1580, 740);
     strset(obj->power_str, "POWER:MILD");
+
+    
+    //刻度
+
+    obj->vertical_line = Line(17,1,Purplish_Red,1,955,300,960,550);
+    obj->line1 = Line(18,1,Yellow,1,830,500,1090,500);
+    obj->line2 = Line(19,1,Yellow,1,855,480,1065,480);
+    obj->line3 = Line(20,1,Yellow,1,880,460,1040,460);
+    obj->line4 = Line(21,1,Yellow,1,905,440,1015,440);
+    obj->line5 = Line(22,1,Yellow,1,930,420,990,420);
+    obj->line6 = Line(23,1,Yellow,1,820,520,1100,520);
+
+
     //初始化percent
     obj->data.cap_percent = 0.0;
     obj->data.bat_voltage = 0.0;
