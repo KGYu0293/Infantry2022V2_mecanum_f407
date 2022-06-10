@@ -151,21 +151,22 @@ void Shoot_Update(Shoot *obj) {
             obj->friction_b->enable = MOTOR_ENABLE;
             switch (obj->cmd_data->bullet_speed) {
                 case 30:
-                    // 弹速28.7-29+的实测ref
+                    // 弹速27.7-28.5的实测ref
                     obj->friction_a->motor_controller->ref_speed = 42300;
                     obj->friction_b->motor_controller->ref_speed = -42300;
+                    obj->upload_data.real_bullet_speed = 28.1;// 此处填写该case下调得实际弹速的典型值
                     break;
                 case 18:
-                    // 17.2
+                    // 17.1-17.8
                     obj->friction_a->motor_controller->ref_speed = 28800;
                     obj->friction_b->motor_controller->ref_speed = -28800;
-                    obj->upload_data.real_bullet_speed = 17.2;
+                    obj->upload_data.real_bullet_speed = 17.4;
                     break;
                 case 15:
                     // 14.3
                     obj->friction_a->motor_controller->ref_speed = 26200;
                     obj->friction_b->motor_controller->ref_speed = -26200;
-                    obj->upload_data.real_bullet_speed = 14.3;// 此处填写该case下调得实际弹速的典型值
+                    obj->upload_data.real_bullet_speed = 14.3;
                     break;
                 case 0:  // 刹车
                     obj->friction_a->motor_controller->ref_speed = 0;
