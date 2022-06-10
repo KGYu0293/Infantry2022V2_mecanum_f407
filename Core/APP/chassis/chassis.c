@@ -133,7 +133,7 @@ void OutputmaxLimit(Chassis *obj) {
         } else if (obj->super_cap->cap_percent < 50) {
             output_limit = 5000;
         } else {
-            output_limit = 8000;
+            output_limit = 6000; //防止快速掉电
         }
     } else {
         // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
@@ -344,7 +344,7 @@ void Chassis_calculate(Chassis *obj) {
 
     if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
-        obj->proc_v_base = 6000;  // 飞坡模式速度设定 6m/s
+        obj->proc_v_base = 4500;  // 飞坡模式速度设定 4.5m/s
     }
 
     // float target_vx, target_vy;
@@ -419,7 +419,7 @@ void Chassis_Update(Chassis *obj) {
     if (obj->cmd_data->power.power_buffer > 30) {
         obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
     } else {
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit;
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 5; //防止电容超功率
     }
 
     // 应用得到的param进行控制
