@@ -184,10 +184,10 @@ void Shoot_Update(Shoot *obj) {
     }
     switch (obj->cmd_data->mag_mode) {
         case magazine_open:
-            obj->mag_lid->pos_servo_control = 0;
+            obj->mag_lid->pos_servo_control = 10;
             break;
         case magazine_close:
-            obj->mag_lid->pos_servo_control = 106;
+            obj->mag_lid->pos_servo_control = 114;
             break;
     }
 
