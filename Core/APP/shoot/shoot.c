@@ -151,22 +151,22 @@ void Shoot_Update(Shoot *obj) {
             obj->friction_b->enable = MOTOR_ENABLE;
             switch (obj->cmd_data->bullet_speed) {
                 case 30:
-                    // 弹速28.7-29+的实测ref
+                    // 弹速28.3-28.9的实测ref 28.6
                     obj->friction_a->motor_controller->ref_speed = 42300;
                     obj->friction_b->motor_controller->ref_speed = -42300;
-                    obj->upload_data.real_bullet_speed = 29;// 此处填写该case下调得实际弹速的典型值
+                    obj->upload_data.real_bullet_speed = 28.6;// 此处填写该case下调得实际弹速的典型值
                     break;
                 case 18:
-                    // 17.2
+                    // 17.0-17.8
                     obj->friction_a->motor_controller->ref_speed = 30500;
                     obj->friction_b->motor_controller->ref_speed = -30500;
-                    obj->upload_data.real_bullet_speed = 17.2;
+                    obj->upload_data.real_bullet_speed = 17.3;
                     break;
                 case 15:
-                    // 14.3
-                    obj->friction_a->motor_controller->ref_speed = 27500;
-                    obj->friction_b->motor_controller->ref_speed = -27500;
-                    obj->upload_data.real_bullet_speed = 14.3;
+                    // 偏差较大 有不少14.6
+                    obj->friction_a->motor_controller->ref_speed = 27700;
+                    obj->friction_b->motor_controller->ref_speed = -27700;
+                    obj->upload_data.real_bullet_speed = 14.1;
                     break;
                 case 0:  // 刹车
                     obj->friction_a->motor_controller->ref_speed = 0;
@@ -174,9 +174,9 @@ void Shoot_Update(Shoot *obj) {
                     obj->upload_data.real_bullet_speed = 0;
                 default:
                     //待实测
-                    obj->friction_a->motor_controller->ref_speed = 27500;
-                    obj->friction_b->motor_controller->ref_speed = -27500;
-                    obj->upload_data.real_bullet_speed = 14.3;
+                    obj->friction_a->motor_controller->ref_speed = 27700;
+                    obj->friction_b->motor_controller->ref_speed = -27700;
+                    obj->upload_data.real_bullet_speed = 14.1;
                     break;
             }
             Shoot_load_Update(obj, obj->cmd_data);
