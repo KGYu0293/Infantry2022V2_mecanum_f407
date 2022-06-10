@@ -323,10 +323,10 @@ void Chassis_calculate(Chassis *obj) {
             obj->proc_v_base = 3900;
             break;
         case 100:
-            obj->proc_v_base = 4100;
+            obj->proc_v_base = 4000;
             break;
         case 120:
-            obj->proc_v_base = 4200;
+            obj->proc_v_base = 4000;
             break;
         default:
             obj->proc_v_base = 1500;  // 和最小（45w）时保持一致
@@ -344,7 +344,7 @@ void Chassis_calculate(Chassis *obj) {
 
     if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
-        obj->proc_v_base = 4500;  // 飞坡模式速度设定 4.5m/s
+        obj->proc_v_base = 4000;  // 飞坡模式速度设定 4m/s
     }
 
     // float target_vx, target_vy;
