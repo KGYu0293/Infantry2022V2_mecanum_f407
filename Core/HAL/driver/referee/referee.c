@@ -3,6 +3,8 @@
 #include "bsp.h"
 #include "cvector.h"
 
+#define BULLET_SPEED_MAX 30
+
 cvector *referee_instances;
 
 void referee_Rx_callback(uint8_t uart_index, uint8_t *data, uint32_t len);
@@ -138,6 +140,11 @@ void referee_data_solve(Referee *obj) {
                 obj->tool.next_step_wait_len = 1;
                 break;
         }
+    }
+
+    // 裁判系统准备时间给5倍数值处理 最小弹速*5>最大弹速
+    if (obj->rx_data.game_robot_state.shooter_id1_17mm_speed_limit > BULLET_SPEED_MAX) {
+        obj->rx_data.game_robot_state.shooter_id1_17mm_speed_limit /= 5;
     }
 }
 

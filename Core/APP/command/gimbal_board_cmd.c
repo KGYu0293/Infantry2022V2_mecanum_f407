@@ -467,9 +467,9 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             } else {
                 obj->shoot_control.bullet_mode = bullet_single;
             }
-        } else if (obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 同时按左右键 卖血发射
+        } else if (obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 同时按左右键 高射频发射
             obj->shoot_control.bullet_mode = bullet_continuous;
-            obj->shoot_control.heat_limit_remain = 200;
+            obj->shoot_control.fire_rate = 15;
         } else if (!obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 只按右键 反转防卡弹
             obj->shoot_control.bullet_mode = bullet_reverse;
         } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE) {  //  视觉控制发射(打符)

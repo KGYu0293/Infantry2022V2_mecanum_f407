@@ -51,8 +51,8 @@ Shoot *Shoot_Create(void) {
     controller_config load_controller_config;
     load_controller_config.control_type = PID_MODEL;
     load_controller_config.control_depth = POS_CONTROL;
-    PID_SetConfig_Pos(&load_controller_config.position_pid_config, 34.13, 0, 0, 0, 15000);
-    PID_SetConfig_Pos(&load_controller_config.speed_pid_config, 2, 0.1, 0, 2000, 10000);
+    PID_SetConfig_Pos(&load_controller_config.position_pid_config, 34.13, 0, 0, 0, 40000);
+    PID_SetConfig_Pos(&load_controller_config.speed_pid_config, 4, 0.1, 0.1, 2000, 10000);
     load_config.motor_model = MODEL_2006;
     load_config.bsp_can_index = 0;
     load_config.motor_set_id = 3;
