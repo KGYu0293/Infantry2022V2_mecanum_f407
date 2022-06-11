@@ -97,7 +97,8 @@
         "bsp_gpio.h": "c",
         "bsp_def.h": "c",
         "mrac.h": "c",
-        "basic_math_functions.h": "c"
+        "basic_math_functions.h": "c",
+        "pc_data.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

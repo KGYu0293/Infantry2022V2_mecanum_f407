@@ -133,7 +133,7 @@ void OutputmaxLimit(Chassis *obj) {
         } else if (obj->super_cap->cap_percent < 50) {
             output_limit = 5000;
         } else {
-            output_limit = 8000;
+            output_limit = 8000; //防止快速掉电
         }
     } else {
         // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
@@ -323,10 +323,10 @@ void Chassis_calculate(Chassis *obj) {
             obj->proc_v_base = 3900;
             break;
         case 100:
-            obj->proc_v_base = 4100;
+            obj->proc_v_base = 4000;
             break;
         case 120:
-            obj->proc_v_base = 4200;
+            obj->proc_v_base = 4000;
             break;
         default:
             obj->proc_v_base = 1500;  // 和最小（45w）时保持一致
@@ -341,10 +341,10 @@ void Chassis_calculate(Chassis *obj) {
     arm_sqrt_f32(a, &ratio);                      // 使用armmath库代替c语言库的sqrt加快速度
     if (ratio > 4) ratio = 4;                     // 最大爆发速度倍率限制
     obj->proc_v_base = obj->proc_v_base * ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
-
+    if (obj->proc_v_base > 4500) obj->proc_v_base = 4500; //最大上限设置值
     if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
-        obj->proc_v_base = 6000;  // 飞坡模式速度设定 6m/s
+        obj->proc_v_base = 3500;  // 飞坡模式速度设定 3.5m/s
     }
 
     // float target_vx, target_vy;
@@ -363,7 +363,7 @@ void Chassis_calculate(Chassis *obj) {
         w = 0.20f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
         //飞坡模式要求底盘跟随云台更加紧密
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
-            w *= 1.5;
+            w *= 1.8;
         }
     }
 
@@ -410,17 +410,18 @@ void Chassis_Update(Chassis *obj) {
     chassis_upload.len = sizeof(Upload_chassis);
     obj->chassis_imu_pub->publish(obj->chassis_imu_pub, chassis_upload);
 
+    //设置电容充电功率，在缓冲功率充足时，多充能
+    if (obj->cmd_data->power.power_buffer > 30) {
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
+    } else {
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 5; //防止电容超功率
+    }
+
     // 获得cmd命令
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
     if (chassis_data.len == -1) return;  // 未收到指令
     obj->cmd_data = (Cmd_chassis *)chassis_data.data;
 
-    //设置电容充电功率，在缓冲功率充足时，多充能
-    if (obj->cmd_data->power.power_buffer > 30) {
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
-    } else {
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit;
-    }
 
     // 应用得到的param进行控制
     if (obj->cmd_data->mode == chassis_stop) {
