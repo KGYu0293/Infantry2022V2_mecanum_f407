@@ -126,6 +126,10 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->mode = robot_run;
     }
 
+    obj->chassis_control.power.dispatch_mode = obj->recv_data->chassis_dispatch_mode;
+    obj->chassis_control.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
+    obj->chassis_control.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
+    obj->chassis_control.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;
     // 底盘控制指令
     if (obj->mode == robot_stop) {
         obj->chassis_control.mode = chassis_stop;
@@ -133,10 +137,6 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->chassis_control.mode = obj->recv_data->chassis_mode;
         obj->chassis_control.target = obj->recv_data->chassis_target;
         // obj->chassis_control.power.if_consume_supercap = obj->recv_data->if_consume_supercap;
-        obj->chassis_control.power.dispatch_mode = obj->recv_data->chassis_dispatch_mode;
-        obj->chassis_control.power.power_buffer = obj->referee->rx_data.power_heat.chassis_power_buffer;
-        obj->chassis_control.power.power_now = obj->referee->rx_data.power_heat.chassis_power;
-        obj->chassis_control.power.power_limit = obj->referee->rx_data.game_robot_state.chassis_power_limit;
     }
 
     // 发布指令

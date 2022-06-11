@@ -130,7 +130,7 @@ void OutputmaxLimit(Chassis *obj) {
         (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly)) {
         if (obj->super_cap->cap_percent < 30) {
             output_limit = 2000;
-        } else if (obj->super_cap->cap_percent < 50) {
+        } else if (obj->super_cap->cap_percent < 40) {
             output_limit = 5000;
         } else {
             output_limit = 8000; //防止快速掉电
@@ -341,10 +341,10 @@ void Chassis_calculate(Chassis *obj) {
     arm_sqrt_f32(a, &ratio);                      // 使用armmath库代替c语言库的sqrt加快速度
     if (ratio > 4) ratio = 4;                     // 最大爆发速度倍率限制
     obj->proc_v_base = obj->proc_v_base * ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
-    if (obj->proc_v_base > 4500) obj->proc_v_base = 4500; //最大上限设置值
-    if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
+    if (obj->proc_v_base > 5000) obj->proc_v_base = 5000; //最大上限设置值
+    // if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
-        obj->proc_v_base = 3500;  // 飞坡模式速度设定 3.5m/s
+        obj->proc_v_base = 5000;  // 飞坡模式速度设定 5m/s
     }
 
     // float target_vx, target_vy;
@@ -379,8 +379,6 @@ void Chassis_calculate(Chassis *obj) {
         w *= 0.7;
     }
 
-
-
     // 麦轮解算
     float chassis_vx = obj->proc_target_vx * cos(obj->cmd_data->target.offset_angle * DEG2RAD) - obj->proc_target_vy * sin(obj->cmd_data->target.offset_angle * DEG2RAD);
     float chassis_vy = obj->proc_target_vx * sin(obj->cmd_data->target.offset_angle * DEG2RAD) + obj->proc_target_vy * cos(obj->cmd_data->target.offset_angle * DEG2RAD);
@@ -414,7 +412,7 @@ void Chassis_Update(Chassis *obj) {
     if (obj->cmd_data->power.power_buffer > 30) {
         obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
     } else {
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 5; //防止电容超功率
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 2; //防止电容超功率
     }
 
     // 获得cmd命令
