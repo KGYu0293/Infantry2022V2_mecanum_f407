@@ -18,7 +18,7 @@ Shoot *Shoot_Create(void) {
     controller_config friction_a_controller_config;
     friction_a_controller_config.control_type = PID_MODEL;
     friction_a_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
+    PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 0);
     PID_SetConfig_Comp(&friction_a_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_a_config.motor_model = MODEL_3508;
     friction_a_config.bsp_can_index = 0;
@@ -35,7 +35,7 @@ Shoot *Shoot_Create(void) {
     controller_config friction_b_controller_config;
     friction_b_controller_config.control_type = PID_MODEL;
     friction_b_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
+    PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 0);
     PID_SetConfig_Comp(&friction_b_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_b_config.motor_model = MODEL_3508;
     friction_b_config.bsp_can_index = 0;
@@ -51,8 +51,8 @@ Shoot *Shoot_Create(void) {
     controller_config load_controller_config;
     load_controller_config.control_type = PID_MODEL;
     load_controller_config.control_depth = POS_CONTROL;
-    PID_SetConfig_Pos(&load_controller_config.position_pid_config, 34.13, 0, 0, 0, 40000);
-    PID_SetConfig_Pos(&load_controller_config.speed_pid_config, 4, 0.1, 0.1, 2000, 10000);
+    PID_SetConfig_Pos(&load_controller_config.position_pid_config, 44, 0, 2, 2000, 50000);
+    PID_SetConfig_Pos(&load_controller_config.speed_pid_config, 2, 0, 0.5, 2000, 10000);
     load_config.motor_model = MODEL_2006;
     load_config.bsp_can_index = 0;
     load_config.motor_set_id = 3;
@@ -98,7 +98,7 @@ void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
             break;
         case bullet_reverse:  // 反转 防卡弹
             obj->load->motor_controller->config.control_depth = SPEED_CONTROL;
-            obj->load->motor_controller->ref_speed = 10 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
+            obj->load->motor_controller->ref_speed = 5 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
             break;
         case bullet_continuous:
             // obj->load->config.motor_pid_model = SPEED_LOOP;
@@ -151,21 +151,21 @@ void Shoot_Update(Shoot *obj) {
             obj->friction_b->enable = MOTOR_ENABLE;
             switch (obj->cmd_data->bullet_speed) {
                 case 30:
-                    // 弹速28.3-28.9的实测ref 28.6
+                    // 弹速28.7-29.2的实测ref 28.6
                     obj->friction_a->motor_controller->ref_speed = 42300;
                     obj->friction_b->motor_controller->ref_speed = -42300;
-                    obj->upload_data.real_bullet_speed = 28.6;// 此处填写该case下调得实际弹速的典型值
+                    obj->upload_data.real_bullet_speed = 28.8;// 此处填写该case下调得实际弹速的典型值
                     break;
                 case 18:
                     // 17.0-17.8
-                    obj->friction_a->motor_controller->ref_speed = 30500;
-                    obj->friction_b->motor_controller->ref_speed = -30500;
+                    obj->friction_a->motor_controller->ref_speed = 29700;
+                    obj->friction_b->motor_controller->ref_speed = -29700;
                     obj->upload_data.real_bullet_speed = 17.3;
                     break;
                 case 15:
                     // 偏差较大 有不少14.6
-                    obj->friction_a->motor_controller->ref_speed = 27700;
-                    obj->friction_b->motor_controller->ref_speed = -27700;
+                    obj->friction_a->motor_controller->ref_speed = 27000;
+                    obj->friction_b->motor_controller->ref_speed = -27000;
                     obj->upload_data.real_bullet_speed = 14.1;
                     break;
                 case 0:  // 刹车
