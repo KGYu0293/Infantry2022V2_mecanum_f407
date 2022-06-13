@@ -187,7 +187,7 @@ void Shoot_Update(Shoot *obj) {
             obj->mag_lid->pos_servo_control = 10;
             break;
         case magazine_close:
-            obj->mag_lid->pos_servo_control = 114;
+            obj->mag_lid->pos_servo_control = 110;
             break;
     }
 
