@@ -103,7 +103,10 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
             obj->referee->robot_status_received = 2;
         }
     } else {
-        obj->mode = robot_stop;
+        // obj->mode = robot_stop;
+        obj->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit = 15;
+        obj->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit = 100;
+        obj->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat = 0;
     }
 
     // 判断除了云台板stop之外，都已经上线，说明底盘板初始化完成，进入ready状态】
