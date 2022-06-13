@@ -18,7 +18,7 @@ Shoot *Shoot_Create(void) {
     controller_config friction_a_controller_config;
     friction_a_controller_config.control_type = PID_MODEL;
     friction_a_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
+    PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 0);
     PID_SetConfig_Comp(&friction_a_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_a_config.motor_model = MODEL_3508;
     friction_a_config.bsp_can_index = 0;
@@ -35,7 +35,7 @@ Shoot *Shoot_Create(void) {
     controller_config friction_b_controller_config;
     friction_b_controller_config.control_type = PID_MODEL;
     friction_b_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 5000);
+    PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 0);
     PID_SetConfig_Comp(&friction_b_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_b_config.motor_model = MODEL_3508;
     friction_b_config.bsp_can_index = 0;
@@ -98,7 +98,7 @@ void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
             break;
         case bullet_reverse:  // 反转 防卡弹
             obj->load->motor_controller->config.control_depth = SPEED_CONTROL;
-            obj->load->motor_controller->ref_speed = 10 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
+            obj->load->motor_controller->ref_speed = 5 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
             break;
         case bullet_continuous:
             // obj->load->config.motor_pid_model = SPEED_LOOP;

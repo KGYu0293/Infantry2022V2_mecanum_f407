@@ -17,6 +17,7 @@ typedef struct ui_status_t {
     uint8_t vision_has_taget;  // 找到目标
     float cap_percent;
     float bat_voltage;
+    float bullet_speed;         //子弹弹速
 } ui_status;
 
 typedef struct robot_ui_t {
@@ -67,14 +68,11 @@ typedef struct robot_ui_t {
     ui_status data;
     ui_status last_data;
 
-    //刻度
+     //瞄准标尺(命名规则：弹速-瞄准距离)不同弹速的瞄准线长不同
     graphic_data vertical_line;
-    graphic_data line1;
-    graphic_data line2;
-    graphic_data line3;
-    graphic_data line4;
-    graphic_data line5;
-    graphic_data line6;
+    graphic_data line_15ms_2m;//对应于18ms：3  30ms:3
+    graphic_data line_15ms_3m;//对应于18ms：4  30ms:5
+    graphic_data line_15ms_4m;//对应于18ms：5  30ms:7
     
 
     // UI刷新时间戳
