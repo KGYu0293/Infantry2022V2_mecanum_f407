@@ -158,15 +158,15 @@ void Shoot_Update(Shoot *obj) {
                     break;
                 case 18:
                     // 17.0-17.8
-                    obj->friction_a->motor_controller->ref_speed = 28800;
-                    obj->friction_b->motor_controller->ref_speed = -28800;
-                    obj->upload_data.real_bullet_speed = 17.4;
+                    obj->friction_a->motor_controller->ref_speed = 28400;
+                    obj->friction_b->motor_controller->ref_speed = -28400;
+                    obj->upload_data.real_bullet_speed = 17.1;
                     break;
                 case 15:
                     // 13.9-14.7
-                    obj->friction_a->motor_controller->ref_speed = 26200;
-                    obj->friction_b->motor_controller->ref_speed = -26200;
-                    obj->upload_data.real_bullet_speed = 14.4;
+                    obj->friction_a->motor_controller->ref_speed = 26000;
+                    obj->friction_b->motor_controller->ref_speed = -26000;
+                    obj->upload_data.real_bullet_speed = 14.2;
                     break;
                 case 0:  // 刹车
                     obj->friction_a->motor_controller->ref_speed = 0;
