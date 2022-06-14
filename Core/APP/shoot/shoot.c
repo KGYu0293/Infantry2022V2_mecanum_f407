@@ -152,21 +152,21 @@ void Shoot_Update(Shoot *obj) {
             switch (obj->cmd_data->bullet_speed) {
                 case 30:
                     // 弹速28.7-29.2的实测ref 28.6
-                    obj->friction_a->motor_controller->ref_speed = 42300;
-                    obj->friction_b->motor_controller->ref_speed = -42300;
-                    obj->upload_data.real_bullet_speed = 29.0;// 此处填写该case下调得实际弹速的典型值
+                    obj->friction_a->motor_controller->ref_speed = 41700;
+                    obj->friction_b->motor_controller->ref_speed = -41700;
+                    obj->upload_data.real_bullet_speed = 28.5;// 此处填写该case下调得实际弹速的典型值
                     break;
                 case 18:
                     // 17.0-17.8
-                    obj->friction_a->motor_controller->ref_speed = 29650;
-                    obj->friction_b->motor_controller->ref_speed = -29650;
-                    obj->upload_data.real_bullet_speed = 17.5;
+                    obj->friction_a->motor_controller->ref_speed = 29800;
+                    obj->friction_b->motor_controller->ref_speed = -29800;
+                    obj->upload_data.real_bullet_speed = 17.1;
                     break;
                 case 15:
                     // 偏差较大 有不少14.6
-                    obj->friction_a->motor_controller->ref_speed = 27000;
-                    obj->friction_b->motor_controller->ref_speed = -27000;
-                    obj->upload_data.real_bullet_speed = 14.1;
+                    obj->friction_a->motor_controller->ref_speed = 27800;
+                    obj->friction_b->motor_controller->ref_speed = -27800;
+                    obj->upload_data.real_bullet_speed = 14.2;
                     break;
                 case 0:  // 刹车
                     obj->friction_a->motor_controller->ref_speed = 0;
@@ -176,7 +176,7 @@ void Shoot_Update(Shoot *obj) {
                     //待实测
                     obj->friction_a->motor_controller->ref_speed = 27700;
                     obj->friction_b->motor_controller->ref_speed = -27700;
-                    obj->upload_data.real_bullet_speed = 14.1;
+                    obj->upload_data.real_bullet_speed = 14.2;
                     break;
             }
             Shoot_load_Update(obj, obj->cmd_data);
@@ -187,7 +187,7 @@ void Shoot_Update(Shoot *obj) {
             obj->mag_lid->pos_servo_control = 10;
             break;
         case magazine_close:
-            obj->mag_lid->pos_servo_control = 110;
+            obj->mag_lid->pos_servo_control = 112;
             break;
     }
 
