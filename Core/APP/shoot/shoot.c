@@ -176,7 +176,7 @@ void Shoot_Update(Shoot *obj) {
                     //待实测
                     obj->friction_a->motor_controller->ref_speed = 26200;
                     obj->friction_b->motor_controller->ref_speed = -26200;
-                    obj->upload_data.real_bullet_speed = 14.4;
+                    obj->upload_data.real_bullet_speed = 14.2;
                     break;
             }
             Shoot_load_Update(obj, obj->cmd_data);
