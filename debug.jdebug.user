@@ -3,9 +3,9 @@ OpenDocument="tasks.c", FilePath="D:/RM/RM_code/git_workspace/Infantry2022V1_mec
 OpenDocument="startup_stm32f407xx.s", FilePath="D:/RM/RM_code/git_workspace/Infantry2022V1_mecanum_F407/startup_stm32f407xx.s", Line=50
 OpenDocument="main.c", FilePath="D:/RM/RM_code/git_workspace/Infantry2022V1_mecanum_F407/Core/Src/main.c", Line=79
 OpenToolbar="Debug", Floating=0, x=0, y=0
-OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=839, h=291, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=839, h=301, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=349, h=814, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=1, w=839, h=522, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=1, w=839, h=512, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=1920, h=120, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[162;119;134;100;168;156]
 TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[233;100;100;100;917]
@@ -17,3 +17,4 @@ TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", Visi
 WatchedExpression="chassis", RefreshRate=1, Window=Watched Data 1
 WatchedExpression="cmd", Window=Watched Data 1
 WatchedExpression="shoot", RefreshRate=1, Window=Watched Data 1
+WatchedExpression="gimbal", RefreshRate=1, Window=Watched Data 1

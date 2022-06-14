@@ -152,20 +152,20 @@ void Shoot_Update(Shoot *obj) {
             switch (obj->cmd_data->bullet_speed) {
                 case 30:
                     // 弹速28.7-29.2的实测ref 28.6
-                    obj->friction_a->motor_controller->ref_speed = 41700;
-                    obj->friction_b->motor_controller->ref_speed = -41700;
+                    obj->friction_a->motor_controller->ref_speed = 42500;
+                    obj->friction_b->motor_controller->ref_speed = -42500;
                     obj->upload_data.real_bullet_speed = 28.5;// 此处填写该case下调得实际弹速的典型值
                     break;
                 case 18:
                     // 17.0-17.8
-                    obj->friction_a->motor_controller->ref_speed = 29800;
-                    obj->friction_b->motor_controller->ref_speed = -29800;
+                    obj->friction_a->motor_controller->ref_speed = 29900;
+                    obj->friction_b->motor_controller->ref_speed = -29900;
                     obj->upload_data.real_bullet_speed = 17.1;
                     break;
                 case 15:
                     // 偏差较大 有不少14.6
-                    obj->friction_a->motor_controller->ref_speed = 27800;
-                    obj->friction_b->motor_controller->ref_speed = -27800;
+                    obj->friction_a->motor_controller->ref_speed = 28000;
+                    obj->friction_b->motor_controller->ref_speed = -28000;
                     obj->upload_data.real_bullet_speed = 14.2;
                     break;
                 case 0:  // 刹车
