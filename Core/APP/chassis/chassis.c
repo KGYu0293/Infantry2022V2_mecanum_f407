@@ -124,16 +124,11 @@ Chassis *Chassis_Create() {
 // 对电流环进行限制 简易版功率限制
 void OutputmaxLimit(Chassis *obj) {
     float output_limit = 0;
-    // if (obj->cmd_data->power.if_consume_supercap)
-    // 若需要消耗电容
-    if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) || (obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) ||
-        (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly)) {
-        if (obj->super_cap->cap_percent < 30) {
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
+        if (obj->super_cap->cap_percent < 25) {
             output_limit = 2000;
-        } else if (obj->super_cap->cap_percent < 40) {
-            output_limit = 5000;
         } else {
-            output_limit = 8000; //防止快速掉电
+            output_limit = 8000;  //防止快速掉电
         }
     } else {
         // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
@@ -166,9 +161,17 @@ void OutputmaxLimit(Chassis *obj) {
                 output_limit = 3000;  // 和最小（45w）时保持一致
                 break;
         }
+
+        if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) {
+            output_limit *= 1.25;
+        }
+
         if (output_limit < 2000) output_limit = 2000;
         if (output_limit > 8000) output_limit = 8000;
-        if (obj->super_cap->cap_percent < 30) output_limit = 1500;
+        if (obj->super_cap->cap_percent < 30)
+            output_limit = 2000;  // 1500
+        else if (obj->super_cap->cap_percent < 50)
+            output_limit *= 0.9;
     }
     obj->lf->motor_controller->pid_speed_data.config.outputMax = output_limit;
     obj->rf->motor_controller->pid_speed_data.config.outputMax = output_limit;
@@ -187,7 +190,7 @@ void ChassisAccelerationLimit(Chassis *obj) {
     // else if (accMax > 270.0f)    accMax = 270.0f;
 
     // 功率控制良好的情况下acc limit主要防打滑 不必与功率相关
-    float accMax = 1200;  // 1020-1620
+    float accMax = 1500;  // 1020-1620
     if (fabs(obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed) > accMax) {
         obj->lf->motor_controller->ref_speed = obj->lf->motor_controller->fdb_speed + accMax * (obj->lf->motor_controller->ref_speed - obj->lf->motor_controller->fdb_speed > 0 ? 1 : -1);
     }
@@ -297,6 +300,7 @@ float auto_rotate_param(Cmd_chassis *param) {
     // }
 
     // rotate = 150;
+    rotate *= 0.9;
     return rotate;
 }
 
@@ -329,19 +333,22 @@ void Chassis_calculate(Chassis *obj) {
             obj->proc_v_base = 4000;
             break;
         default:
-            obj->proc_v_base = 1500;  // 和最小（45w）时保持一致
+            obj->proc_v_base = 2700;  // 和最小（45w）时保持一致
             break;
     }
+
+    obj->proc_v_base *= 0.8;  // 调试 降功率
+
     //同时按住前后和平移
-    if(fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5){
-        obj->cmd_data->target.vx *= 0.6; //平移减速
+    if (fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5) {
+        obj->cmd_data->target.vx *= 0.6;  //平移减速
     }
     float a = ((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy));
     float ratio;
-    arm_sqrt_f32(a, &ratio);                      // 使用armmath库代替c语言库的sqrt加快速度
-    if (ratio > 4) ratio = 4;                     // 最大爆发速度倍率限制
-    obj->proc_v_base = obj->proc_v_base * ratio;  // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
-    if (obj->proc_v_base > 5000) obj->proc_v_base = 5000; //最大上限设置值
+    arm_sqrt_f32(a, &ratio);                               // 使用armmath库代替c语言库的sqrt加快速度
+    if (ratio > 4) ratio = 4;                              // 最大爆发速度倍率限制
+    obj->proc_v_base = obj->proc_v_base * ratio;           // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
+    if (obj->proc_v_base > 5000) obj->proc_v_base = 5000;  //最大上限设置值
     // if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
         obj->proc_v_base = 5000;  // 飞坡模式速度设定 5m/s
@@ -360,7 +367,11 @@ void Chassis_calculate(Chassis *obj) {
     if (obj->cmd_data->mode == chassis_rotate_run) {
         w = auto_rotate_param(obj->cmd_data);
     } else if (obj->cmd_data->mode == chassis_run_follow_offset) {
-        w = 0.20f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);  // 采用二次函数
+        // 平方根函数
+        arm_sqrt_f32(2000 * fabs(obj->cmd_data->target.offset_angle), &w);
+        w *= sgn(obj->cmd_data->target.offset_angle);
+        // 采用二次函数
+        // w = 0.20f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);
         //飞坡模式要求底盘跟随云台更加紧密
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
             w *= 1.8;
@@ -412,14 +423,13 @@ void Chassis_Update(Chassis *obj) {
     if (obj->cmd_data->power.power_buffer > 30) {
         obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
     } else {
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 2; //防止电容超功率
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 2;  //防止电容超功率
     }
 
     // 获得cmd命令
     publish_data chassis_data = obj->chassis_cmd_suber->getdata(obj->chassis_cmd_suber);
     if (chassis_data.len == -1) return;  // 未收到指令
     obj->cmd_data = (Cmd_chassis *)chassis_data.data;
-
 
     // 应用得到的param进行控制
     if (obj->cmd_data->mode == chassis_stop) {

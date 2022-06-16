@@ -158,8 +158,8 @@ void Shoot_Update(Shoot *obj) {
                     break;
                 case 18:
                     // 17.0-17.8
-                    obj->friction_a->motor_controller->ref_speed = 29900;
-                    obj->friction_b->motor_controller->ref_speed = -29900;
+                    obj->friction_a->motor_controller->ref_speed = 30400;
+                    obj->friction_b->motor_controller->ref_speed = -30400;
                     obj->upload_data.real_bullet_speed = 17.1;
                     break;
                 case 15:
