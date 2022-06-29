@@ -69,7 +69,7 @@ Shoot *Shoot_Create(void) {
     magazine_config.model = MODEL_POS;
     magazine_config.bsp_pwm_index = PWM_SERVO_1_PORT;
     magazine_config.max_angle = 270;
-    magazine_config.initial_angle = 212;
+    magazine_config.initial_angle = 190;
     obj->mag_lid = Servo_Create(&magazine_config);
 
     // 关闭红点激光
@@ -185,10 +185,10 @@ void Shoot_Update(Shoot *obj) {
     switch (obj->cmd_data->mag_mode) {
         case magazine_open:
             // BSP_PWM_SetCCR();
-            obj->mag_lid->pos_servo_control = 70;
+            obj->mag_lid->pos_servo_control = 100;
             break;
         case magazine_close:
-            obj->mag_lid->pos_servo_control = 212;
+            obj->mag_lid->pos_servo_control = 194;
             break;
     }
 
