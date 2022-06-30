@@ -115,7 +115,7 @@ void BMI088_Update(BMI088_imu *obj) {
     BMI088_read_raw(obj);
     BMI088_heat_control(obj);
     obj->monitor->reset(obj->monitor);
-    if (obj->temp < 52) {
+    if (obj->temp < obj->config.temp_target - 3) {
         obj->bias_init_success = 0;
         return;
     }
