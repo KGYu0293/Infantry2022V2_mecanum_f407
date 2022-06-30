@@ -4,7 +4,10 @@
 #include <robot_def.h>
 #include <robot_ui.h>
 #include <string.h>
-#define REPEAT(x) for(int i = 0;i < 1;++i) {x}
+#define REPEAT(x)                 \
+    for (int i = 0; i < 1; ++i) { \
+        x                         \
+    }
 // 2s刷新一次
 #define UI_REFRESH_INTERVAL 3000
 
@@ -20,7 +23,6 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->cap_int);
     add_graphic(obj->ui_sender, &obj->bat_float);
     add_graphic(obj->ui_sender, &obj->vision_frame);
-    
     //指示灯
     add_graphic(obj->ui_sender, &obj->fri_circle);
     add_graphic(obj->ui_sender, &obj->mag_circle);
@@ -28,8 +30,6 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->chassis_circle);
     add_graphic(obj->ui_sender, &obj->autoaim_circle);
     add_graphic(obj->ui_sender, &obj->power_circle);
-    
-    
     //文字
     add_text(obj->ui_sender, &obj->fri_text, obj->fri_str, UI_TEXT_BUFFER_SIZE);
     add_text(obj->ui_sender, &obj->mag_text, obj->mag_str, UI_TEXT_BUFFER_SIZE);
@@ -39,10 +39,10 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_text(obj->ui_sender, &obj->power_text, obj->power_str, UI_TEXT_BUFFER_SIZE);
 
     //刻度
-    add_graphic(obj->ui_sender,&obj->vertical_line);
-    add_graphic(obj->ui_sender,&obj->line_15ms_2m);
-    add_graphic(obj->ui_sender,&obj->line_15ms_3m);
-    add_graphic(obj->ui_sender,&obj->line_15ms_4m);
+    add_graphic(obj->ui_sender, &obj->vertical_line);
+    add_graphic(obj->ui_sender, &obj->line_15ms_2m);
+    add_graphic(obj->ui_sender, &obj->line_15ms_3m);
+    add_graphic(obj->ui_sender, &obj->line_15ms_4m);
 }
 
 //改变图形元素
@@ -57,82 +57,77 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     modifiy_graphic(obj->ui_sender, &obj->bat_float);
     modifiy_graphic(obj->ui_sender, &obj->cap_line);
     //射速变化
-    if(obj->data.bullet_speed == 15)
-    {
+    if (obj->data.bullet_speed == 15) {
         obj->vertical_line.start_x = 945;
         obj->vertical_line.end_x = 945;
-        //15ms,2m
+        // 15ms,2m
         obj->line_15ms_2m.start_x = 840;
         obj->line_15ms_2m.start_y = 416;
         obj->line_15ms_2m.end_x = 1050;
         obj->line_15ms_2m.end_y = 416;
 
-        //15ms,3m
+        // 15ms,3m
         obj->line_15ms_3m.start_x = 860;
         obj->line_15ms_3m.start_y = 405;
         obj->line_15ms_3m.end_x = 1030;
         obj->line_15ms_3m.end_y = 405;
-        //18ms,4m
+        // 18ms,4m
         obj->line_15ms_4m.start_x = 880;
         obj->line_15ms_4m.start_y = 400;
         obj->line_15ms_4m.end_x = 1010;
         obj->line_15ms_4m.end_y = 400;
 
-        modifiy_graphic(obj->ui_sender,&obj->vertical_line);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_2m);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_3m);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_4m);
-    }
-    else if(obj->data.bullet_speed == 18)
-    {
+        modifiy_graphic(obj->ui_sender, &obj->vertical_line);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_2m);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_3m);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_4m);
+    } else if (obj->data.bullet_speed == 18) {
         obj->vertical_line.start_x = 945;
         obj->vertical_line.end_x = 945;
-        //18ms,3m
+        // 18ms,3m
         obj->line_15ms_2m.start_x = 840;
         obj->line_15ms_2m.start_y = 435;
         obj->line_15ms_2m.end_x = 1050;
         obj->line_15ms_2m.end_y = 435;
-        //18ms,4m
+        // 18ms,4m
         obj->line_15ms_3m.start_x = 860;
         obj->line_15ms_3m.start_y = 430;
         obj->line_15ms_3m.end_x = 1030;
         obj->line_15ms_3m.end_y = 430;
-        //18ms,5m
+        // 18ms,5m
         obj->line_15ms_4m.start_x = 880;
         obj->line_15ms_4m.start_y = 420;
         obj->line_15ms_4m.end_x = 1010;
         obj->line_15ms_4m.end_y = 420;
 
-        modifiy_graphic(obj->ui_sender,&obj->vertical_line);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_2m);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_3m);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_4m);
-    }
-    else if(obj->data.bullet_speed == 30)
-    {
+        modifiy_graphic(obj->ui_sender, &obj->vertical_line);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_2m);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_3m);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_4m);
+    } else if (obj->data.bullet_speed == 30) {
         //竖直线右移
         obj->vertical_line.start_x = 960;
         obj->vertical_line.end_x = 960;
-        //30ms,3m
+        // 30ms,3m
         obj->line_15ms_2m.start_x = 840;
         obj->line_15ms_2m.start_y = 485;
         obj->line_15ms_2m.end_x = 1050;
         obj->line_15ms_2m.end_y = 485;
-        //30ms,5m
+        // 30ms,5m
         obj->line_15ms_3m.start_x = 860;
         obj->line_15ms_3m.start_y = 480;
         obj->line_15ms_3m.end_x = 1030;
         obj->line_15ms_3m.end_y = 480;
-        //30ms,7m
+        // 30ms,7m
         obj->line_15ms_4m.start_x = 880;
         obj->line_15ms_4m.start_y = 475;
         obj->line_15ms_4m.end_x = 1010;
         obj->line_15ms_4m.end_y = 475;
 
-        modifiy_graphic(obj->ui_sender,&obj->vertical_line);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_2m);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_3m);
-        modifiy_graphic(obj->ui_sender,&obj->line_15ms_4m);
+        modifiy_graphic(obj->ui_sender, &obj->vertical_line);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_2m);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_3m);
+        modifiy_graphic(obj->ui_sender, &obj->line_15ms_4m);
     }
 
     //摩擦轮变化
@@ -181,23 +176,22 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     }
 
     // 功率模式
-    if (obj->data.power_mode == chassis_dispatch_mild){
+    if (obj->data.power_mode == chassis_dispatch_mild) {
         obj->power_circle.color = Green;
         strset(obj->power_str, "POWER:MILD");
-    } else if (obj->data.power_mode == chassis_dispatch_shift){
+    } else if (obj->data.power_mode == chassis_dispatch_shift) {
         obj->power_circle.color = Orange;
         strset(obj->power_str, "POWER:SHIFT");
-    } else if (obj->data.power_mode == chassis_dispatch_climb){
+    } else if (obj->data.power_mode == chassis_dispatch_climb) {
         obj->power_circle.color = Orange;
         strset(obj->power_str, "POWER:CLIMB");
-    } else if (obj->data.power_mode == chassis_dispatch_fly){
+    } else if (obj->data.power_mode == chassis_dispatch_fly) {
         obj->power_circle.color = Purplish_Red;
         strset(obj->power_str, "POWER:FLY");
-    } else if (obj->data.power_mode == chassis_dispatch_without_acc_limit){
+    } else if (obj->data.power_mode == chassis_dispatch_without_acc_limit) {
         obj->power_circle.color = Cyan;
         strset(obj->power_str, "POWER:ACC");
     }
-
 
     //自瞄模式
     if (!obj->data.pc_online) {
@@ -221,25 +215,25 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
         obj->vision_frame.width = 1;
         strset(obj->autoaim_str, "AUTOAIM:BIG");
     }
-    obj->vision_frame.color = obj->data.vision_has_taget ? Green: White;
+    obj->vision_frame.color = obj->data.vision_has_taget ? Green : White;
 
     modifiy_graphic(obj->ui_sender, &obj->vision_frame);
-    if(obj->data.fri_mode != obj->last_data.fri_mode) modifiy_graphic(obj->ui_sender, &obj->fri_circle);
-    if(obj->data.mag_mode != obj->last_data.mag_mode) modifiy_graphic(obj->ui_sender, &obj->mag_circle);
-    if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) modifiy_graphic(obj->ui_sender, &obj->gimbal_circle);
-    if(obj->data.chassis_mode != obj->last_data.chassis_mode) modifiy_graphic(obj->ui_sender, &obj->chassis_circle);
-    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode || obj->data.pc_online != obj->last_data.pc_online) modifiy_graphic(obj->ui_sender, &obj->autoaim_circle);
-    if(obj->data.power_mode != obj->last_data.power_mode) modifiy_graphic(obj->ui_sender, &obj->power_circle);
-    if(obj->data.fri_mode != obj->last_data.fri_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->fri_text, obj->fri_str, 20);)
-    if(obj->data.mag_mode != obj->last_data.mag_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->mag_text, obj->mag_str, 20);)
-    if(obj->data.gimbal_mode != obj->last_data.gimbal_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);)
-    if(obj->data.chassis_mode != obj->last_data.chassis_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);)
-    if(obj->data.autoaim_mode != obj->last_data.autoaim_mode || obj->data.pc_online != obj->last_data.pc_online) REPEAT(modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);)
-    if(obj->data.power_mode != obj->last_data.power_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->power_text, obj->power_str, 20);)
-    if(obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender,&obj->line_15ms_2m);)
-    if(obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender,&obj->line_15ms_3m);)
-    if(obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender,&obj->line_15ms_4m);)
-    if(obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender,&obj->vertical_line);)
+    if (obj->data.fri_mode != obj->last_data.fri_mode) modifiy_graphic(obj->ui_sender, &obj->fri_circle);
+    if (obj->data.mag_mode != obj->last_data.mag_mode) modifiy_graphic(obj->ui_sender, &obj->mag_circle);
+    if (obj->data.gimbal_mode != obj->last_data.gimbal_mode) modifiy_graphic(obj->ui_sender, &obj->gimbal_circle);
+    if (obj->data.chassis_mode != obj->last_data.chassis_mode) modifiy_graphic(obj->ui_sender, &obj->chassis_circle);
+    if (obj->data.autoaim_mode != obj->last_data.autoaim_mode || obj->data.pc_online != obj->last_data.pc_online) modifiy_graphic(obj->ui_sender, &obj->autoaim_circle);
+    if (obj->data.power_mode != obj->last_data.power_mode) modifiy_graphic(obj->ui_sender, &obj->power_circle);
+    if (obj->data.fri_mode != obj->last_data.fri_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->fri_text, obj->fri_str, 20);)
+    if (obj->data.mag_mode != obj->last_data.mag_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->mag_text, obj->mag_str, 20);)
+    if (obj->data.gimbal_mode != obj->last_data.gimbal_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->gimbal_text, obj->gimbal_str, 20);)
+    if (obj->data.chassis_mode != obj->last_data.chassis_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->chassis_text, obj->chassis_str, 20);)
+    if (obj->data.autoaim_mode != obj->last_data.autoaim_mode || obj->data.pc_online != obj->last_data.pc_online) REPEAT(modifiy_text(obj->ui_sender, &obj->autoaim_text, obj->autoaim_str, 20);)
+    if (obj->data.power_mode != obj->last_data.power_mode) REPEAT(modifiy_text(obj->ui_sender, &obj->power_text, obj->power_str, 20);)
+    if (obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender, &obj->line_15ms_2m);)
+    if (obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender, &obj->line_15ms_3m);)
+    if (obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender, &obj->line_15ms_4m);)
+    if (obj->data.bullet_speed != obj->last_data.power_mode) REPEAT(modifiy_graphic(obj->ui_sender, &obj->vertical_line);)
     obj->last_data = obj->data;
 }
 
@@ -286,19 +280,17 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->autoaim_circle = Circle(13, 0, Green, 8, 150, 531, 10);
     obj->autoaim_text = Char(14, 0, White, 3, 20, 20, 180, 540);
     strset(obj->autoaim_str, "AUTOAIM:OFF");
+    
     //功率
     obj->power_circle = Circle(15, 0, Green, 8, 1550, 731, 10);
     obj->power_text = Char(16, 0, White, 3, 20, 20, 1580, 740);
     strset(obj->power_str, "POWER:MILD");
 
-    
     //刻度
-
-    obj->vertical_line = Line(17,1,Purplish_Red,1,945,300,945,550);
-    obj->line_15ms_2m = Line(18,1,Yellow,1,840,416,1050,416);
-    obj->line_15ms_3m = Line(19,1,Yellow,1,860,405,1030,405);
-    obj->line_15ms_4m = Line(20,1,Yellow,1,880,400,1010,400);
-
+    obj->vertical_line = Line(17, 1, Purplish_Red, 1, 945, 300, 945, 550);
+    obj->line_15ms_2m = Line(18, 1, Yellow, 1, 840, 416, 1050, 416);
+    obj->line_15ms_3m = Line(19, 1, Yellow, 1, 860, 405, 1030, 405);
+    obj->line_15ms_4m = Line(20, 1, Yellow, 1, 880, 400, 1010, 400);
 
     //初始化percent
     obj->data.cap_percent = 0.0;

@@ -30,7 +30,6 @@ Shoot *Shoot_Create(void) {
     friction_a_config.lost_callback = shoot_motor_lost;
     obj->friction_a = Can_Motor_Create(&friction_a_config);
 
-
     can_motor_config friction_b_config;
     controller_config friction_b_controller_config;
     friction_b_controller_config.control_type = PID_MODEL;
@@ -61,7 +60,7 @@ Shoot *Shoot_Create(void) {
     load_config.speed_fdb_model = MOTOR_FDB;
     load_config.output_model = MOTOR_OUTPUT_NORMAL;
     load_config.lost_callback = shoot_motor_lost;
-    
+
     obj->load = Can_Motor_Create(&load_config);
 
     // 舵机
@@ -69,7 +68,7 @@ Shoot *Shoot_Create(void) {
     magazine_config.model = MODEL_POS;
     magazine_config.bsp_pwm_index = PWM_SERVO_1_PORT;
     magazine_config.max_angle = 270;
-    magazine_config.initial_angle = 100;
+    magazine_config.initial_angle = 190;
     obj->mag_lid = Servo_Create(&magazine_config);
 
     // 关闭红点激光
@@ -82,54 +81,100 @@ Shoot *Shoot_Create(void) {
     return obj;
 };
 
-void Shoot_load_Update(Shoot *obj, Cmd_shoot *param) {
-    if (param->heat_limit_remain <= SHOOT_UNIT_HEAT_17MM * 3) {
-        param->bullet_mode = bullet_holdon;
+void Shoot_load_Update(Shoot *obj) {
+    if (obj->cmd_data->heat_limit_remain <= SHOOT_UNIT_HEAT_17MM * 3) {
+        obj->cmd_data->bullet_mode = bullet_holdon;
     }
     // 发射一个弹丸编码器转过的角度
     static float load_delta_pos = 360.0 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
 
     uint32_t time_now = BSP_sys_time_ms();
     if (time_now < obj->cooldown_start + obj->cooldown_time) return;
-    switch (param->bullet_mode) {
-        case bullet_holdon:
-            obj->load->motor_controller->config.control_depth = POS_CONTROL;
-            obj->load->motor_controller->ref_position = obj->load->real_position;  // 刹车
-            break;
-        case bullet_reverse:  // 反转 防卡弹
-            obj->load->motor_controller->config.control_depth = SPEED_CONTROL;
-            obj->load->motor_controller->ref_speed = 5 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
-            break;
-        case bullet_continuous:
-            // obj->load->config.motor_pid_model = SPEED_LOOP;
-            // obj->load->speed_pid.ref = -param->fire_rate * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
-            obj->load->motor_controller->config.control_depth = POS_CONTROL;
-            if (param->fire_rate < 2) {
+
+    if (obj->cmd_data->mode == shoot_holdon) {
+        obj->load->motor_controller->config.control_depth = POS_CONTROL;
+        obj->load->motor_controller->ref_position = obj->load->real_position;  // 刹车
+    } else if (obj->cmd_data->mode == shoot_stuck_handle) {
+        // 反转防卡弹 部分拨盘适用
+        obj->load->motor_controller->config.control_depth = SPEED_CONTROL;
+        obj->load->motor_controller->ref_speed = 5 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
+    } else {
+        switch (obj->cmd_data->bullet_mode) {
+            case bullet_holdon:
+                obj->load->motor_controller->config.control_depth = POS_CONTROL;
                 obj->load->motor_controller->ref_position = obj->load->real_position;
-            } else {
+                break;
+            case bullet_continuous:
+                obj->load->motor_controller->config.control_depth = POS_CONTROL;
+                if (obj->cmd_data->fire_rate < 2) {
+                    obj->load->motor_controller->ref_position = obj->load->real_position;
+                } else {
+                    obj->load->motor_controller->ref_position = obj->load->real_position - load_delta_pos;
+                    obj->cooldown_start = time_now;
+                    obj->cooldown_time = (int)(1000 / obj->cmd_data->fire_rate);
+                }
+                break;
+            case bullet_single:
+                obj->load->motor_controller->config.control_depth = POS_CONTROL;
                 obj->load->motor_controller->ref_position = obj->load->real_position - load_delta_pos;
                 obj->cooldown_start = time_now;
-                obj->cooldown_time = (int)(1000 / param->fire_rate);  //待测试
-            }
-            break;
-        case bullet_single:
-            obj->load->motor_controller->config.control_depth = POS_CONTROL;
-            obj->load->motor_controller->ref_position = obj->load->real_position - load_delta_pos;
-            obj->cooldown_start = time_now;
-            obj->cooldown_time = 300;  //待测试
-            break;
-        case bullet_double:
-            obj->load->motor_controller->config.control_depth = POS_CONTROL;
-            obj->load->motor_controller->ref_position = obj->load->real_position - (2 * load_delta_pos);
-            obj->cooldown_start = time_now;
-            obj->cooldown_time = 450;  //待测试
-            break;
-        case bullet_trible:
-            obj->load->motor_controller->config.control_depth = POS_CONTROL;
-            obj->load->motor_controller->ref_position = obj->load->real_position - (3 * load_delta_pos);
-            obj->cooldown_start = time_now;
-            obj->cooldown_time = 650;  //待测试
-            break;
+                obj->cooldown_time = 300;  //待测试
+                break;
+            case bullet_double:
+                obj->load->motor_controller->config.control_depth = POS_CONTROL;
+                obj->load->motor_controller->ref_position = obj->load->real_position - (2 * load_delta_pos);
+                obj->cooldown_start = time_now;
+                obj->cooldown_time = 450;  //待测试
+                break;
+            case bullet_trible:
+                obj->load->motor_controller->config.control_depth = POS_CONTROL;
+                obj->load->motor_controller->ref_position = obj->load->real_position - (3 * load_delta_pos);
+                obj->cooldown_start = time_now;
+                obj->cooldown_time = 650;  //待测试
+                break;
+        }
+    }
+}
+
+void Shoot_friction_Update(Shoot *obj) {
+    if (obj->cmd_data->mode == shoot_holdon) {
+        obj->friction_a->motor_controller->ref_speed = 0;
+        obj->friction_b->motor_controller->ref_speed = 0;
+    } else if (obj->cmd_data->mode == shoot_stuck_handle) {
+        // 反转防卡弹
+        obj->friction_a->motor_controller->ref_speed = -2000;
+        obj->friction_b->motor_controller->ref_speed = 2000;
+    } else {
+        switch (obj->cmd_data->bullet_speed) {
+            case 30:
+                // 弹速28.0-29.0的实测ref
+                obj->friction_a->motor_controller->ref_speed = 43000;
+                obj->friction_b->motor_controller->ref_speed = -43000;
+                obj->upload_data.real_bullet_speed = 28.35;  // 此处填写该case下调得实际弹速的典型值
+                break;
+            case 18:
+                // 17.0-17.8
+                obj->friction_a->motor_controller->ref_speed = 28400;
+                obj->friction_b->motor_controller->ref_speed = -28400;
+                obj->upload_data.real_bullet_speed = 17.1;
+                break;
+            case 15:
+                // 13.9-14.7
+                obj->friction_a->motor_controller->ref_speed = 26000;
+                obj->friction_b->motor_controller->ref_speed = -26000;
+                obj->upload_data.real_bullet_speed = 14.2;
+                break;
+            case 0:  // 刹车
+                obj->friction_a->motor_controller->ref_speed = 0;
+                obj->friction_b->motor_controller->ref_speed = 0;
+                obj->upload_data.real_bullet_speed = 0;
+            default:
+                // 与最低弹速保持一致
+                obj->friction_a->motor_controller->ref_speed = 26200;
+                obj->friction_b->motor_controller->ref_speed = -26200;
+                obj->upload_data.real_bullet_speed = 14.2;
+                break;
+        }
     }
 }
 
@@ -139,49 +184,25 @@ void Shoot_Update(Shoot *obj) {
     if (data.len == -1) return;  // cmd未发布指令
     obj->cmd_data = (Cmd_shoot *)data.data;
 
-    switch (obj->cmd_data->mode) {
-        case shoot_stop:
-            obj->load->enable = MOTOR_STOP;
-            obj->friction_a->enable = MOTOR_STOP;
-            obj->friction_b->enable = MOTOR_STOP;
-            break;
-        case shoot_run:
-            obj->load->enable = MOTOR_ENABLE;
-            obj->friction_a->enable = MOTOR_ENABLE;
-            obj->friction_b->enable = MOTOR_ENABLE;
-            switch (obj->cmd_data->bullet_speed) {
-                case 30:
-                    // 弹速28.7-29.2的实测ref 28.6
-                    obj->friction_a->motor_controller->ref_speed = 42500;
-                    obj->friction_b->motor_controller->ref_speed = -42500;
-                    obj->upload_data.real_bullet_speed = 28.5;// 此处填写该case下调得实际弹速的典型值
-                    break;
-                case 18:
-                    // 17.0-17.8
-                    obj->friction_a->motor_controller->ref_speed = 30400;
-                    obj->friction_b->motor_controller->ref_speed = -30400;
-                    obj->upload_data.real_bullet_speed = 17.1;
-                    break;
-                case 15:
-                    // 偏差较大 有不少14.6
-                    obj->friction_a->motor_controller->ref_speed = 28000;
-                    obj->friction_b->motor_controller->ref_speed = -28000;
-                    obj->upload_data.real_bullet_speed = 14.2;
-                    break;
-                case 0:  // 刹车
-                    obj->friction_a->motor_controller->ref_speed = 0;
-                    obj->friction_b->motor_controller->ref_speed = 0;
-                    obj->upload_data.real_bullet_speed = 0;
-                default:
-                    //待实测
-                    obj->friction_a->motor_controller->ref_speed = 27700;
-                    obj->friction_b->motor_controller->ref_speed = -27700;
-                    obj->upload_data.real_bullet_speed = 14.2;
-                    break;
-            }
-            Shoot_load_Update(obj, obj->cmd_data);
-            break;
+    // 电机掉线停转
+    if ((obj->friction_a->monitor->count < 1) || (obj->friction_b->monitor->count < 1)) {
+        obj->cmd_data->mode = shoot_stop;
     }
+
+    // 电机控制
+    if (obj->cmd_data->mode == shoot_stop) {
+        obj->load->enable = MOTOR_STOP;
+        obj->friction_a->enable = MOTOR_STOP;
+        obj->friction_b->enable = MOTOR_STOP;
+    } else {
+        obj->load->enable = MOTOR_ENABLE;
+        obj->friction_a->enable = MOTOR_ENABLE;
+        obj->friction_b->enable = MOTOR_ENABLE;
+        Shoot_friction_Update(obj);
+        Shoot_load_Update(obj);
+    }
+
+    // 弹舱盖控制
     switch (obj->cmd_data->mag_mode) {
         case magazine_open:
             obj->mag_lid->pos_servo_control = 10;
@@ -194,6 +215,6 @@ void Shoot_Update(Shoot *obj) {
     // 返回实际弹速
     publish_data shoot_upload;
     shoot_upload.data = (uint8_t *)&(obj->upload_data);
-    shoot_upload.len  = sizeof(Upload_shoot);
+    shoot_upload.len = sizeof(Upload_shoot);
     obj->shoot_upload_puber->publish(obj->shoot_upload_puber, shoot_upload);
 }

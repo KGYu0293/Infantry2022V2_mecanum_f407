@@ -323,6 +323,7 @@ void Chassis_calculate(Chassis *obj) {
             break;
         case 70:
             obj->proc_v_base = 3700;
+            break;
         case 80:
             obj->proc_v_base = 3900;
             break;

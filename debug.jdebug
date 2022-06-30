@@ -4,9 +4,9 @@
 *                         www.segger.com                             *
 **********************************************************************
 
-File          : 
-Created       : 8 May 2022 14:54
-Ozone Version : V3.26d
+File          : D:/RM/RM_code/git_workspace/Infantry2022V2_mecanum_F407/debug.jdebug
+Created       : 30 Jun 2022 15:04
+Ozone Version : V3.26e
 */
 
 /*********************************************************************
@@ -25,15 +25,13 @@ void OnProjectLoad (void) {
   Project.SetDevice ("STM32F407IG");
   Project.SetHostIF ("USB", "29783368");
   Project.SetTargetIF ("SWD");
-  Project.SetTIFSpeed ("12 MHz");
-  Project.AddPathSubstitute ("D:/STM32Projects/Infantry2022V1_mecanum_F407", "$(ProjectDir)");
-  Project.AddPathSubstitute ("d:/stm32projects/infantry2022v1_mecanum_f407", "$(ProjectDir)");
+  Project.SetTIFSpeed ("4 MHz");
   Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4F.svd");
   //
   // User settings
   //
-  Project.SetOSPlugin ("FreeRTOSPlugin");
   File.Open ("$(ProjectDir)/build/STM32F407_2022_framework.elf");
+  Project.SetOSPlugin ("FreeRTOSPlugin");
 }
 
 /*********************************************************************
