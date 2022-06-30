@@ -235,15 +235,17 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
 
     // 发射机构控制
     if (obj->remote->data.rc.s1 == 1) {
-        obj->shoot_control.mode = shoot_stop;
-        obj->shoot_control.bullet_mode = bullet_holdon;
-        obj->shoot_control.bullet_speed = 0;
+        // obj->shoot_control.mode = shoot_stop;
+        // obj->shoot_control.bullet_mode = bullet_holdon;
+        // obj->shoot_control.bullet_speed = 0;
+        obj->shoot_control.mode = shoot_holdon;
         if (obj->remote->data.rc.ch4 > CHx_BIAS + 400) obj->shoot_control.mag_mode = magazine_open;
         if (obj->remote->data.rc.ch4 < CHx_BIAS - 400) obj->shoot_control.mag_mode = magazine_close;
     } else {
         obj->shoot_control.mode = shoot_run;
         if (obj->remote->data.rc.ch4 < CHx_BIAS - 400)
-            obj->shoot_control.bullet_mode = bullet_reverse;
+            // obj->shoot_control.bullet_mode = bullet_reverse;
+            obj->shoot_control.mode = shoot_stuck_handle;
         else {
             obj->shoot_control.bullet_mode = bullet_continuous;
             obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
@@ -452,9 +454,10 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     // 发射机构控制参数
     if (obj->remote->data.rc.s1 == 1) {
         // 发射机构刹车
-        obj->shoot_control.bullet_mode = bullet_holdon;
-        obj->shoot_control.bullet_speed = 0;
-        obj->shoot_control.mode = shoot_stop;
+        // obj->shoot_control.bullet_mode = bullet_holdon;
+        // obj->shoot_control.bullet_speed = 0;
+        // obj->shoot_control.mode = shoot_stop;
+        obj->shoot_control.mode = shoot_holdon;
     } else {
         obj->shoot_control.mode = shoot_run;
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
@@ -471,7 +474,8 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             obj->shoot_control.bullet_mode = bullet_continuous;
             obj->shoot_control.fire_rate = 15;
         } else if (!obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 只按右键 反转防卡弹
-            obj->shoot_control.bullet_mode = bullet_reverse;
+            // obj->shoot_control.bullet_mode = bullet_reverse;
+            obj->shoot_control.mode = shoot_stuck_handle;
         } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE) {  //  视觉控制发射(打符)
             obj->shoot_control.bullet_mode = bullet_single;
         } else if ((obj->remote->data.rc.s1 == 3) || (obj->remote->data.rc.ch4 > CHx_BIAS + 400)) {  // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试时测试弹道用

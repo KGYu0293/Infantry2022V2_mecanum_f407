@@ -4,7 +4,7 @@
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
 // #define GIMBAL_BOARD
- #define CHASSIS_BOARD
+#define CHASSIS_BOARD
 
 #include "stdint.h"
 #include "stdlib.h"
@@ -23,12 +23,10 @@
 /** 机器人模式定义 **/
 
 // 对模块是否掉线的定义
-typedef enum Module_status_e { module_lost = 0,
-                               module_working } Module_status;
+typedef enum Module_status_e { module_lost = 0, module_working } Module_status;
 
 // 机器人总模式
-typedef enum Robot_mode_e { robot_stop = 0,
-                            robot_run } Robot_mode;
+typedef enum Robot_mode_e { robot_stop = 0, robot_run } Robot_mode;
 
 // 底盘运行模式
 typedef enum Chassis_mode_e {
@@ -50,7 +48,7 @@ typedef enum Chassis_dispatch_mode_e {
 // 拨弹轮运行模式
 typedef enum Bullet_mode_e {
     bullet_holdon = 0,
-    bullet_reverse,    // 反转，卡弹处理
+    // bullet_reverse,    // 反转，卡弹处理
     bullet_single,     // 单发
     bullet_double,     // 双发
     bullet_trible,     // 三发
@@ -59,14 +57,16 @@ typedef enum Bullet_mode_e {
 
 // 发射机构运行模式
 typedef enum Shoot_mode_e {
-    shoot_stop = 0,  // 关闭发射机构
+    shoot_stop = 0,      // 关闭发射机构
+    shoot_holdon,        // 控制器控制停止
+    shoot_stuck_handle,  // 卡弹反转处理
     shoot_run
 } Shoot_mode;
 
 // 弹仓盖模式
 typedef enum Magazine_mode_e {
-    magazine_close = 122,  // 开弹仓
-    magazine_open          // 关弹仓
+    magazine_close = 0,  // 开弹仓
+    magazine_open        // 关弹仓
 } Magazine_mode;
 
 // 云台模式
@@ -148,9 +148,9 @@ typedef struct Upload_chassis_t {
     imu_data* chassis_imu;
 } Upload_chassis;
 
-typedef struct Upload_shoot_t{
+typedef struct Upload_shoot_t {
     float real_bullet_speed;
-}Upload_shoot;
+} Upload_shoot;
 
 // 板间通信定义
 // 云台->底盘数据包
