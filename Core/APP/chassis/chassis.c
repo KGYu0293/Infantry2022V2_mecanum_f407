@@ -175,13 +175,13 @@ void OutputmaxLimit(Chassis *obj) {
     }
 
     // outputlimit按照需求进行分配
-    float output_sum = fabs(obj->lf->motor_controller->output) + fabs(obj->lb->motor_controller->output) + fabs(obj->rf->motor_controller->output) + fabs(obj->rb->motor_controller->output);
+    float output_sum = fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited);
     if (output_sum > 1.0f) {
         // 保证四个outputmax之和为4*output_limit
-        obj->lf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->lf->motor_controller->output) / output_sum;
-        obj->rf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->rf->motor_controller->output) / output_sum;
-        obj->lb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->lb->motor_controller->output) / output_sum;
-        obj->rb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->rb->motor_controller->output) / output_sum;
+        obj->lf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->rf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->lb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->rb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
     } else {
         obj->lf->motor_controller->pid_speed_data.config.outputMax = output_limit;
         obj->rf->motor_controller->pid_speed_data.config.outputMax = output_limit;

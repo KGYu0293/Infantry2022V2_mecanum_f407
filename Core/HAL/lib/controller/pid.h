@@ -25,6 +25,7 @@ typedef struct PID_t {
     float fdb;
     float ref;
     float output;
+    float output_unlimited; // 经outputMax限制前的原始输出
     float error_delta;
 } pid;
 
