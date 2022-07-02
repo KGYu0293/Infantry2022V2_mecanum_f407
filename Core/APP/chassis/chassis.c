@@ -130,46 +130,43 @@ void OutputmaxLimit(Chassis *obj) {
         } else {
             output_limit = 32000;
         }
-    } else if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) {
-        if (obj->super_cap->cap_percent < 30) {  //防止快速掉电
-            output_limit = 6000;
-        } else {
-            output_limit = 20000;
-        }
     } else {
         // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
         switch (obj->cmd_data->power.power_limit) {
             case 45:
-                output_limit = 4 * 3000;
+                output_limit = 12000;
                 break;
             case 50:
-                output_limit = 4 * 3200;
+                output_limit = 12800;
                 break;
             case 55:
-                output_limit = 4 * 3500;
+                output_limit = 14000;
                 break;
             case 60:
-                output_limit = 4 * 3800;
+                output_limit = 15200;
                 break;
             case 70:
-                output_limit = 4 * 4200;
+                output_limit = 16800;
                 break;
             case 80:
-                output_limit = 4 * 4700;
+                output_limit = 18800;
                 break;
             case 100:
-                output_limit = 4 * 5300;
+                output_limit = 21200;
                 break;
             case 120:
-                output_limit = 4 * 5500;
+                output_limit = 22000;
                 break;
             default:
-                output_limit = 4 * 3000;  // 和最小（45w）时保持一致
+                output_limit = 12000;  // 和最小（45w）时保持一致
                 break;
         }
 
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) {
             output_limit *= 1.5;
+        }
+        if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) || (output_limit < 18000)) {
+            output_limit = 18000;
         }
 
         if (obj->super_cap->cap_percent < 30)
@@ -177,7 +174,7 @@ void OutputmaxLimit(Chassis *obj) {
         else if (obj->super_cap->cap_percent < 50)
             output_limit *= 0.9;
         //
-        if (output_limit < 6000) output_limit = 6000;
+        if (output_limit < 5000) output_limit = 5000;
         if (output_limit > 32000) output_limit = 32000;
     }
 
