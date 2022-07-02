@@ -15,7 +15,7 @@ Gimbal *Gimbal_Create() {
     internal_imu_config.bsp_gpio_gyro_index = GPIO_BMI088_GYRO_NS;
     internal_imu_config.bsp_pwm_heat_index = PWM_BMI088_HEAT_PORT;
     internal_imu_config.bsp_spi_index = SPI_BMI088_PORT;
-    internal_imu_config.temp_target = 55.0f;  //设定温度为55度
+    internal_imu_config.temp_target = 45.0f;  //设定温度为x度
     internal_imu_config.lost_callback = gimbal_imu_lost;
     //定义转换矩阵
     internal_imu_config.imu_axis_convert[0] = -2;
