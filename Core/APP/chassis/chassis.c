@@ -163,7 +163,7 @@ void OutputmaxLimit(Chassis *obj) {
         }
 
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) {
-            output_limit *= 1.25;
+            output_limit *= 1.5;
         }
 
         if (output_limit < 2000) output_limit = 2000;
@@ -175,7 +175,8 @@ void OutputmaxLimit(Chassis *obj) {
     }
 
     // outputlimit按照需求进行分配
-    float output_sum = fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited);
+    float output_sum = fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) +
+                       fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited);
     if (output_sum > 1.0f) {
         // 保证四个outputmax之和为4*output_limit
         obj->lf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ 4 * output_limit * fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
@@ -188,6 +189,12 @@ void OutputmaxLimit(Chassis *obj) {
         obj->lb->motor_controller->pid_speed_data.config.outputMax = output_limit;
         obj->rb->motor_controller->pid_speed_data.config.outputMax = output_limit;
     }
+
+    //
+    if (obj->lf->motor_controller->pid_speed_data.error[0] > 0.5 * obj->lf->motor_controller->pid_speed_data.ref) obj->lf->motor_controller->pid_speed_data.config.outputMax *= 2;
+    if (obj->lb->motor_controller->pid_speed_data.error[0] > 0.5 * obj->lb->motor_controller->pid_speed_data.ref) obj->lb->motor_controller->pid_speed_data.config.outputMax *= 2;
+    if (obj->rf->motor_controller->pid_speed_data.error[0] > 0.5 * obj->rf->motor_controller->pid_speed_data.ref) obj->rf->motor_controller->pid_speed_data.config.outputMax *= 2;
+    if (obj->rb->motor_controller->pid_speed_data.error[0] > 0.5 * obj->rb->motor_controller->pid_speed_data.ref) obj->rb->motor_controller->pid_speed_data.config.outputMax *= 2;
 }
 
 /**
