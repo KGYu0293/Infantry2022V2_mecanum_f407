@@ -20,7 +20,7 @@
 //云台结构定义
 // 云台水平并朝向底盘正前方时云台和底盘的编码器值
 #define PITCH_MOTOR_ENCORDER_BIAS 1080
-#define YAW_MOTOR_ENCORDER_BIAS 0
+#define YAW_MOTOR_ENCORDER_BIAS 2790
 // 云台抬头/低头限位
 #define PITCH_ENCORDER_HIGHEST 1870
 #define PITCH_ENCORDER_LOWEST 560
