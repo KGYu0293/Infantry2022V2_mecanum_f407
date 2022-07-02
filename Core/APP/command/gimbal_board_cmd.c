@@ -350,8 +350,8 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     }
     // 按住shift加速
     if (obj->remote->data.key_down.shift) {
-        obj->send_data.chassis_target.vx *= 2.0;
-        obj->send_data.chassis_target.vy *= 2.0;
+        obj->send_data.chassis_target.vx *= 1.45;
+        obj->send_data.chassis_target.vy *= 1.45;
         if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_mild) obj->send_data.chassis_dispatch_mode = chassis_dispatch_shift;
     } else if (obj->send_data.chassis_dispatch_mode == chassis_dispatch_shift) {
         obj->send_data.chassis_dispatch_mode = chassis_dispatch_mild;
