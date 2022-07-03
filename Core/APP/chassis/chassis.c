@@ -165,7 +165,7 @@ void OutputmaxLimit(Chassis *obj) {
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) {
             output_limit *= 1.5;
         }
-        if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) || (output_limit < 18000)) {
+        if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) && (output_limit < 18000)) {
             output_limit = 18000;
         }
 
