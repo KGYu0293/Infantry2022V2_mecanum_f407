@@ -23,7 +23,6 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->cap_int);
     add_graphic(obj->ui_sender, &obj->bat_float);
     add_graphic(obj->ui_sender, &obj->vision_frame);
-
     //指示灯
     add_graphic(obj->ui_sender, &obj->fri_circle);
     add_graphic(obj->ui_sender, &obj->mag_circle);
@@ -31,7 +30,6 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->chassis_circle);
     add_graphic(obj->ui_sender, &obj->autoaim_circle);
     add_graphic(obj->ui_sender, &obj->power_circle);
-
     //文字
     add_text(obj->ui_sender, &obj->fri_text, obj->fri_str, UI_TEXT_BUFFER_SIZE);
     add_text(obj->ui_sender, &obj->mag_text, obj->mag_str, UI_TEXT_BUFFER_SIZE);

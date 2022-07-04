@@ -290,7 +290,7 @@ void BMI088_read_raw(BMI088_imu *obj) {
     gyro_raw[2] = tmp * BMI088_GYRO_SEN;
 
     //坐标系转换
-    for(int i = 0;i < 3;++i){
+    for (int i = 0; i < 3; ++i) {
         obj->data.accel[i] = acc_raw[abs(obj->config.imu_axis_convert[i]) - 1] * sgn(obj->config.imu_axis_convert[i]);
         obj->data.gyro[i] = gyro_raw[abs(obj->config.imu_axis_convert[i]) - 1] * sgn(obj->config.imu_axis_convert[i]);
     }

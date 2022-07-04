@@ -24,7 +24,7 @@ Chassis *Chassis_Create() {
     internal_imu_config.bsp_gpio_gyro_index = GPIO_BMI088_GYRO_NS;
     internal_imu_config.bsp_pwm_heat_index = PWM_BMI088_HEAT_PORT;
     internal_imu_config.bsp_spi_index = SPI_BMI088_PORT;
-    internal_imu_config.temp_target = 55.0f;  //设定温度为55度
+    internal_imu_config.temp_target = 45.0f;  //设定温度为x度
     internal_imu_config.lost_callback = chassis_imu_lost;
     internal_imu_config.imu_axis_convert[0] = 1;
     internal_imu_config.imu_axis_convert[1] = 2;
@@ -124,61 +124,80 @@ Chassis *Chassis_Create() {
 // 对电流环进行限制 简易版功率限制
 void OutputmaxLimit(Chassis *obj) {
     float output_limit = 0;
-    // 若需要消耗电容|| (obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb)(obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) ||
-    if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly)) {
-        if (obj->super_cap->cap_percent < 25) {
-            output_limit = 2000;
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
+        if (obj->super_cap->cap_percent < 25) {  //防止快速掉电
+            output_limit = 6000;
         } else {
-            output_limit = 8000;  //防止快速掉电
+            output_limit = 32000;
         }
     } else {
         // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
         switch (obj->cmd_data->power.power_limit) {
             case 45:
-                output_limit = 3000;
+                output_limit = 12000;
                 break;
             case 50:
-                output_limit = 3200;
+                output_limit = 12800;
                 break;
             case 55:
-                output_limit = 3500;
+                output_limit = 14000;
                 break;
             case 60:
-                output_limit = 3800;
+                output_limit = 15200;
                 break;
             case 70:
-                output_limit = 4200;
+                output_limit = 16800;
                 break;
             case 80:
-                output_limit = 4700;
+                output_limit = 18800;
                 break;
             case 100:
-                output_limit = 5300;
+                output_limit = 21200;
                 break;
             case 120:
-                output_limit = 5500;
+                output_limit = 22000;
                 break;
             default:
-                output_limit = 3000;  // 和最小（45w）时保持一致
+                output_limit = 12000;  // 和最小（45w）时保持一致
                 break;
         }
 
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift) {
-            output_limit *= 1.25;
+            output_limit *= 1.5;
+        }
+        if ((obj->cmd_data->power.dispatch_mode == chassis_dispatch_climb) && (output_limit < 18000)) {
+            output_limit = 18000;
         }
 
-        if (output_limit < 2000) output_limit = 2000;
-        if (output_limit > 8000) output_limit = 8000;
-
         if (obj->super_cap->cap_percent < 30)
-            output_limit = 2000;  // 1500
+            output_limit = 6000;
         else if (obj->super_cap->cap_percent < 50)
             output_limit *= 0.9;
+        //
+        if (output_limit < 5000) output_limit = 5000;
+        if (output_limit > 32000) output_limit = 32000;
     }
-    obj->lf->motor_controller->pid_speed_data.config.outputMax = output_limit;
-    obj->rf->motor_controller->pid_speed_data.config.outputMax = output_limit;
-    obj->lb->motor_controller->pid_speed_data.config.outputMax = output_limit;
-    obj->rb->motor_controller->pid_speed_data.config.outputMax = output_limit;
+
+    // outputlimit按照需求进行分配
+    float output_sum = fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) +
+                       fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited);
+    if (output_sum > 1.0f) {
+        // 保证四个outputmax之和为output_limit
+        obj->lf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->rf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->lb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->rb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+    } else {
+        obj->lf->motor_controller->pid_speed_data.config.outputMax = output_limit;
+        obj->rf->motor_controller->pid_speed_data.config.outputMax = output_limit;
+        obj->lb->motor_controller->pid_speed_data.config.outputMax = output_limit;
+        obj->rb->motor_controller->pid_speed_data.config.outputMax = output_limit;
+    }
+
+    // if (obj->lf->motor_controller->pid_speed_data.error[0] > 0.5 * obj->lf->motor_controller->pid_speed_data.ref) obj->lf->motor_controller->pid_speed_data.config.outputMax *= 2;
+    // if (obj->lb->motor_controller->pid_speed_data.error[0] > 0.5 * obj->lb->motor_controller->pid_speed_data.ref) obj->lb->motor_controller->pid_speed_data.config.outputMax *= 2;
+    // if (obj->rf->motor_controller->pid_speed_data.error[0] > 0.5 * obj->rf->motor_controller->pid_speed_data.ref) obj->rf->motor_controller->pid_speed_data.config.outputMax *= 2;
+    // if (obj->rb->motor_controller->pid_speed_data.error[0] > 0.5 * obj->rb->motor_controller->pid_speed_data.ref) obj->rb->motor_controller->pid_speed_data.config.outputMax *= 2;
 }
 
 /**
@@ -302,6 +321,7 @@ float auto_rotate_param(Cmd_chassis *param) {
     // }
 
     // rotate = 150;
+    rotate *= 0.9;
     return rotate;
 }
 
@@ -341,22 +361,20 @@ void Chassis_calculate(Chassis *obj) {
 
     obj->proc_v_base *= 0.8;  // 调试 降功率
 
-    //同时按住前后和平移
-    if (fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5) {
-        obj->cmd_data->target.vx *= 0.6;  //平移减速
-    }
+    // //同时按住前后和平移
+    // if (fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5) {
+    //     obj->cmd_data->target.vx *= 0.6;  //平移减速
+    // }
     float a = ((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy));
     float ratio;
     arm_sqrt_f32(a, &ratio);                               // 使用armmath库代替c语言库的sqrt加快速度
     if (ratio > 4) ratio = 4;                              // 最大爆发速度倍率限制
     obj->proc_v_base = obj->proc_v_base * ratio;           // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
-    if (obj->proc_v_base > 5000) obj->proc_v_base = 5000;  //最大上限设置值
-    // if (obj->proc_v_base > 9000) obj->proc_v_base = 9000;  // 最大速度限制
+    if (obj->proc_v_base > 5000) obj->proc_v_base = 5000;  // 最大上限设置值
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
         obj->proc_v_base = 5000;  // 飞坡模式速度设定 5m/s
     }
 
-    // float target_vx, target_vy;
     if (fabs(ratio) < 1e-5) {
         obj->proc_target_vx = obj->proc_target_vy = 0;
     } else {
@@ -382,7 +400,7 @@ void Chassis_calculate(Chassis *obj) {
 
     //小陀螺加速
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift && obj->cmd_data->mode == chassis_rotate_run) {
-        w *= 1.5;
+        w *= 1.25;
     }
 
     // 边旋转边平移的功率分配
@@ -408,11 +426,12 @@ void Chassis_Update(Chassis *obj) {
     // 检查imu在线并初始化完成
     if (obj->imu->monitor->count < 1 || !(obj->imu->bias_init_success)) {
         obj->upload_data.chassis_status = module_lost;
+        obj->cmd_data->mode = robot_stop;
     } else {
         obj->upload_data.chassis_status = module_working;
     }
 
-    //电容剩余值
+    // 电容剩余值
     obj->upload_data.chassis_supercap_percent = obj->super_cap->cap_percent;
     obj->upload_data.chassis_battery_voltage = obj->super_cap->voltage_input_fdb;
     // 发送回传数据指针
@@ -421,11 +440,14 @@ void Chassis_Update(Chassis *obj) {
     chassis_upload.len = sizeof(Upload_chassis);
     obj->chassis_imu_pub->publish(obj->chassis_imu_pub, chassis_upload);
 
-    //设置电容充电功率，在缓冲功率充足时，多充能
-    if (obj->cmd_data->power.power_buffer > 30) {
+    // 设置电容充电功率，在缓冲功率充足时，多充能
+    // stop模式等各种模式要能执行这一段，否则可能会超功率
+    if (obj->cmd_data->power.power_buffer > 60) {  // 按照目前规则 仅触发飞坡增益时超过60（为250）
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
+    } else if (obj->cmd_data->power.power_buffer > 30) {
         obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
     } else {
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 2;  //防止电容超功率
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit - 2;  // 防止电容超功率
     }
 
     // 获得cmd命令
