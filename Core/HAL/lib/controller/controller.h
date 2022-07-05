@@ -1,16 +1,13 @@
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
+#include <adrc.h>
 #include <mrac.h>
 #include <pid.h>
-#include <adrc.h>
 
-enum controller_type_e { PID_MODEL = 0,
-                         MRAC_MODEL,
-                         ADRC_MODEL };
+enum controller_type_e { PID_MODEL = 0, MRAC_MODEL, ADRC_MODEL, SMC_MODEL };
 
-enum controller_depth { CURRENT_CONTROL = 0,
-                        SPEED_CONTROL,
-                        POS_CONTROL };
+enum controller_depth { CURRENT_CONTROL = 0, SPEED_CONTROL, POS_CONTROL };
+
 typedef struct controller_config_t {
     enum controller_type_e control_type;  //控制器算法类型
     enum controller_depth control_depth;  //控制器深度

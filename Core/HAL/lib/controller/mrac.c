@@ -1,7 +1,7 @@
 /**
  * @file           : mrac.c
  * @brief          :
- * @Author         : lwy
+ * @Author         : 刘文熠
  * @Date           : 2022-04-10 09:36
  * @LastEditTime   : 2022-04-28 17:34
  * @Note           :
