@@ -49,12 +49,12 @@ void MTDFunction(MTD_t *ptd, float aim) {
  * @retval None
  */
 void mrac_2d_calc(mrac_2d *mrac, float ref, float x1_fdb, float x2_fdb, unsigned char enable) {
+    mrac->x1_fdb = x1_fdb;
+    mrac->x2_fdb = x2_fdb;
     if (enable == 1) {
         float cosx, sinx;
         cosx = cos(x1_fdb * M_PI / 180.0f);
         sinx = sin(x1_fdb * M_PI / 180.0f);
-        mrac->x1_fdb = x1_fdb;
-        mrac->x2_fdb = x2_fdb;
         MTDFunction(&mrac->x1_td, ref);
         mrac->x1_ref = mrac->x1_td.x1;
         mrac->x1_err = mrac->x1_ref - mrac->x1_fdb;
@@ -92,6 +92,8 @@ void mrac_2d_calc(mrac_2d *mrac, float ref, float x1_fdb, float x2_fdb, unsigned
         mrac->x2_ref = x2_fdb;
         mrac->x2_err = 0;
         mrac->output = 0;
+
+        mrac->integrator_sum_err = 0;
     }
 }
 
@@ -111,7 +113,16 @@ void mrac_Init(mrac_2d *mrac, Mrac_config *config) {
     mrac->x1_td.r = 8000;
     mrac->x1_td.h = 0.001f;
     mrac->x1_td.dt = 0.001f;
-    mrac->x2_td.r = 100000;
+    mrac->x2_td.r = 20000;
     mrac->x2_td.h = 0.001f;
     mrac->x2_td.dt = 0.001f;
+    // td初始化
+    mrac->x1_td.x1 = 0;
+    mrac->x1_td.x2 = 0;
+    mrac->x1_td.x = 0;
+    mrac->x1_td.aim = 0;
+    mrac->x2_td.x1 = 0;
+    mrac->x2_td.x2 = 0;
+    mrac->x2_td.aim = 0;
+    mrac->x2_td.x = 0;
 }
