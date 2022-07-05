@@ -7,6 +7,7 @@
 #define SUPER_CAP_WULI_RX_ID 0x211  //雾列超级电容控制板
 #define SUPER_CAP_WULI_TX_ID 0x210
 
+#pragma pack(1)
 typedef struct super_cap_wuli_config_t {
     uint8_t bsp_can_index;
     uint16_t super_cap_wuli_tx_id;
@@ -27,6 +28,7 @@ typedef struct super_cap_wuli_t {
     float cap_percent;       // 电容电量剩余百分比，该电容由电压值测得大致百分比
     monitor_item* monitor;
 } Super_cap_wuli;
+#pragma pack()
 
 void Super_cap_wuli_Driver_Init();
 Super_cap_wuli* Super_cap_wuli_Create(super_cap_wuli_config* config);

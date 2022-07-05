@@ -8,6 +8,7 @@
 #include "can_motor.h"
 #include "BMI088.h"
 
+#pragma pack(1)
 typedef struct Gimbal_t {
     BMI088_imu* imu;
     can_motor *pitch;
@@ -21,6 +22,7 @@ typedef struct Gimbal_t {
     float pitch_limit_down;
     float pitch_limit_up;
 } Gimbal;
+#pragma pack()
 
 Gimbal* Gimbal_Create(void);
 void Gimbal_Update(Gimbal* obj);

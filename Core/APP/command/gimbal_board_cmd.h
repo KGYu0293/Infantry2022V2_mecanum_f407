@@ -14,6 +14,7 @@
 #include "can_send.h"
 #include "indicator_led.h"
 
+#pragma pack(1)
 typedef struct Gimbal_board_cmd_t {
     // 标志量
     Robot_mode mode;
@@ -43,8 +44,8 @@ typedef struct Gimbal_board_cmd_t {
     Cmd_gimbal gimbal_control;
     Subscriber *gimbal_upload_suber;
     Upload_gimbal *gimbal_upload_data;
-
 } Gimbal_board_cmd;
+#pragma pack()
 
 Gimbal_board_cmd *Gimbal_board_CMD_Create(void);
 void Gimbal_board_CMD_Update(Gimbal_board_cmd *obj);

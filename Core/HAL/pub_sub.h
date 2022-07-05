@@ -4,6 +4,8 @@
 #include "cvector.h"
 #include "circular_queue.h"
 #include "stdint.h"
+
+#pragma pack(1)
 struct internal_topic;
 typedef struct publish_data_t {
     uint8_t* data;
@@ -21,6 +23,7 @@ typedef struct subscriber_t{
     circular_queue* queue;
     publish_data (*getdata)(struct subscriber_t* sub);
 } Subscriber;
+#pragma pack()
 
 void SubPub_Init();
 Publisher* register_pub(const char* topic);

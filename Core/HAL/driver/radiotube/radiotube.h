@@ -4,6 +4,7 @@
 #include "bsp_spi.h"
 #include "monitor.h"
 
+#pragma pack(1)
 typedef struct _spi_eio_config_t {
     uint8_t bsp_spi_index;
     int eio_tx_data_len; //发送数据所用字节数
@@ -27,6 +28,7 @@ typedef struct spi_EIO_t {
     spi_eio_config config;
     monitor_item* monitor;
 } spi_EIO;
+#pragma pack()
 
 void Spi_EIO_Transmit(spi_EIO* obj);
 void Spi_EIO_Receive(spi_EIO* obj);

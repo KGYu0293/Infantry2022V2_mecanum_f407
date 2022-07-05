@@ -1,6 +1,7 @@
 #ifndef _IMU_DATA_H_
 #define _IMU_DATA_H_
 
+#pragma pack(1)
 //此处欧拉角定义为 绕固定参考坐标轴旋转X-Y-Z 也就是 roll pitch yaw
 typedef struct imu_data_t {
     // XYZ
@@ -17,5 +18,6 @@ typedef struct imu_data_t {
     float yaw_8192_real;
     float yaw_deg_real;
 } imu_data;
+#pragma pack()
 
 #endif

@@ -106,6 +106,7 @@
 //通道中间值为1024
 #define CHx_BIAS 1024
 
+#pragma pack(1)
 typedef struct dt7_config_t {
     uint8_t bsp_uart_index;
     lost_callback lost_callback;
@@ -167,6 +168,7 @@ typedef struct dt7Remote_t {
     dt7_config config;
     monitor_item* monitor;
 } dt7Remote;
+#pragma pack()
 
 void dt7_driver_init(void);
 

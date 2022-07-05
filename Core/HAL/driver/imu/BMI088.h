@@ -11,6 +11,8 @@
 #include "monitor.h"
 #include "pid.h"
 #include "stdint.h"
+
+#pragma pack(1)
 typedef struct BMI088_config_t {
     uint8_t bsp_spi_index;
     uint8_t bsp_pwm_heat_index;
@@ -36,6 +38,7 @@ typedef struct BMI088_imu_t {
     MadgwickAHRS madgwick_solver;
     monitor_item* monitor;
 } BMI088_imu;
+#pragma pack()
 
 void BMI088_Driver_Init();
 void BMI088_Update_All();

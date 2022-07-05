@@ -21,6 +21,7 @@
 #include "stdint.h"
 #include "super_cap_wuli.h"
 
+#pragma pack(1)
 typedef struct Chassis_t {
     BMI088_imu *imu;
     Super_cap_wuli *super_cap;
@@ -41,6 +42,7 @@ typedef struct Chassis_t {
     Cmd_chassis *cmd_data;       // 接收到的指令数据
     Upload_chassis upload_data;  // 回传的数据
 } Chassis;
+#pragma pack()
 
 Chassis *Chassis_Create(void);
 void Chassis_Update(Chassis *obj);

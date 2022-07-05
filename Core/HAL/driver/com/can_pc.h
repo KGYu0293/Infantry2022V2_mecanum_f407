@@ -8,6 +8,7 @@
 #include "stdint.h"
 #include <pc_data.h>
 
+#pragma pack(1)
 typedef struct canpc_config_t {
     uint8_t bsp_can_index;
     uint16_t send_identifer;
@@ -22,6 +23,7 @@ typedef struct canpc_t {
     pc_recv* pc_recv_data;
     uint8_t* data_updated;
 } canpc;
+#pragma pack()
 
 canpc* CanPC_Create(canpc_config* config);
 void CanPC_Send(canpc* obj, pc_send* data);

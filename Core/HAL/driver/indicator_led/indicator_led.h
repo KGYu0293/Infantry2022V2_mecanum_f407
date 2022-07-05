@@ -2,6 +2,8 @@
 #define _INDICATOR_LED_H_
 
 #include "stdint.h"
+
+#pragma pack(1)
 typedef struct Indicator_led_config_t{
     uint8_t bsp_gpio_led1_index;
     uint8_t bsp_gpio_led2_index;
@@ -12,6 +14,7 @@ typedef struct Indicator_led_t{
     Indicator_led_config config;
     uint8_t led_cnt;
 }Indicator_led;
+#pragma pack()
 
 void indicator_led_Driver_Init(void);
 Indicator_led* indicator_led_Create(Indicator_led_config* config);

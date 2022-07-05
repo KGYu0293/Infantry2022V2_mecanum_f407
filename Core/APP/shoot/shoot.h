@@ -8,6 +8,7 @@
 #include "can_motor.h"
 #include "pwm_servo.h"
 
+#pragma pack(1)
 typedef struct Shoot_t {
     can_motor *friction_a;
     can_motor *friction_b;
@@ -24,6 +25,7 @@ typedef struct Shoot_t {
     uint32_t cooldown_start;  //冷却起始时间点
     uint32_t cooldown_time;   //冷却时间
 } Shoot;
+#pragma pack()
 
 Shoot *Shoot_Create(void);
 void Shoot_Update(Shoot *obj);

@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 
+#pragma pack(1)
 typedef struct color_rgb_t {
     uint8_t r, g, b;
 } color_rgb;
@@ -18,6 +19,7 @@ typedef struct ws2812_t {
     uint16_t send_len;
     ws2812_config config;
 } ws2812;
+#pragma pack()
 
 extern color_rgb red;
 extern color_rgb green;
