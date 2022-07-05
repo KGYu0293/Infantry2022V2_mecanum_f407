@@ -3,6 +3,7 @@
 
 typedef float (*ReachingLaw)(float data);
 
+#pragma pack(1)
 typedef struct Smc_config_t {
     float kp;  // 常规滑动模态面系数
     float kd;
@@ -19,9 +20,10 @@ typedef struct Smc_t {
     float fdb;
     float output;
 } Smc;
+#pragma pack()
 
-void Smc_init(Smc* smc, Smc_config* config);
-void Smc_calc(Smc* smc);
+void Smc_Init(Smc* smc, Smc_config* config);
+void Smc_Calc(Smc* smc);
 void Smc_SetConfig(Smc* smc, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax);
 
 // 趋近律

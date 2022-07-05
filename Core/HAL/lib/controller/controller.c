@@ -18,7 +18,7 @@ void controller_calc(controller* obj) {
     } else if (obj->config.control_type == MRAC_MODEL) {
         mrac_2d_calc(&obj->mrac_2d_data, obj->ref_position, obj->fdb_position, obj->fdb_speed, 1);
         obj->output = obj->mrac_2d_data.output;
-    } else if( obj->config.control_type == ADRC_MODEL) {
+    } else if (obj->config.control_type == ADRC_MODEL) {
         if (obj->config.control_depth >= POS_CONTROL) {
             obj->adrc_pos_data.prog.fdb = obj->fdb_position;
             obj->adrc_pos_data.prog.ref = obj->ref_position;
@@ -38,16 +38,19 @@ controller* create_controller(controller_config* _config) {
     controller* obj = malloc(sizeof(controller));
     memset(obj, 0, sizeof(controller));
     obj->config = *_config;
-    if (obj->config.control_type == MRAC_MODEL) obj->mrac_2d_data = obj->config.mrac_2d_init;
+    if (obj->config.control_type == MRAC_MODEL) {
+        // obj->mrac_2d_data = obj->config.mrac_2d_init;
+        mrac_Init(&obj->mrac_2d_data, &obj->config.mrac_config);
+    }
     if (obj->config.control_type == PID_MODEL) {
         obj->pid_pos_data.config = obj->config.position_pid_config;
         obj->pid_speed_data.config = obj->config.speed_pid_config;
     }
-    if(obj->config.control_type == ADRC_MODEL){
+    if (obj->config.control_type == ADRC_MODEL) {
         obj->adrc_pos_data.adrc_config = obj->config.pos_adrc_config;
         obj->adrc_speed_data.adrc_config = obj->config.speed_adrc_config;
-        //memset(&obj->adrc_speed_data, 0, sizeof(obj->adrc_speed_data));
-        //memset(&obj->adrc_pos_data, 0, sizeof(obj->adrc_pos_data));
+        // memset(&obj->adrc_speed_data, 0, sizeof(obj->adrc_speed_data));
+        // memset(&obj->adrc_pos_data, 0, sizeof(obj->adrc_pos_data));
     }
     return obj;
 }

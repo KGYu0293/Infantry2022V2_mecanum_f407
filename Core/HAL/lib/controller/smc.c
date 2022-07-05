@@ -5,7 +5,7 @@
 
 // sliding mode control 滑膜控制
 
-void Smc_init(Smc* smc, Smc_config* config) { smc->config = *config; }
+void Smc_Init(Smc* smc, Smc_config* config) { smc->config = *config; }
 
 void Smc_SetConfig(Smc* smc, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax) {
     smc->config.kp = kp;
@@ -15,7 +15,7 @@ void Smc_SetConfig(Smc* smc, float kp, float kd, float kmax, ReachingLaw reachin
     smc->config.outputMax = outputMax;
 }
 
-void Smc_calc(Smc* smc) {
+void Smc_Calc(Smc* smc) {
     smc->error[1] = smc->error[0];
     smc->error[0] = smc->ref - smc->fdb;
 
