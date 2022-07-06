@@ -99,7 +99,8 @@
         "mrac.h": "c",
         "basic_math_functions.h": "c",
         "pc_data.h": "c",
-        "controller.h": "c"
+        "controller.h": "c",
+        "smc.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

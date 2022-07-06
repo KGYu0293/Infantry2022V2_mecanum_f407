@@ -3,6 +3,7 @@
 #include <adrc.h>
 #include <mrac.h>
 #include <pid.h>
+#include <smc.h>
 
 enum controller_type_e { PID_MODEL = 0, MRAC_MODEL, ADRC_MODEL, SMC_MODEL };
 
@@ -20,6 +21,8 @@ typedef struct controller_config_t {
     //使用ADRC控制时填写ADRC配置结构体
     ADRC_Config_t speed_adrc_config;
     ADRC_Config_t pos_adrc_config;
+    // 使用滑膜控制时配置结构体，目前只使用速度环控制
+    Smc_config speed_smc_config;
 } controller_config;
 
 typedef struct controller_t {
@@ -29,6 +32,7 @@ typedef struct controller_t {
     pid pid_pos_data;
     ADRC_t adrc_speed_data;
     ADRC_t adrc_pos_data;
+    Smc smc_speed_data;
     float output;
     float ref_speed;
     float ref_position;

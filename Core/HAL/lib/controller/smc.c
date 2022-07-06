@@ -7,12 +7,12 @@
 
 void Smc_Init(Smc* smc, Smc_config* config) { smc->config = *config; }
 
-void Smc_SetConfig(Smc* smc, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax) {
-    smc->config.kp = kp;
-    smc->config.kd = kd;
-    smc->config.kmax = kmax;
-    smc->config.reaching_law = reaching_law;
-    smc->config.outputMax = outputMax;
+void Smc_SetConfig(Smc_config* config, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax) {
+    config->kp = kp;
+    config->kd = kd;
+    config->kmax = kmax;
+    config->reaching_law = reaching_law;
+    config->outputMax = outputMax;
 }
 
 void Smc_Calc(Smc* smc) {

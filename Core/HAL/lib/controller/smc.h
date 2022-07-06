@@ -24,7 +24,7 @@ typedef struct Smc_t {
 
 void Smc_Init(Smc* smc, Smc_config* config);
 void Smc_Calc(Smc* smc);
-void Smc_SetConfig(Smc* smc, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax);
+void Smc_SetConfig(Smc_config* config, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax);
 
 // 趋近律
 float ReachingLaw_sgn(float error);

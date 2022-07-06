@@ -16,8 +16,10 @@ void controller_calc(controller* obj) {
             obj->output = obj->pid_speed_data.output;
         }
     } else if (obj->config.control_type == MRAC_MODEL) {
-        mrac_2d_calc(&obj->mrac_2d_data, obj->ref_position, obj->fdb_position, obj->fdb_speed, 1);
-        obj->output = obj->mrac_2d_data.output;
+        if (obj->config.control_depth >= POS_CONTROL) {
+            mrac_2d_calc(&obj->mrac_2d_data, obj->ref_position, obj->fdb_position, obj->fdb_speed, 1);
+            obj->output = obj->mrac_2d_data.output;
+        }
     } else if (obj->config.control_type == ADRC_MODEL) {
         if (obj->config.control_depth >= POS_CONTROL) {
             obj->adrc_pos_data.prog.fdb = obj->fdb_position;
@@ -30,6 +32,13 @@ void controller_calc(controller* obj) {
             obj->adrc_speed_data.prog.ref = obj->ref_speed;
             ADRCFunction(&obj->adrc_speed_data);
             obj->output = obj->adrc_speed_data.prog.output;
+        }
+    } else if (obj->config.control_type == SMC_MODEL) {
+        if (obj->config.control_depth >= SPEED_CONTROL) {
+            obj->smc_speed_data.fdb = obj->fdb_speed;
+            obj->smc_speed_data.ref = obj->ref_speed;
+            Smc_Calc(&obj->smc_speed_data);
+            obj->output = obj->smc_speed_data.output;
         }
     }
 }
@@ -51,6 +60,9 @@ controller* create_controller(controller_config* _config) {
         obj->adrc_speed_data.adrc_config = obj->config.speed_adrc_config;
         // memset(&obj->adrc_speed_data, 0, sizeof(obj->adrc_speed_data));
         // memset(&obj->adrc_pos_data, 0, sizeof(obj->adrc_pos_data));
+    }
+    if (obj->config.control_type == SMC_MODEL) {
+        Smc_Init(&obj->smc_speed_data, &obj->config.speed_smc_config);
     }
     return obj;
 }
