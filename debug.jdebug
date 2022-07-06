@@ -22,12 +22,12 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
-  Project.AddPathSubstitute ("D:/RM/RM_code/git_workspace/Infantry2022V2_mecanum_F407", "$(ProjectDir)");
-  Project.AddPathSubstitute ("d:/rm/rm_code/git_workspace/infantry2022v2_mecanum_f407", "$(ProjectDir)");
   Project.SetDevice ("STM32F407ZG");
-  Project.SetHostIF ("USB", "29783368");
+  Project.SetHostIF ("USB", "20220507");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");
+  Project.AddPathSubstitute ("D:/RM/RM_code/git_workspace/Infantry2022V2_mecanum_F407", "$(ProjectDir)");
+  Project.AddPathSubstitute ("d:/rm/rm_code/git_workspace/infantry2022v2_mecanum_f407", "$(ProjectDir)");
   Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4F.svd");
   //
   // User settings

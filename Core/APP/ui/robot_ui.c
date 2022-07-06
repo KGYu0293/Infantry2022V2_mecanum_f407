@@ -4,6 +4,7 @@
 #include <robot_def.h>
 #include <robot_ui.h>
 #include <string.h>
+#include <math.h>
 #define REPEAT(x)                 \
     for (int i = 0; i < 1; ++i) { \
         x                         \
@@ -43,6 +44,10 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->line_15ms_2m);
     add_graphic(obj->ui_sender, &obj->line_15ms_3m);
     add_graphic(obj->ui_sender, &obj->line_15ms_4m);
+
+    //夹角
+    add_graphic(obj->ui_sender, &obj->angle_chassis);
+    add_graphic(obj->ui_sender, &obj->angle_gimbal);
 }
 
 //改变图形元素
@@ -58,8 +63,8 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     modifiy_graphic(obj->ui_sender, &obj->cap_line);
     //射速变化
     if (obj->data.bullet_speed == 15) {
-        obj->vertical_line.start_x = 945;
-        obj->vertical_line.end_x = 945;
+        obj->vertical_line.start_x = 955;
+        obj->vertical_line.end_x = 955;
         // 15ms,2m
         obj->line_15ms_2m.start_x = 840;
         obj->line_15ms_2m.start_y = 416;
@@ -82,8 +87,8 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
         modifiy_graphic(obj->ui_sender, &obj->line_15ms_3m);
         modifiy_graphic(obj->ui_sender, &obj->line_15ms_4m);
     } else if (obj->data.bullet_speed == 18) {
-        obj->vertical_line.start_x = 945;
-        obj->vertical_line.end_x = 945;
+        obj->vertical_line.start_x = 955;
+        obj->vertical_line.end_x = 955;
         // 18ms,3m
         obj->line_15ms_2m.start_x = 840;
         obj->line_15ms_2m.start_y = 435;
@@ -106,8 +111,8 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
         modifiy_graphic(obj->ui_sender, &obj->line_15ms_4m);
     } else if (obj->data.bullet_speed == 30) {
         //竖直线右移
-        obj->vertical_line.start_x = 960;
-        obj->vertical_line.end_x = 960;
+        obj->vertical_line.start_x = 955;
+        obj->vertical_line.end_x = 955;
         // 30ms,3m
         obj->line_15ms_2m.start_x = 840;
         obj->line_15ms_2m.start_y = 485;
@@ -217,6 +222,14 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     }
     obj->vision_frame.color = obj->data.vision_has_taget ? Green : White;
 
+    //夹角
+    obj->angle_chassis.start_x = 1700 - 35 * sin(obj->data.angle);
+    obj->angle_chassis.start_y = 825 - 35 * cos(obj->data.angle);
+    obj->angle_chassis.end_x = 1700 + 45 * sin(obj->data.angle);
+    obj->angle_chassis.end_y = 825 + 45 * cos(obj->data.angle);
+    modifiy_graphic(obj->ui_sender, &obj->angle_chassis);
+    modifiy_graphic(obj->ui_sender, &obj->angle_gimbal);
+
     modifiy_graphic(obj->ui_sender, &obj->vision_frame);
     if (obj->data.fri_mode != obj->last_data.fri_mode) modifiy_graphic(obj->ui_sender, &obj->fri_circle);
     if (obj->data.mag_mode != obj->last_data.mag_mode) modifiy_graphic(obj->ui_sender, &obj->mag_circle);
@@ -249,8 +262,8 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
 
     //创建各种 UI 实体对象
     obj->cap_line_len = 1210 - 710;
-    obj->cap_rec_outline = Rectangle(0, 0, Green, 2, 710, 100, 1210, 150);
-    obj->cap_line = Line(1, 0, Yellow, 50, 710, 125, 960, 125);
+    obj->cap_rec_outline = Rectangle(0, 0, Green, 2, 710, 90, 1210, 100);
+    obj->cap_line = Line(1, 0, Yellow, 10, 710, 95, 960, 95);
     // obj->cap_float = Float(2, 0, Yellow, 2, 30, 1, 1225, 140, 50.0);
     obj->cap_int = Int(2, 0, Yellow, 2, 30, 1225, 140, 50);
     obj->bat_float = Float(3, 0, RedBlue, 2, 30, 1, 1225, 100, 24.0);
@@ -291,6 +304,10 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->line_15ms_2m = Line(18, 1, Yellow, 1, 840, 416, 1050, 416);
     obj->line_15ms_3m = Line(19, 1, Yellow, 1, 860, 405, 1030, 405);
     obj->line_15ms_4m = Line(20, 1, Yellow, 1, 880, 400, 1010, 400);
+
+    //云台底盘夹角
+    obj->angle_chassis = Line(21, 0, White, 60, 1700, 800, 1700, 860);
+    obj->angle_gimbal = Line(22, 0, RedBlue, 8, 1700, 835, 1700, 875);
 
     //初始化percent
     obj->data.cap_percent = 0.0;
