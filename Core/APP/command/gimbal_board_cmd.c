@@ -9,11 +9,11 @@ void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!
 void pc_lost(void* obj) { printf_log("pc lost!\n"); }
 
 // cmd的private函数
-void stop_mode_update(Gimbal_board_cmd* obj);       //机器人停止模式更新函数
-void remote_mode_update(Gimbal_board_cmd* obj);     //机器人遥控器模式更新函数
-void mouse_key_mode_update(Gimbal_board_cmd* obj);  //机器人键鼠模式更新函数
-void send_cmd_and_data(Gimbal_board_cmd* obj);      //发布指令和板间通信
-void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj);
+void stop_mode_update(Gimbal_board_cmd* obj);                //机器人停止模式更新函数
+void remote_mode_update(Gimbal_board_cmd* obj);              //机器人遥控器模式更新函数
+void mouse_key_mode_update(Gimbal_board_cmd* obj);           //机器人键鼠模式更新函数
+void send_cmd_and_data(Gimbal_board_cmd* obj);               //发布指令和板间通信
+void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj);  //底盘和云台的默认状态
 // 其他功能函数
 float get_offset_angle(short init_forward, short now_encoder);  // 获取云台朝向与底盘正前的夹角
 
@@ -163,6 +163,14 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
     // 机器人控制
     if (obj->mode == robot_stop) {
         stop_mode_update(obj);
+        // 在stop模式可以长按Crtl+G软重启
+        if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
+            obj->soft_reset_cnt++;
+            //连续按住3秒
+            if (obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
+        } else {
+            obj->soft_reset_cnt = 0;
+        }
     } else if (obj->mode == robot_run) {
         // 获取云台offset
         obj->send_data.chassis_target.offset_angle = get_offset_angle(YAW_MOTOR_ENCORDER_BIAS, *obj->gimbal_upload_data->yaw_encorder);
@@ -330,14 +338,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             // 关闭打符自动进入云台跟随底盘
             mousekey_GimbalChassis_default(obj);
         }
-    }
-    // Crtl+G软重启
-    if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
-        obj->soft_reset_cnt++;
-        //连续按住3秒
-        if (obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
-    } else {
-        obj->soft_reset_cnt = 0;
     }
 
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;
