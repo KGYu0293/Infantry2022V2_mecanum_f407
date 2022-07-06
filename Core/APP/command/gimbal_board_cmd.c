@@ -269,7 +269,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             mousekey_GimbalChassis_default(obj);
         }
     }
-    // v:云台底盘独立
+    // v:云台底盘分离
     if (obj->remote->data.key_single_press_cnt.v != obj->remote->last_data.key_single_press_cnt.v) {
         if (obj->send_data.chassis_mode != chassis_run || obj->gimbal_control.mode != gimbal_run) {
             obj->send_data.chassis_mode = chassis_run;
@@ -307,17 +307,29 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     }
     // g:小符
     if (obj->remote->data.key_single_press_cnt.g != obj->remote->last_data.key_single_press_cnt.g) {
-        if (obj->autoaim_mode != auto_aim_buff_small)
+        if (obj->autoaim_mode != auto_aim_buff_small) {
             obj->autoaim_mode = auto_aim_buff_small;
-        else
+            // 打符自动进入云台底盘分离
+            obj->send_data.chassis_mode = chassis_run;
+            obj->gimbal_control.mode = gimbal_run;
+        } else {
             obj->autoaim_mode = auto_aim_off;
+            // 关闭打符自动进入云台跟随底盘
+            mousekey_GimbalChassis_default(obj);
+        }
     }
     // b:大符
     if (obj->remote->data.key_single_press_cnt.b != obj->remote->last_data.key_single_press_cnt.b) {
-        if (obj->autoaim_mode != auto_aim_buff_big)
+        if (obj->autoaim_mode != auto_aim_buff_big) {
             obj->autoaim_mode = auto_aim_buff_big;
-        else
+            // 打符自动进入云台底盘分离
+            obj->send_data.chassis_mode = chassis_run;
+            obj->gimbal_control.mode = gimbal_run;
+        } else {
             obj->autoaim_mode = auto_aim_off;
+            // 关闭打符自动进入云台跟随底盘
+            mousekey_GimbalChassis_default(obj);
+        }
     }
     // Crtl+G软重启
     if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
