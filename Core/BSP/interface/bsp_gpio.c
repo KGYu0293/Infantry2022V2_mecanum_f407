@@ -7,6 +7,7 @@ typedef struct BSP_GPIO_Typedef_t {
     GPIO_TypeDef* base;
     uint16_t pin;
     uint8_t mode;
+    GPIO_InitTypeDef GPIO_InitStruct;
 } BSP_GPIO_Typedef;
 
 BSP_GPIO_Typedef gpio_ports[DEVICE_GPIO_CNT];
@@ -35,12 +36,35 @@ void BSP_GPIO_Init() {
     gpio_ports[5].base = GPIO_5_BASE;
     gpio_ports[5].pin = GPIO_5_PIN;
     gpio_ports[5].mode = GPIO_5_MODE;
+
+    gpio_ports[6].base = GPIO_6_BASE;
+    gpio_ports[6].pin = GPIO_6_PIN;
+    gpio_ports[6].mode = GPIO_6_MODE;
+
+    gpio_ports[7].base = GPIO_7_BASE;
+    gpio_ports[7].pin = GPIO_7_PIN;
+    gpio_ports[7].mode = GPIO_7_MODE;
 }
 
 void BSP_GPIO_Set(uint8_t gpio_index, uint8_t status) {
     if (gpio_ports[gpio_index].mode == GPIO_OUTPUT_MODE) {
         HAL_GPIO_WritePin(gpio_ports[gpio_index].base, gpio_ports[gpio_index].pin, status);
     }
+}
+
+void BSP_GPIO_Reinit(uint8_t gpio_index, uint8_t mode) {
+    gpio_ports[gpio_index].GPIO_InitStruct.Pin = gpio_ports[gpio_index].pin;
+    if(mode){
+        gpio_ports[gpio_index].GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+        gpio_ports[gpio_index].mode = GPIO_OUTPUT_MODE;
+    }
+    else{
+        gpio_ports[gpio_index].GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+        gpio_ports[gpio_index].mode = GPIO_INPUT_MODE;
+    }
+    gpio_ports[gpio_index].GPIO_InitStruct.Pull = GPIO_NOPULL;
+    gpio_ports[gpio_index].GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    HAL_GPIO_Init(gpio_ports[gpio_index].base,&gpio_ports[gpio_index].GPIO_InitStruct);
 }
 
 void BSP_GPIO_Toggle(uint8_t gpio_index) {
