@@ -16,10 +16,14 @@ Shoot *Shoot_Create(void) {
     // 电机初始化
     can_motor_config friction_a_config;
     controller_config friction_a_controller_config;
-    friction_a_controller_config.control_type = PID_MODEL;
+    // friction_a_controller_config.control_type = PID_MODEL;
+    // friction_a_controller_config.control_depth = SPEED_CONTROL;
+    // PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    // PID_SetConfig_Comp(&friction_a_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_a_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Comp(&friction_a_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
+    friction_a_controller_config.control_type = SMC_MODEL;
+    SMC_SetConfig(&friction_a_controller_config.speed_smc_config, 3, 10, 100, ReachingLaw_sqrt, 15000);
+
     friction_a_config.motor_model = MODEL_3508;
     friction_a_config.bsp_can_index = 0;
     friction_a_config.motor_set_id = 1;
@@ -32,10 +36,14 @@ Shoot *Shoot_Create(void) {
 
     can_motor_config friction_b_config;
     controller_config friction_b_controller_config;
-    friction_b_controller_config.control_type = PID_MODEL;
+    // friction_b_controller_config.control_type = PID_MODEL;
+    // friction_b_controller_config.control_depth = SPEED_CONTROL;
+    // PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 0);
+    // PID_SetConfig_Comp(&friction_b_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_b_controller_config.control_depth = SPEED_CONTROL;
-    PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Comp(&friction_b_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
+    friction_b_controller_config.control_type = SMC_MODEL;
+    SMC_SetConfig(&friction_b_controller_config.speed_smc_config, 3, 10, 100, ReachingLaw_sqrt, 15000);
+
     friction_b_config.motor_model = MODEL_3508;
     friction_b_config.bsp_can_index = 0;
     friction_b_config.motor_set_id = 2;
@@ -154,14 +162,14 @@ void Shoot_friction_Update(Shoot *obj) {
                 break;
             case 18:
                 // 17.0-17.8
-                obj->friction_a->motor_controller->ref_speed = 28400;
-                obj->friction_b->motor_controller->ref_speed = -28400;
+                obj->friction_a->motor_controller->ref_speed = 29500;
+                obj->friction_b->motor_controller->ref_speed = -29500;
                 obj->upload_data.real_bullet_speed = 17.1;
                 break;
             case 15:
                 // 13.9-14.7
-                obj->friction_a->motor_controller->ref_speed = 26000;
-                obj->friction_b->motor_controller->ref_speed = -26000;
+                obj->friction_a->motor_controller->ref_speed = 26200;
+                obj->friction_b->motor_controller->ref_speed = -26200;
                 obj->upload_data.real_bullet_speed = 14.2;
                 break;
             case 0:  // 刹车

@@ -22,9 +22,9 @@ typedef struct Smc_t {
 } Smc;
 #pragma pack()
 
-void Smc_Init(Smc* smc, Smc_config* config);
-void Smc_Calc(Smc* smc);
-void Smc_SetConfig(Smc_config* config, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax);
+void SMC_Init(Smc* smc, Smc_config* config);
+void SMC_Calc(Smc* smc);
+void SMC_SetConfig(Smc_config* config, float kp, float kd, float kmax, ReachingLaw reaching_law, float outputMax);
 
 // 趋近律
 float ReachingLaw_sgn(float error);

@@ -37,7 +37,7 @@ void controller_calc(controller* obj) {
         if (obj->config.control_depth >= SPEED_CONTROL) {
             obj->smc_speed_data.fdb = obj->fdb_speed;
             obj->smc_speed_data.ref = obj->ref_speed;
-            Smc_Calc(&obj->smc_speed_data);
+            SMC_Calc(&obj->smc_speed_data);
             obj->output = obj->smc_speed_data.output;
         }
     }
@@ -62,7 +62,7 @@ controller* create_controller(controller_config* _config) {
         // memset(&obj->adrc_pos_data, 0, sizeof(obj->adrc_pos_data));
     }
     if (obj->config.control_type == SMC_MODEL) {
-        Smc_Init(&obj->smc_speed_data, &obj->config.speed_smc_config);
+        SMC_Init(&obj->smc_speed_data, &obj->config.speed_smc_config);
     }
     return obj;
 }
