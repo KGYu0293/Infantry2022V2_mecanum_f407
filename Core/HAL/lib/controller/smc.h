@@ -16,7 +16,6 @@ typedef struct Smc_t {
     Smc_config config;
     float error[2];
     float ref;
-    float ref_last;
     float fdb;
     float output;
 } Smc;
