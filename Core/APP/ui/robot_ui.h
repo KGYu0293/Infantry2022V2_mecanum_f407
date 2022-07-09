@@ -18,6 +18,7 @@ typedef struct ui_status_t {
     float cap_percent;
     float bat_voltage;
     float bullet_speed;         //子弹弹速
+    float angle;                //云台与底盘夹角(弧度)
 } ui_status;
 
 typedef struct robot_ui_t {
@@ -73,6 +74,10 @@ typedef struct robot_ui_t {
     graphic_data line_15ms_2m;//对应于18ms：3  30ms:3
     graphic_data line_15ms_3m;//对应于18ms：4  30ms:5
     graphic_data line_15ms_4m;//对应于18ms：5  30ms:7
+
+        //云台与底盘夹角提示
+    graphic_data angle_chassis;//绘制底盘
+    graphic_data angle_gimbal;//绘制云台
     
 
     // UI刷新时间戳

@@ -43,6 +43,9 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->line_15ms_2m);
     add_graphic(obj->ui_sender, &obj->line_15ms_3m);
     add_graphic(obj->ui_sender, &obj->line_15ms_4m);
+    //夹角
+    add_graphic(obj->ui_sender, &obj->angle_chassis);
+    add_graphic(obj->ui_sender, &obj->angle_gimbal);
 }
 
 //改变图形元素
@@ -217,6 +220,14 @@ void Robot_UI_ModifyElements(robot_ui* obj) {
     }
     obj->vision_frame.color = obj->data.vision_has_taget ? Green : White;
 
+    //夹角
+    obj->angle_chassis.start_x = 1700 - 35 * sin(obj->data.angle);
+    obj->angle_chassis.start_y = 825 - 35 * cos(obj->data.angle);
+    obj->angle_chassis.end_x = 1700 + 45 * sin(obj->data.angle);
+    obj->angle_chassis.end_y = 825 + 45 * cos(obj->data.angle);
+    modifiy_graphic(obj->ui_sender, &obj->angle_chassis);
+    modifiy_graphic(obj->ui_sender, &obj->angle_gimbal);
+
     modifiy_graphic(obj->ui_sender, &obj->vision_frame);
     if (obj->data.fri_mode != obj->last_data.fri_mode) modifiy_graphic(obj->ui_sender, &obj->fri_circle);
     if (obj->data.mag_mode != obj->last_data.mag_mode) modifiy_graphic(obj->ui_sender, &obj->mag_circle);
@@ -291,6 +302,10 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->line_15ms_2m = Line(18, 1, Yellow, 1, 840, 416, 1050, 416);
     obj->line_15ms_3m = Line(19, 1, Yellow, 1, 860, 405, 1030, 405);
     obj->line_15ms_4m = Line(20, 1, Yellow, 1, 880, 400, 1010, 400);
+
+    //云台底盘夹角
+    obj->angle_chassis = Line(21, 0, White, 60, 1700, 800, 1700, 860);
+    obj->angle_gimbal = Line(22, 0, RedBlue, 8, 1700, 835, 1700, 875);
 
     //初始化percent
     obj->data.cap_percent = 0.0;

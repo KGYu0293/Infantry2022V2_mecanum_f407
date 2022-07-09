@@ -168,6 +168,7 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
             obj->ui->data.vision_has_taget = obj->recv_data->vision_has_target;
             obj->ui->data.power_mode = obj->recv_data->chassis_dispatch_mode;
             obj->ui->data.bullet_speed = obj->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
+            obj->ui->data.angle = obj->recv_data->chassis_target.offset_angle * 3.14159 / 180;
         }
         Robot_UI_update(obj->ui);
     }
