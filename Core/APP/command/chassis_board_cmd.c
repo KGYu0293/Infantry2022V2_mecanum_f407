@@ -109,14 +109,13 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
         obj->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat = 0;
     }
 
-    // 判断除了云台板stop之外，都已经上线，说明底盘板初始化完成，进入ready状态】
+    // 判断除了云台板stop之外，都已经上线，说明底盘板初始化完成，进入ready状态
     if (obj->mode == robot_run) {
         obj->send_data.chassis_board_status = module_working;
         if (!obj->robot_ready) {
             obj->robot_ready = 1;
             // 播放音乐
             Buzzer_Start(obj->internal_buzzer);
-            //
         }
     } else {
         obj->send_data.chassis_board_status = module_lost;

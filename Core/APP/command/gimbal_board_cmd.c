@@ -163,14 +163,6 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
     // 机器人控制
     if (obj->mode == robot_stop) {
         stop_mode_update(obj);
-        // 在stop模式可以长按Crtl+G软重启
-        if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
-            obj->soft_reset_cnt++;
-            //连续按住3秒
-            if (obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
-        } else {
-            obj->soft_reset_cnt = 0;
-        }
     } else if (obj->mode == robot_run) {
         // 获取云台offset
         obj->send_data.chassis_target.offset_angle = get_offset_angle(YAW_MOTOR_ENCORDER_BIAS, *obj->gimbal_upload_data->yaw_encorder);
@@ -213,6 +205,14 @@ void stop_mode_update(Gimbal_board_cmd* obj) {
     obj->send_data.chassis_mode = chassis_stop;
     obj->gimbal_control.mode = gimbal_stop;
     obj->shoot_control.mode = shoot_stop;
+    // 在stop模式可以长按Crtl+G软重启
+    if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
+        obj->soft_reset_cnt++;
+        //连续按住3秒
+        if (obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
+    } else {
+        obj->soft_reset_cnt = 0;
+    }
 }
 
 void remote_mode_update(Gimbal_board_cmd* obj) {

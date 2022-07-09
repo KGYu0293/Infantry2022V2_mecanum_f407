@@ -377,7 +377,7 @@ void StartRefereeSendTask(void *argument)
     for (;;) {
         FrameRateStatistics(&task_frameRate.FPS_JudgeSend);
         HAL_Referee_Send_Loop();
-        osDelay(50);
+        osDelay(100);
     }
   /* USER CODE END StartRefereeSendTask */
 }
