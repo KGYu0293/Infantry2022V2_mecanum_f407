@@ -7,6 +7,7 @@
 
 typedef enum Servo_Model_e { MODEL_SPEED, MODEL_POS } Servo_Model;  //舵机类型
 
+#pragma pack(1)
 typedef struct Servo_config_t {
     uint8_t bsp_pwm_index;  // 在bsp_pwm中的的端口号
     Servo_Model model;
@@ -26,6 +27,7 @@ typedef struct Servo_t {
     uint16_t pos_servo_control;               // 设定角度（角度式）
     Speed_servo_control speed_servo_control;  // 360舵机（速度式）
 } Servo;
+#pragma pack()
 
 void Servo_Driver_Init(void);
 Servo *Servo_Create(Servo_config *config);

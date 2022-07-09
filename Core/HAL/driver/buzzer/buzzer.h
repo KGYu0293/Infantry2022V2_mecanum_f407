@@ -2,6 +2,8 @@
 #define _BUZZER_H
 #include "stdint.h"
 #include "stdlib.h"
+
+#pragma pack(1)
 typedef struct buzzer_config_t{
     uint16_t* music;
     uint16_t len;
@@ -14,6 +16,8 @@ typedef struct buzzer_t {
     uint16_t started;
     buzzer_config config;
 } buzzer;
+#pragma pack()
+
 //预定义的一些音乐
 extern uint16_t music1[];
 extern uint16_t music2[];

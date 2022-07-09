@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 enum PID_Mode_e { PID_POSITION = 0, PID_DELTA, PID_COMP_POSITION };
+
+#pragma pack(1)
 typedef struct PID_config_t {
     float KP;
     float KI;
@@ -28,6 +30,7 @@ typedef struct PID_t {
     float output_unlimited; // 经outputMax限制前的原始输出
     float error_delta;
 } pid;
+#pragma pack()
 
 void PID_Init(struct PID_t* pid, struct PID_config_t* config);
 void PID_Calc(struct PID_t* pid);

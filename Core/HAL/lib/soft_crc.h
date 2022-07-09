@@ -12,6 +12,7 @@ extern "C" {
 
 #include "stdint.h"
 
+#pragma pack(1)
 typedef struct CRC16_config_t {
     uint16_t poly;
     uint16_t crc_init;
@@ -29,6 +30,7 @@ typedef struct CRC8_t {
     uint8_t table[256];
     uint8_t crc_init;
 } CRC8;
+#pragma pack()
 
 extern CRC16* crc16_default;
 extern CRC8* crc8_default;

@@ -16,6 +16,7 @@
 #include "robot_ui.h"
 #include "indicator_led.h"
 
+#pragma pack(1)
 typedef struct Chassis_board_cmd_t {
     // 机器人状态
     Robot_mode mode;
@@ -36,8 +37,8 @@ typedef struct Chassis_board_cmd_t {
     Upload_chassis *chassis_upload_data;  //底盘模块回传数据
     // 标志量
     uint8_t robot_ready;
-
 } chassis_board_cmd;
+#pragma pack()
 
 chassis_board_cmd *Chassis_board_CMD_Create(void);
 void Chassis_board_CMD_Update(chassis_board_cmd *obj);

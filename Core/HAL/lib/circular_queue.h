@@ -4,6 +4,8 @@
 #include "stdint.h"
 #include "stdlib.h"
 #include "string.h"
+
+#pragma pack(1)
 /*
 cq_len:队列中元素个数
 cq_max_len:队列最多能容纳的元素个数
@@ -14,6 +16,7 @@ typedef struct circular_queue_t {
     size_t cq_size, cq_len, cq_max_len;
     size_t head, tail;
 } circular_queue;
+#pragma pack()
 
 circular_queue* create_circular_queue(size_t cq_size, size_t max_len);
 

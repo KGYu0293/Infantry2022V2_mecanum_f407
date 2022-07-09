@@ -5,6 +5,7 @@
 #include <uart_recv.h>
 #include <uart_send.h>
 
+#pragma pack(1)
 typedef struct uartpc_config_t {
     uint8_t bsp_uart_index;
     uint16_t send_identifer;
@@ -19,6 +20,7 @@ typedef struct uartpc_t {
     pc_recv* pc_recv_data;
     uint8_t* data_updated;
 } uartpc;
+#pragma pack()
 
 uartpc* UartPC_Create(uartpc_config* config);
 void UartPC_Send(uartpc* obj, pc_send* data);

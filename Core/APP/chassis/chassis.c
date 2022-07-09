@@ -365,9 +365,14 @@ void Chassis_calculate(Chassis *obj) {
     // if (fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5) {
     //     obj->cmd_data->target.vx *= 0.6;  //平移减速
     // }
-    float a = ((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy));
+    // float a = ((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy));
     float ratio;
-    arm_sqrt_f32(a, &ratio);                               // 使用armmath库代替c语言库的sqrt加快速度
+    // arm_sqrt_f32(a, &ratio);                               // 使用armmath库代替c语言库的sqrt加快速度
+    if (fabs(obj->cmd_data->target.vx) > fabs(obj->cmd_data->target.vy)) {
+        ratio = fabs(obj->cmd_data->target.vx);
+    } else {
+        ratio = fabs(obj->cmd_data->target.vy);
+    }
     if (ratio > 4) ratio = 4;                              // 最大爆发速度倍率限制
     obj->proc_v_base = obj->proc_v_base * ratio;           // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
     if (obj->proc_v_base > 5000) obj->proc_v_base = 5000;  // 最大上限设置值

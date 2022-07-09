@@ -17,6 +17,7 @@ enum Motor_FDB_Model_e { MOTOR_FDB = 0,
 enum Motor_OUTPUT_Model_e { MOTOR_OUTPUT_NORMAL = 0,
                             MOTOR_OUTPUT_REVERSE };  //是否输出反转
 
+#pragma pack(1)
 typedef struct can_motor_config_t {
     uint8_t bsp_can_index;
     uint8_t motor_set_id;  //电调上通过闪灯次数确定的id
@@ -52,6 +53,7 @@ typedef struct can_motor_t {
     float velocity;                  //用电机编码器计算出来的角速度（单位：度每秒）
     monitor_item* monitor;
 } can_motor;
+#pragma pack()
 
 void Can_Motor_Driver_Init();
 can_motor* Can_Motor_Create(can_motor_config* config);

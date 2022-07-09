@@ -90,7 +90,7 @@ void CanMotor_RxCallBack(uint8_t can_id, uint32_t identifier, uint8_t *data, uin
 void Can_Motor_FeedbackData_Update(can_motor *obj, uint8_t *data) {
     obj->last_fdbPosition = obj->fdbPosition;
     obj->fdbPosition = ((short)data[0]) << 8 | data[1];
-    if(obj->last_fdbPosition == FDB_INIT_VALUE) obj->last_fdbPosition = obj->fdbPosition;
+    if (obj->last_fdbPosition == FDB_INIT_VALUE) obj->last_fdbPosition = obj->fdbPosition;
     obj->fdbSpeed = ((short)data[2]) << 8 | data[3];
     obj->electric_current = ((short)data[4]) << 8 | data[5];
     if (obj->config.motor_model == MODEL_2006) {
@@ -129,15 +129,15 @@ void Can_Motor_Calc_Send() {
                 //电机掉线判断，如果同一个包内的所有的电机都掉线，那么这个包将不会发出
                 if (is_Offline(obj->monitor)) continue;
                 identifier_send = 1;
-                if (obj->config.position_fdb_model == OTHER_FDB){
+                if (obj->config.position_fdb_model == OTHER_FDB) {
                     obj->motor_controller->fdb_position = *obj->config.position_fdb;
                 } else {
                     obj->motor_controller->fdb_position = obj->real_position;
                 }
-                if(obj->config.speed_fdb_model == OTHER_FDB){
+                if (obj->config.speed_fdb_model == OTHER_FDB) {
                     obj->motor_controller->fdb_speed = *obj->config.speed_fdb;
                 } else {
-                    obj->motor_controller->fdb_speed = obj->velocity;
+                    obj->motor_controller->fdb_speed = obj->fdbSpeed * 6;
                 }
 
                 controller_calc(obj->motor_controller);

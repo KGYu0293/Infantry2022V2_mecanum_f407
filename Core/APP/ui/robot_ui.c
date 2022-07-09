@@ -44,7 +44,6 @@ void Robot_UI_AddElements(robot_ui* obj) {
     add_graphic(obj->ui_sender, &obj->line_15ms_2m);
     add_graphic(obj->ui_sender, &obj->line_15ms_3m);
     add_graphic(obj->ui_sender, &obj->line_15ms_4m);
-
     //夹角
     add_graphic(obj->ui_sender, &obj->angle_chassis);
     add_graphic(obj->ui_sender, &obj->angle_gimbal);

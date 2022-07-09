@@ -1,6 +1,7 @@
 #ifndef _MahonyAHRS_h
 #define _MahonyAHRS_h
 
+#pragma pack(1)
 typedef struct _MahonyAHRS {
     float twoKp;
     float twoKi;
@@ -9,6 +10,7 @@ typedef struct _MahonyAHRS {
     float integralFBx, integralFBy, integralFBz;
     float euler[3];
 } MahonyAHRS;
+#pragma pack()
 
 void MahonyAHRS_init(MahonyAHRS *obj, float _twoKp, float _twoKi,
                      float _sampleFreq);

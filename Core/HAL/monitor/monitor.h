@@ -3,6 +3,7 @@
 #include <stdint.h>
 typedef void (*lost_callback)(void* data);
 
+#pragma pack(1)
 typedef struct monitor_item_t {
     int reload_count;
     int count;
@@ -10,6 +11,7 @@ typedef struct monitor_item_t {
     void (*reset)(struct monitor_item_t* item);
     void* data;
 } monitor_item;
+#pragma pack()
 
 void Monitor_Init();
 monitor_item* Monitor_Register(lost_callback callback, int count, void* callback_data);

@@ -9,11 +9,11 @@ void gimbal_core_module_lost(void* obj) { printf_log("gimbal_core_module_lost!!!
 void pc_lost(void* obj) { printf_log("pc lost!\n"); }
 
 // cmd的private函数
-void stop_mode_update(Gimbal_board_cmd* obj);       //机器人停止模式更新函数
-void remote_mode_update(Gimbal_board_cmd* obj);     //机器人遥控器模式更新函数
-void mouse_key_mode_update(Gimbal_board_cmd* obj);  //机器人键鼠模式更新函数
-void send_cmd_and_data(Gimbal_board_cmd* obj);      //发布指令和板间通信
-void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj);
+void stop_mode_update(Gimbal_board_cmd* obj);                //机器人停止模式更新函数
+void remote_mode_update(Gimbal_board_cmd* obj);              //机器人遥控器模式更新函数
+void mouse_key_mode_update(Gimbal_board_cmd* obj);           //机器人键鼠模式更新函数
+void send_cmd_and_data(Gimbal_board_cmd* obj);               //发布指令和板间通信
+void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj);  //底盘和云台的默认状态
 // 其他功能函数
 float get_offset_angle(short init_forward, short now_encoder);  // 获取云台朝向与底盘正前的夹角
 
@@ -205,6 +205,14 @@ void stop_mode_update(Gimbal_board_cmd* obj) {
     obj->send_data.chassis_mode = chassis_stop;
     obj->gimbal_control.mode = gimbal_stop;
     obj->shoot_control.mode = shoot_stop;
+    // 在stop模式可以长按Crtl+G软重启
+    if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
+        obj->soft_reset_cnt++;
+        //连续按住3秒
+        if (obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
+    } else {
+        obj->soft_reset_cnt = 0;
+    }
 }
 
 void remote_mode_update(Gimbal_board_cmd* obj) {
@@ -269,7 +277,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             mousekey_GimbalChassis_default(obj);
         }
     }
-    // v:云台底盘独立
+    // v:云台底盘分离
     if (obj->remote->data.key_single_press_cnt.v != obj->remote->last_data.key_single_press_cnt.v) {
         if (obj->send_data.chassis_mode != chassis_run || obj->gimbal_control.mode != gimbal_run) {
             obj->send_data.chassis_mode = chassis_run;
@@ -307,25 +315,29 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     }
     // g:小符
     if (obj->remote->data.key_single_press_cnt.g != obj->remote->last_data.key_single_press_cnt.g) {
-        if (obj->autoaim_mode != auto_aim_buff_small)
+        if (obj->autoaim_mode != auto_aim_buff_small) {
             obj->autoaim_mode = auto_aim_buff_small;
-        else
+            // 打符自动进入云台底盘分离
+            obj->send_data.chassis_mode = chassis_run;
+            obj->gimbal_control.mode = gimbal_run;
+        } else {
             obj->autoaim_mode = auto_aim_off;
+            // 关闭打符自动进入云台跟随底盘
+            mousekey_GimbalChassis_default(obj);
+        }
     }
     // b:大符
     if (obj->remote->data.key_single_press_cnt.b != obj->remote->last_data.key_single_press_cnt.b) {
-        if (obj->autoaim_mode != auto_aim_buff_big)
+        if (obj->autoaim_mode != auto_aim_buff_big) {
             obj->autoaim_mode = auto_aim_buff_big;
-        else
+            // 打符自动进入云台底盘分离
+            obj->send_data.chassis_mode = chassis_run;
+            obj->gimbal_control.mode = gimbal_run;
+        } else {
             obj->autoaim_mode = auto_aim_off;
-    }
-    // Crtl+G软重启
-    if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
-        obj->soft_reset_cnt++;
-        //连续按住3秒
-        if (obj->soft_reset_cnt == 1500) obj->soft_reset_flag = 1;
-    } else {
-        obj->soft_reset_cnt = 0;
+            // 关闭打符自动进入云台跟随底盘
+            mousekey_GimbalChassis_default(obj);
+        }
     }
 
     obj->pc_send_data.auto_mode_flag = obj->autoaim_mode;

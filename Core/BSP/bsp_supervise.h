@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 
+#pragma pack(1)
 typedef struct {
     short count;
     short FPS;
@@ -18,6 +19,7 @@ typedef struct {
     FPS_t FPS_Judge;
     FPS_t FPS_JudgeSend;
 } FrameRate;
+#pragma pack(1)
 
 extern FrameRate task_frameRate;
 void FrameRateStatistics(FPS_t *FPS);
