@@ -54,7 +54,7 @@
  * @brief      :主控用到的GPIO口的数目
  * @attention  :用到几个就填几个，如果更改的话需要在bsp_gpio.c中的函数里面加上额外的gpio配置，并添加如下的宏定义
  */
-#define DEVICE_GPIO_CNT 8
+#define DEVICE_GPIO_CNT 9
 
 /**
  * @brief      :gpio_ports[x]的宏定义配置，分别为引脚定义、输入还是输出模式
@@ -92,6 +92,10 @@
 #define GPIO_7_PIN GPIO_PIN_7
 #define GPIO_7_MODE GPIO_OUTPUT_MODE
 
+#define GPIO_8_BASE GPIOC
+#define GPIO_8_PIN GPIO_PIN_6
+#define GPIO_8_MODE GPIO_OUTPUT_MODE
+
 /**
  * @brief      :APP层和HAL层会调用的GPIO口的宏定义
  * @attention  :0代表gpio_ports[0]，1代表gpio_ports[1]，以此类推
@@ -104,6 +108,7 @@
 #define GPIO_LED3 5
 #define GPIO_SOFT_I2C_SCL 6
 #define GPIO_SOFT_I2C_SDA 7
+#define GPIO_VL53L0x_ENABLE 8
 
 /*--------------------------------------------------bsp_pwm--------------------------------------------------*/
 /**

@@ -10,7 +10,6 @@ typedef struct Soft_I2c_config_t {
 } Soft_I2c_config;
 typedef struct Soft_I2c_t {
     Soft_I2c_config config;
-    uint8_t data;
 } Soft_I2c;
 #pragma pack()
 

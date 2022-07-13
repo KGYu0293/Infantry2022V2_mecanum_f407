@@ -97,17 +97,18 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
         obj->pc_send_data.robot_id = obj->recv_data->robot_id;
         obj->gimbal_control.rotate_feedforward = obj->recv_data->gyro_yaw;
     }
-    // 判断云台IMU是否上线
+    // 判断云台模块
     publish_data gimbal_data_fdb = obj->gimbal_upload_suber->getdata(obj->gimbal_upload_suber);
     if (gimbal_data_fdb.len == -1) {
-        obj->send_data.chassis_target.offset_angle = 0;
         obj->mode = robot_stop;
     } else {
         obj->gimbal_upload_data = (Upload_gimbal*)gimbal_data_fdb.data;
         obj->pc_send_data.euler[0] = obj->gimbal_upload_data->gimbal_imu->euler[0];
         obj->pc_send_data.euler[1] = obj->gimbal_upload_data->gimbal_imu->euler[1];
         obj->pc_send_data.euler[2] = obj->gimbal_upload_data->gimbal_imu->euler[2];
-        if (obj->gimbal_upload_data->gimbal_status == module_lost) obj->mode = robot_stop;
+        if (obj->gimbal_upload_data->gimbal_status == module_lost) {
+            obj->mode = robot_stop;
+        }
     }
 
     // 除了遥控器之外都已经上线
@@ -127,11 +128,10 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
         }
     }
 
-    //已经进入soft_reset准备状态
+    // soft_reset
     if (obj->soft_reset_flag > 0) {
         obj->mode = robot_stop;
     }
-
     if (obj->soft_reset_flag == 1) {
         static int16_t soft_rest_robot_stop_wait_cnt = 0;
         soft_rest_robot_stop_wait_cnt++;
@@ -201,10 +201,13 @@ void mousekey_GimbalChassis_default(Gimbal_board_cmd* obj) {
 }
 
 void stop_mode_update(Gimbal_board_cmd* obj) {
+    // 关闭自身模块
     obj->send_data.now_robot_mode = robot_stop;
-    obj->send_data.chassis_mode = chassis_stop;
     obj->gimbal_control.mode = gimbal_stop;
     obj->shoot_control.mode = shoot_stop;
+    // 关闭底盘板模块
+    obj->send_data.chassis_mode = chassis_stop;
+    obj->send_data.chassis_target.offset_angle = 0;
     // 在stop模式可以长按Crtl+G软重启
     if (obj->remote->data.key_down.ctrl && obj->remote->data.key_down.g) {
         obj->soft_reset_cnt++;
@@ -234,8 +237,6 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
     if (obj->remote->data.rc.s1 == 2) {
         // 小陀螺模式
         obj->send_data.chassis_mode = chassis_rotate_run;
-        // obj->send_data.chassis_target.vy *= 0.60f;
-        // obj->send_data.chassis_target.vx *= 0.60f;
     } else {
         // 底盘跟随模式
         obj->send_data.chassis_mode = chassis_run_follow_offset;
@@ -243,9 +244,6 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
 
     // 发射机构控制
     if (obj->remote->data.rc.s1 == 1) {
-        // obj->shoot_control.mode = shoot_stop;
-        // obj->shoot_control.bullet_mode = bullet_holdon;
-        // obj->shoot_control.bullet_speed = 0;
         obj->shoot_control.mode = shoot_holdon;
         if (obj->remote->data.rc.ch4 > CHx_BIAS + 400) obj->shoot_control.mag_mode = magazine_open;
         if (obj->remote->data.rc.ch4 < CHx_BIAS - 400) obj->shoot_control.mag_mode = magazine_close;
@@ -289,8 +287,9 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     // x: 飞坡模式 暂时去掉云台跟随底盘
     if (obj->remote->data.key_single_press_cnt.x != obj->remote->last_data.key_single_press_cnt.x) {
         if (obj->send_data.chassis_dispatch_mode != chassis_dispatch_fly) {
-            // obj->gimbal_control.mode = gimbal_middle;
+            obj->gimbal_control.mode = gimbal_middle;
             // obj->send_data.chassis_mode = chassis_run;
+            obj->send_data.chassis_mode = chassis_run_follow_offset;
             obj->send_data.chassis_dispatch_mode = chassis_dispatch_fly;
         } else {
             mousekey_GimbalChassis_default(obj);
@@ -396,8 +395,6 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
         if (obj->autoaim_mode == auto_aim_off) {
             obj->autoaim_mode = auto_aim_normal;
         }
-        obj->gimbal_control.yaw -= 0.001f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
-        obj->gimbal_control.pitch -= 0.001f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
         if ((float)obj->remote->data.rc.ch0 > CHx_BIAS + 300) obj->autoaim_mode = auto_aim_normal;
         if ((float)obj->remote->data.rc.ch1 > CHx_BIAS + 300) obj->autoaim_mode = auto_aim_buff_big;
         if ((float)obj->remote->data.rc.ch1 < CHx_BIAS - 300) obj->autoaim_mode = auto_aim_buff_small;
@@ -406,56 +403,84 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
     }
 
     // 云台控制参数
+    // if (obj->gimbal_control.mode == gimbal_run) {
+    //     if (obj->autoaim_mode == auto_aim_off) {
+    //         obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+    //         obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
+    //         obj->send_data.vision_has_target = 0;
+    //         //不管开没开自瞄，都更新pc接收数据的状态
+    //         if (*obj->pc->data_updated) {
+    //             *obj->pc->data_updated = 0;
+    //         }
+    //     } else {
+    //         static int16_t pc_lost_cnt = 10;
+    //         if (*obj->pc->data_updated) {
+    //             *obj->pc->data_updated = 0;
+    //             // 自瞄开
+    //             // 计算真实yaw值
+    //             if (obj->pc->pc_recv_data->vitual_mode != VISUAL_NO_TARGET) {
+    //                 if (obj->pc->pc_recv_data->yaw < pi && obj->pc->pc_recv_data->yaw > -pi && obj->pc->pc_recv_data->pitch < pi && obj->pc->pc_recv_data->pitch > -pi) {
+    //                     float yaw_target = obj->pc->pc_recv_data->yaw * 360.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 360.0;
+    //                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 360.0;
+    //                     if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 360.0;
+    //                     obj->gimbal_control.yaw = yaw_target;
+    //                     obj->gimbal_control.pitch = obj->pc->pc_recv_data->pitch * 360.0 / 2 / pi;
+    //                 }
+
+    //                 obj->send_data.vision_has_target = 1;
+    //             } else {
+    //                 // 没有目标
+    //                 //使用鼠标控制云台
+    //                 obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+    //                 obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
+    //                 obj->send_data.vision_has_target = 0;
+    //             }
+
+    //             pc_lost_cnt = 10;
+    //         } else {
+    //             pc_lost_cnt--;
+    //             //判断小电脑通信彻底丢失（等待了20ms）
+    //             if (pc_lost_cnt <= 0) {
+    //                 pc_lost_cnt = 0;
+    //             }
+    //             //使用鼠标控制云台
+    //             obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
+    //             obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
+    //             obj->send_data.vision_has_target = 0;
+    //         }
+    //     }
     if (obj->gimbal_control.mode == gimbal_run) {
-        if (obj->autoaim_mode == auto_aim_off) {
+        if ((obj->autoaim_mode == auto_aim_off) || (obj->pc->recv->monitor->count < 1) || (*obj->pc->data_updated == 0) || (obj->pc->pc_recv_data->vitual_mode == VISUAL_NO_TARGET)) {
+            obj->send_data.vision_has_target = 0;
+            // 正常键鼠控制
             obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
             obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
-            obj->send_data.vision_has_target = 0;
-            //不管开没开自瞄，都更新pc接收数据的状态
-            if (*obj->pc->data_updated) {
-                *obj->pc->data_updated = 0;
+            // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试用
+            if (obj->remote->data.rc.s1 == 2) {
+                obj->gimbal_control.yaw -= 0.001f * ((float)obj->remote->data.rc.ch2 - CHx_BIAS);
+                obj->gimbal_control.pitch -= 0.001f * ((float)obj->remote->data.rc.ch3 - CHx_BIAS);
             }
         } else {
-            static int16_t pc_lost_cnt = 10;
-            if (*obj->pc->data_updated) {
-                *obj->pc->data_updated = 0;
-                // 自瞄开
-                // 计算真实yaw值
-                if (obj->pc->pc_recv_data->vitual_mode != VISUAL_LOST) {
-                    if (obj->pc->pc_recv_data->yaw < pi && obj->pc->pc_recv_data->yaw > -pi && obj->pc->pc_recv_data->pitch < pi && obj->pc->pc_recv_data->pitch > -pi) {
-                        float yaw_target = obj->pc->pc_recv_data->yaw * 360.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 360.0;
-                        if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 360.0;
-                        if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 360.0;
-                        obj->gimbal_control.yaw = yaw_target;
-                        obj->gimbal_control.pitch = obj->pc->pc_recv_data->pitch * 360.0 / 2 / pi;
-                    }
-
-                    obj->send_data.vision_has_target = 1;
-                } else {
-                    // 没有目标
-                    //使用鼠标控制云台
-                    obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
-                    obj->send_data.vision_has_target = 0;
-                }
-
-                pc_lost_cnt = 10;
-            } else {
-                pc_lost_cnt--;
-                //判断小电脑通信彻底丢失（等待了20ms）
-                if (pc_lost_cnt <= 0) {
-                    pc_lost_cnt = 0;
-                    //使用鼠标控制云台
-                    obj->gimbal_control.yaw -= 0.0132f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
-                    obj->gimbal_control.pitch += 0.01f * ((float)obj->remote->data.mouse.y);
-                    obj->send_data.vision_has_target = 0;
-                }
+            // UI-自瞄开
+            obj->send_data.vision_has_target = 1;
+            // 计算真实yaw值
+            if (obj->pc->pc_recv_data->yaw < pi && obj->pc->pc_recv_data->yaw > -pi && obj->pc->pc_recv_data->pitch < pi && obj->pc->pc_recv_data->pitch > -pi) {
+                float yaw_target = obj->pc->pc_recv_data->yaw * 360.0 / 2 / pi + obj->gimbal_upload_data->gimbal_imu->round * 360.0;
+                if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] > pi) yaw_target -= 360.0;
+                if (obj->pc->pc_recv_data->yaw - obj->gimbal_upload_data->gimbal_imu->euler[YAW_AXIS] < -pi) yaw_target += 360.0;
+                obj->gimbal_control.yaw = yaw_target;
+                obj->gimbal_control.pitch = obj->pc->pc_recv_data->pitch * 360.0 / 2 / pi;
             }
         }
-    } else if (obj->gimbal_control.mode == gimbal_middle) {
+        *obj->pc->data_updated = 0;
+    }else if (obj->gimbal_control.mode == gimbal_middle) {
+        obj->gimbal_control.yaw -= 0.01f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));
         // 云台跟随底盘模式
-        obj->send_data.chassis_target.rotate -= 1.0f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));  // 云台跟随底盘
+        // obj->send_data.chassis_target.rotate -= 1.0f * (0.7f * (obj->remote->data.mouse.x) + 0.3f * (obj->remote->last_data.mouse.x));  // 云台跟随底盘
     }
+    // pitch轴限幅
+    if (obj->gimbal_control.pitch < -90) obj->gimbal_control.pitch = -90;
+    if (obj->gimbal_control.pitch > 90) obj->gimbal_control.pitch = 90;
 
     // c:开关弹仓
     if (obj->remote->data.key_single_press_cnt.c % 2)
@@ -465,11 +490,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
 
     // 发射机构控制参数
     if (obj->remote->data.rc.s1 == 1) {
-        // 发射机构刹车
-        // obj->shoot_control.bullet_mode = bullet_holdon;
-        // obj->shoot_control.bullet_speed = 0;
-        // obj->shoot_control.mode = shoot_stop;
-        obj->shoot_control.mode = shoot_holdon;
+        obj->shoot_control.mode = shoot_holdon;  // 发射机构刹车
     } else {
         obj->shoot_control.mode = shoot_run;
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;  // 下板传回的热量剩余
@@ -486,9 +507,8 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             obj->shoot_control.bullet_mode = bullet_continuous;
             obj->shoot_control.fire_rate = 15;
         } else if (!obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 只按右键 反转防卡弹
-            // obj->shoot_control.bullet_mode = bullet_reverse;
             obj->shoot_control.mode = shoot_stuck_handle;
-        } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE) {  //  视觉控制发射(打符)
+        } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE && obj->pc->recv->monitor->count > 1) {  //  视觉控制发射(打符)
             obj->shoot_control.bullet_mode = bullet_single;
         } else if ((obj->remote->data.rc.s1 == 3) || (obj->remote->data.rc.ch4 > CHx_BIAS + 400)) {  // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试时测试弹道用
             obj->shoot_control.bullet_mode = bullet_continuous;

@@ -19,7 +19,7 @@ Referee *referee_Create(referee_config *config) {
     Referee *obj = (Referee *)malloc(sizeof(Referee));
     memset(obj, 0, sizeof(Referee));
     obj->config = *config;
-    obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 30, obj);
     cvector_pushback(referee_instances, &obj);
     // 数据接收队列
     obj->primary_data = create_circular_queue(sizeof(uint8_t), REFEREE_RX_QUENE_MAX_LEN);

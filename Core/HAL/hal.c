@@ -16,6 +16,7 @@
 #include "soft_crc.h"
 #include "super_cap_wuli.h"
 #include "indicator_led.h"
+#include "VL53L0x.h"
 
 void HAL_Layer_Init() {
     Monitor_Init();
@@ -32,6 +33,7 @@ void HAL_Layer_Init() {
     Super_cap_wuli_Driver_Init();
     Servo_Driver_Init();
     indicator_led_Driver_Init();
+    VL53L0x_Driver_Init();
 }
 
 void HAL_Layer_Default_Loop() {

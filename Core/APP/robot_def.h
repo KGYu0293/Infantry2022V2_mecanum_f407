@@ -127,7 +127,7 @@ typedef struct Cmd_shoot_t {
 // 对云台的控制量
 typedef struct Cmd_gimbal_t {
     Gimbal_mode mode;
-    float yaw;
+    float yaw;  // 单位 度
     float pitch;
 
     float rotate_feedforward;  // 小陀螺前馈

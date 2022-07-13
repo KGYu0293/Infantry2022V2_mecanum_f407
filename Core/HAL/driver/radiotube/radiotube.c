@@ -9,7 +9,7 @@ spi_EIO *Spi_EIO_Create(spi_eio_config *config) {
     spi_EIO *obj = (spi_EIO *)malloc(sizeof(spi_EIO));
     memset(obj, 0, sizeof(spi_EIO));
     obj->config = *config;
-    obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 20, obj);
     memset(obj, 0, sizeof(spi_EIO));
     obj->Eio_tx_data_len = config->eio_tx_data_len;
     obj->Eio_rx_data_len = config->eio_rx_data_len;

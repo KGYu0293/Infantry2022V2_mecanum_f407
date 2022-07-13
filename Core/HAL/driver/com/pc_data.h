@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define VISUAL_LOST 0         // 找不到目标
+#define VISUAL_NO_TARGET 0    // 找不到目标
 #define VISUAL_FOLLOW 1       // 跟随目标
 #define VISUAL_FIRE_SINGLE 2  // 单发（打符）
 

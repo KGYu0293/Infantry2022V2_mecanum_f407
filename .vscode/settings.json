@@ -100,7 +100,8 @@
         "basic_math_functions.h": "c",
         "pc_data.h": "c",
         "controller.h": "c",
-        "smc.h": "c"
+        "smc.h": "c",
+        "i2c.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
 }

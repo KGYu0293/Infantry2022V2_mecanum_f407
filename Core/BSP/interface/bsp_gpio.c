@@ -44,6 +44,10 @@ void BSP_GPIO_Init() {
     gpio_ports[7].base = GPIO_7_BASE;
     gpio_ports[7].pin = GPIO_7_PIN;
     gpio_ports[7].mode = GPIO_7_MODE;
+
+    gpio_ports[8].base = GPIO_8_BASE;
+    gpio_ports[8].pin = GPIO_8_PIN;
+    gpio_ports[8].mode = GPIO_8_MODE;
 }
 
 void BSP_GPIO_Set(uint8_t gpio_index, uint8_t status) {

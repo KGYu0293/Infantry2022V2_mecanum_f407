@@ -9,7 +9,9 @@
 void chassis_motor_lost(void *motor) { printf_log("chassis motor lost!\n"); }
 void chassis_imu_lost(void *motor) { printf_log("chassis IMU lost!!\n"); }
 void chassis_super_cap_lost(void *motor) { printf_log("super cap lost!!\n"); }
+void chassis_vl53l0x_lost(void *motor) { printf_log("vl53l0x lost!!\n"); }
 void Speed_set(Chassis *obj, Cmd_chassis *param);
+void Chassis_Fly_React(Chassis *obj);
 
 Chassis *Chassis_Create() {
     Chassis *obj = (Chassis *)malloc(sizeof(Chassis));
@@ -39,6 +41,15 @@ Chassis *Chassis_Create() {
     cap_config.lost_callback = chassis_super_cap_lost;
     obj->super_cap = Super_cap_wuli_Create(&cap_config);
 
+    //激光测距
+    VL53L0x_config vl53l0x_config;
+    vl53l0x_config.bsp_gpio_xshut_index = GPIO_VL53L0x_ENABLE;
+    vl53l0x_config.lost_callback = chassis_vl53l0x_lost;
+    vl53l0x_config.soft_i2c_config.bsp_gpio_scl_index = GPIO_SOFT_I2C_SCL;
+    vl53l0x_config.soft_i2c_config.bsp_gpio_sda_index = GPIO_SOFT_I2C_SDA;
+    obj->vl53l0x = VL53L0x_Create(&vl53l0x_config);
+    VL53L0x_Enable(obj->vl53l0x);
+
     can_motor_config lf_config;
     can_motor_config rf_config;
     can_motor_config lb_config;
@@ -53,7 +64,7 @@ Chassis *Chassis_Create() {
     lf_controller_config.control_type = PID_MODEL;
     lf_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&lf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&lf_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
+    PID_SetConfig_Pos(&lf_controller_config.speed_pid_config, 4, 0, 2, 0, 12000);
     lf_config.motor_model = MODEL_3508;
     lf_config.bsp_can_index = 0;
     lf_config.motor_set_id = 2;
@@ -69,7 +80,7 @@ Chassis *Chassis_Create() {
     rf_controller_config.control_type = PID_MODEL;
     rf_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&rf_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&rf_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
+    PID_SetConfig_Pos(&rf_controller_config.speed_pid_config, 4, 0, 2, 0, 12000);
     rf_config.motor_model = MODEL_3508;
     rf_config.bsp_can_index = 0;
     rf_config.motor_set_id = 1;
@@ -84,7 +95,7 @@ Chassis *Chassis_Create() {
     lb_controller_config.control_type = PID_MODEL;
     lb_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&lb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&lb_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
+    PID_SetConfig_Pos(&lb_controller_config.speed_pid_config, 4, 0, 2, 0, 12000);
     lb_config.motor_model = MODEL_3508;
     lb_config.bsp_can_index = 0;
     lb_config.motor_set_id = 3;
@@ -99,7 +110,7 @@ Chassis *Chassis_Create() {
     rb_controller_config.control_type = PID_MODEL;
     rb_controller_config.control_depth = SPEED_CONTROL;
     PID_SetConfig_Pos(&rb_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    PID_SetConfig_Pos(&rb_controller_config.speed_pid_config, 5, 0, 10, 0, 12000);
+    PID_SetConfig_Pos(&rb_controller_config.speed_pid_config, 4, 0, 2, 0, 12000);
     rb_config.motor_model = MODEL_3508;
     rb_config.bsp_can_index = 0;
     rb_config.motor_set_id = 4;
@@ -125,11 +136,7 @@ Chassis *Chassis_Create() {
 void OutputmaxLimit(Chassis *obj) {
     float output_limit = 0;
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
-        if (obj->super_cap->cap_percent < 25) {  //防止快速掉电
-            output_limit = 6000;
-        } else {
-            output_limit = 32000;
-        }
+        output_limit = 32000;
     } else {
         // output_limit = 3000 + 5000 * (obj->cmd_data->power.power_limit - 30) / 90;
         switch (obj->cmd_data->power.power_limit) {
@@ -169,35 +176,38 @@ void OutputmaxLimit(Chassis *obj) {
             output_limit = 18000;
         }
 
-        if (obj->super_cap->cap_percent < 30)
-            output_limit = 6000;
-        else if (obj->super_cap->cap_percent < 50)
-            output_limit *= 0.9;
-        //
+        // 防止快速掉电
+        if (obj->super_cap->cap_percent < 50)  // output_limit *= 0.9;
+            output_limit *= (obj->super_cap->cap_percent * 0.01 + 0.5);
+
         if (output_limit < 5000) output_limit = 5000;
         if (output_limit > 32000) output_limit = 32000;
+    }
+
+    // 掉电保护
+    if (obj->super_cap->cap_percent < 25 && output_limit > 6000) {
+        output_limit = 6000;
+    }
+    if (obj->super_cap->cap_percent < 0 && output_limit > 3000) {
+        output_limit = 3000;
     }
 
     // outputlimit按照需求进行分配
     float output_sum = fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) +
                        fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) + fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited);
-    if (output_sum > 1.0f) {
+
+    if (output_sum > 1.0f) {  // 避免分母=0
         // 保证四个outputmax之和为output_limit
-        obj->lf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
-        obj->rf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
-        obj->lb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
-        obj->rb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 3*/ output_limit * fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->lf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 0.75*/ output_limit * fabs(obj->lf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->rf->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 0.75*/ output_limit * fabs(obj->rf->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->lb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 0.75*/ output_limit * fabs(obj->lb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
+        obj->rb->motor_controller->pid_speed_data.config.outputMax = /*0.25 * output_limit + 0.75*/ output_limit * fabs(obj->rb->motor_controller->pid_speed_data.output_unlimited) / output_sum;
     } else {
         obj->lf->motor_controller->pid_speed_data.config.outputMax = output_limit;
         obj->rf->motor_controller->pid_speed_data.config.outputMax = output_limit;
         obj->lb->motor_controller->pid_speed_data.config.outputMax = output_limit;
         obj->rb->motor_controller->pid_speed_data.config.outputMax = output_limit;
     }
-
-    // if (obj->lf->motor_controller->pid_speed_data.error[0] > 0.5 * obj->lf->motor_controller->pid_speed_data.ref) obj->lf->motor_controller->pid_speed_data.config.outputMax *= 2;
-    // if (obj->lb->motor_controller->pid_speed_data.error[0] > 0.5 * obj->lb->motor_controller->pid_speed_data.ref) obj->lb->motor_controller->pid_speed_data.config.outputMax *= 2;
-    // if (obj->rf->motor_controller->pid_speed_data.error[0] > 0.5 * obj->rf->motor_controller->pid_speed_data.ref) obj->rf->motor_controller->pid_speed_data.config.outputMax *= 2;
-    // if (obj->rb->motor_controller->pid_speed_data.error[0] > 0.5 * obj->rb->motor_controller->pid_speed_data.ref) obj->rb->motor_controller->pid_speed_data.config.outputMax *= 2;
 }
 
 /**
@@ -256,7 +266,6 @@ void mecanum_calculate(Chassis *obj, float vx, float vy, float rotate) {
 // 小陀螺情况下的旋转速度控制函数
 float auto_rotate_param(Cmd_chassis *param) {
     static float rotate = 0;
-    // 位置式变速
     float rotate_baseline = 170 + (param->power.power_limit - 45) * 2;  // 该功率下的基准转速 线性拟合
     // 还是单独测吧（
     switch (param->power.power_limit) {
@@ -288,10 +297,10 @@ float auto_rotate_param(Cmd_chassis *param) {
             rotate_baseline = 240;  // 和最小（45w）时保持一致
             break;
     }
-
+    rotate = rotate_baseline;
+    // 位置式变速
     // float x = (param->target.offset_angle / RADIAN_COEF) - 0.25 * pi;  // 原点 换算成弧度 加定值使速度最低时装甲板不在正面
     // rotate = rotate_baseline + rotate_baseline * 0.2 * sin(x);       // 变速函数&变速范围
-    rotate = rotate_baseline;
     // 时间式变速
     // static uint8_t spin_speed_change = 1;// 0：定速 1：加速 2：减速 （初始从低往高加）
     // // 基准转速 = 最低转速 + 高功率下加速旋转
@@ -320,8 +329,7 @@ float auto_rotate_param(Cmd_chassis *param) {
     //     }
     // }
 
-    // rotate = 150;
-    rotate *= 0.9;
+    rotate *= 0.9;  // 临时调整 降功率
     return rotate;
 }
 
@@ -358,33 +366,29 @@ void Chassis_calculate(Chassis *obj) {
             obj->proc_v_base = 2700;  // 和最小（45w）时保持一致
             break;
     }
-
     obj->proc_v_base *= 0.8;  // 调试 降功率
 
-    // //同时按住前后和平移
-    // if (fabs(obj->cmd_data->target.vx) > 1e-5 && fabs(obj->cmd_data->target.vy) > 1e-5) {
-    //     obj->cmd_data->target.vx *= 0.6;  //平移减速
-    // }
-    // float a = ((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy));
+    float target_v;
+    arm_sqrt_f32(((obj->cmd_data->target.vx * obj->cmd_data->target.vx) + (obj->cmd_data->target.vy * obj->cmd_data->target.vy)), &target_v);  // 使用armmath库代替c语言库的sqrt加快速度
     float ratio;
-    // arm_sqrt_f32(a, &ratio);                               // 使用armmath库代替c语言库的sqrt加快速度
-    if (fabs(obj->cmd_data->target.vx) > fabs(obj->cmd_data->target.vy)) {
+    if (fabs(obj->cmd_data->target.vx) > fabs(obj->cmd_data->target.vy)) {  // 取cmd_data->target.vx/y绝对值中较大的一个
         ratio = fabs(obj->cmd_data->target.vx);
     } else {
         ratio = fabs(obj->cmd_data->target.vy);
     }
     if (ratio > 4) ratio = 4;                              // 最大爆发速度倍率限制
-    obj->proc_v_base = obj->proc_v_base * ratio;           // 理论上应该取cmd_data->target.vx/y绝对值中较大的一个
+    obj->proc_v_base = obj->proc_v_base * ratio;           // 加速倍率
     if (obj->proc_v_base > 5000) obj->proc_v_base = 5000;  // 最大上限设置值
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
         obj->proc_v_base = 5000;  // 飞坡模式速度设定 5m/s
     }
 
-    if (fabs(ratio) < 1e-5) {
+    // 速度分配到两个轴 使其比例不变且矢量和为设定值
+    if (fabs(ratio) < 1e-5) {  // 防止分母=0
         obj->proc_target_vx = obj->proc_target_vy = 0;
     } else {
-        obj->proc_target_vx = obj->proc_v_base * obj->cmd_data->target.vx / ratio;
-        obj->proc_target_vy = obj->proc_v_base * obj->cmd_data->target.vy / ratio;
+        obj->proc_target_vx = obj->proc_v_base * obj->cmd_data->target.vx / target_v;
+        obj->proc_target_vy = obj->proc_v_base * obj->cmd_data->target.vy / target_v;
     }
 
     // 计算旋转速度
@@ -395,15 +399,15 @@ void Chassis_calculate(Chassis *obj) {
         // 平方根函数
         arm_sqrt_f32(2000 * fabs(obj->cmd_data->target.offset_angle), &w);
         w *= sgn(obj->cmd_data->target.offset_angle);
-        // 采用二次函数
+        // 二次函数
         // w = 0.20f * (obj->cmd_data->target.offset_angle) * fabs(obj->cmd_data->target.offset_angle);
-        //飞坡模式要求底盘跟随云台更加紧密
+        // 飞坡模式要求底盘跟随云台更加紧密
         if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
             w *= 1.8;
         }
     }
 
-    //小陀螺加速
+    // 小陀螺加速
     if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_shift && obj->cmd_data->mode == chassis_rotate_run) {
         w *= 1.25;
     }
@@ -425,6 +429,82 @@ void Chassis_calculate(Chassis *obj) {
     }
     // 功率控制
     OutputmaxLimit(obj);
+    // 飞坡处理
+    if (obj->cmd_data->power.dispatch_mode == chassis_dispatch_fly) {
+        if(obj->imu->data.euler_deg[0]>13){
+            obj->lf->motor_controller->pid_speed_data.config.outputMax *= 0.8;
+            obj->rf->motor_controller->pid_speed_data.config.outputMax *= 0.8;
+            obj->lb->motor_controller->pid_speed_data.config.outputMax *= 1.2;
+            obj->rb->motor_controller->pid_speed_data.config.outputMax *= 1.2;
+        }
+    }
+        // Chassis_Fly_React(obj);
+        
+}
+
+//前轮出坡
+int Chassis_if_Fly(Chassis *obj) {
+    if (obj->chassis_fly.if_fly == 0) {
+        if (obj->vl53l0x->distValid > 300) {
+            return 1;
+        } else if (obj->vl53l0x->distValid < 300)
+            return 0;
+    } else {
+        if (obj->vl53l0x->distValid > 200) {
+            return 1;
+        } else if (obj->vl53l0x->distValid < 200)
+            return 0;
+    }
+}
+
+void Chassis_Fly_React(Chassis *obj) {
+    //记录原始数据
+    float outputmax[4];
+    outputmax[0] = obj->lf->motor_controller->pid_speed_data.config.outputMax;
+    outputmax[1] = obj->rf->motor_controller->pid_speed_data.config.outputMax;
+    outputmax[2] = obj->lb->motor_controller->pid_speed_data.config.outputMax;
+    outputmax[3] = obj->rb->motor_controller->pid_speed_data.config.outputMax;
+
+    //前轮出坡
+    //车子起飞时，前两轮卸力
+    if (Chassis_if_Fly(obj)) {
+        //飞坡处理：前两轮pid输出置0
+        obj->lf->motor_controller->pid_speed_data.config.outputMax = 0;
+        obj->rf->motor_controller->pid_speed_data.config.outputMax = 0;
+        float outputmax_sum = outputmax[0] + outputmax[1] + outputmax[2] + outputmax[3];
+        obj->lb->motor_controller->pid_speed_data.config.outputMax = outputmax_sum / 2;
+        obj->rb->motor_controller->pid_speed_data.config.outputMax = outputmax_sum / 2;
+
+        obj->chassis_fly.if_fly = 1;  //记录飞坡
+    }
+
+    //落地处理
+    //车子落地时，把输出限小幅，避免超功率扣血
+    if (!Chassis_if_Fly(obj) && obj->chassis_fly.if_fly) {
+        //进入飞坡结束处理，为了防止掉血，将pid输出拉低 等待一段时间再拉高
+        obj->chassis_fly.wait_calm = 1;
+        obj->chassis_fly.if_fly = 0;
+    }
+    if (obj->chassis_fly.wait_calm == 1) {
+        //飞坡处理：pid输出限幅拉低
+        // obj->lf->motor_controller->pid_speed_data.config.outputMax = 1500;
+        // obj->rf->motor_controller->pid_speed_data.config.outputMax = 1500;
+        obj->lb->motor_controller->pid_speed_data.config.outputMax = 1500;
+        obj->rb->motor_controller->pid_speed_data.config.outputMax = 1500;
+
+        obj->chassis_fly.wait_calm_cnt++;
+        if (obj->chassis_fly.wait_calm_cnt >= 500)  // 1s之后
+        {
+            //处理结束，限幅恢复
+            obj->lf->motor_controller->pid_speed_data.config.outputMax = outputmax[0];
+            obj->rf->motor_controller->pid_speed_data.config.outputMax = outputmax[1];
+            obj->lb->motor_controller->pid_speed_data.config.outputMax = outputmax[2];
+            obj->rb->motor_controller->pid_speed_data.config.outputMax = outputmax[3];
+
+            obj->chassis_fly.wait_calm_cnt = 0;  //计数初始化
+            obj->chassis_fly.wait_calm = 0;      //冷静标志位置no，等待下一次飞坡结束处理
+        }
+    }
 }
 
 void Chassis_Update(Chassis *obj) {
@@ -435,6 +515,10 @@ void Chassis_Update(Chassis *obj) {
     } else {
         obj->upload_data.chassis_status = module_working;
     }
+
+    //测距
+    VL53L0x_StartConversion(obj->vl53l0x);
+    VL53L0x_ReadDistance(obj->vl53l0x);
 
     // 电容剩余值
     obj->upload_data.chassis_supercap_percent = obj->super_cap->cap_percent;
@@ -448,7 +532,7 @@ void Chassis_Update(Chassis *obj) {
     // 设置电容充电功率，在缓冲功率充足时，多充能
     // stop模式等各种模式要能执行这一段，否则可能会超功率
     if (obj->cmd_data->power.power_buffer > 60) {  // 按照目前规则 仅触发飞坡增益时超过60（为250）
-        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
+        obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10 + 0.5 * (obj->cmd_data->power.power_buffer - 60);
     } else if (obj->cmd_data->power.power_buffer > 30) {
         obj->super_cap->power_set = obj->cmd_data->power.power_limit + 10;
     } else {

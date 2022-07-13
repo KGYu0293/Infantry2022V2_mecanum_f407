@@ -68,7 +68,7 @@ can_motor *Can_Motor_Create(can_motor_config *config) {
         obj->config.position_fdb = &obj->real_position;
     }
     obj->motor_controller = create_controller(&obj->config.motor_controller_config);
-    obj->monitor = Monitor_Register(obj->config.lost_callback, 5, obj);
+    obj->monitor = Monitor_Register(obj->config.lost_callback, 10, obj);
 
     obj->enable = MOTOR_STOP;
     return obj;

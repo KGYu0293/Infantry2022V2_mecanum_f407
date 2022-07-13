@@ -1,5 +1,6 @@
 #include <bsp_random.h>
 #include <bsp_time.h>
+#include <math.h>
 #include <referee_ui.h>
 #include <robot_def.h>
 #include <robot_ui.h>
@@ -268,6 +269,8 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->bat_float = Float(3, 0, RedBlue, 2, 30, 1, 1225, 100, 24.0);
     obj->vision_frame = Rectangle(4, 0, White, 0, 820, 430, 1100, 650);
 
+    
+
     //摩擦轮
     obj->fri_circle = Circle(5, 0, Green, 8, 150, 731, 10);
     obj->fri_text = Char(6, 0, White, 3, 20, 20, 180, 740);
@@ -292,7 +295,7 @@ robot_ui* Create_Robot_UI(robot_ui_config* _config) {
     obj->autoaim_circle = Circle(13, 0, Green, 8, 150, 531, 10);
     obj->autoaim_text = Char(14, 0, White, 3, 20, 20, 180, 540);
     strset(obj->autoaim_str, "AUTOAIM:OFF");
-    
+
     //功率
     obj->power_circle = Circle(15, 0, Green, 8, 1550, 731, 10);
     obj->power_text = Char(16, 0, White, 3, 20, 20, 1580, 740);
