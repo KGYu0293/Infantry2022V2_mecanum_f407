@@ -79,13 +79,14 @@ Shoot *Shoot_Create(void) {
     magazine_config.initial_angle = 237;
     obj->mag_lid = Servo_Create(&magazine_config);
 
-    // 关闭红点激光
-    BSP_GPIO_Set(GPIO_5V_OUTPUT, 0);
+    // 开启红点激光
+    BSP_GPIO_Set(GPIO_5V_OUTPUT, 1);
 
     obj->shoot_cmd_suber = register_sub("cmd_shoot", 1);
     obj->shoot_upload_puber = register_pub("upload_shoot");
     obj->cmd_data = NULL;
     obj->cooldown_start = obj->cooldown_time = 0;
+
     return obj;
 };
 
@@ -105,7 +106,7 @@ void Shoot_load_Update(Shoot *obj) {
     } else if (obj->cmd_data->mode == shoot_stuck_handle) {
         // 反转防卡弹 部分拨盘适用
         obj->load->motor_controller->config.control_depth = SPEED_CONTROL;
-        obj->load->motor_controller->ref_speed = 5 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
+        obj->load->motor_controller->ref_speed = 3 * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
     } else {
         switch (obj->cmd_data->bullet_mode) {
             case bullet_holdon:
@@ -126,19 +127,19 @@ void Shoot_load_Update(Shoot *obj) {
                 obj->load->motor_controller->config.control_depth = POS_CONTROL;
                 obj->load->motor_controller->ref_position = obj->load->real_position - load_delta_pos;
                 obj->cooldown_start = time_now;
-                obj->cooldown_time = 300;  //待测试
+                obj->cooldown_time = 100;  //待测试
                 break;
             case bullet_double:
                 obj->load->motor_controller->config.control_depth = POS_CONTROL;
                 obj->load->motor_controller->ref_position = obj->load->real_position - (2 * load_delta_pos);
                 obj->cooldown_start = time_now;
-                obj->cooldown_time = 450;  //待测试
+                obj->cooldown_time = 200;  //待测试
                 break;
             case bullet_trible:
                 obj->load->motor_controller->config.control_depth = POS_CONTROL;
                 obj->load->motor_controller->ref_position = obj->load->real_position - (3 * load_delta_pos);
                 obj->cooldown_start = time_now;
-                obj->cooldown_time = 650;  //待测试
+                obj->cooldown_time = 300;  //待测试
                 break;
         }
     }
@@ -225,4 +226,19 @@ void Shoot_Update(Shoot *obj) {
     shoot_upload.data = (uint8_t *)&(obj->upload_data);
     shoot_upload.len = sizeof(Upload_shoot);
     obj->shoot_upload_puber->publish(obj->shoot_upload_puber, shoot_upload);
+}
+
+//发弹受温度影响控制
+void Shoot_Temp_Control(Shoot *obj)
+{
+    if(obj->start_friction_time< 10e-7)
+    {
+        obj->start_friction_time = BSP_sys_time_ms() / 1000.0f;
+        obj->motor_init_temp = obj->friction_a->temperature;
+        obj->cmd_data->shoot_cnt = 0;
+    }
+    float friction_run_time = BSP_sys_time_ms() / 1000.0f - obj->start_friction_time;//计算出摩擦轮运行时间
+    float temp_change = friction_run_time * 8.33e-3 + obj->cmd_data->shoot_cnt * 0.00365;//计算目前的温度
+    if(temp_change > 7 || obj->motor_init_temp > 38) temp_change = 7;//达到恒定温度
+    obj->shoot_speed_change = 0.175 * temp_change;//预测不限温时的弹速变化
 }

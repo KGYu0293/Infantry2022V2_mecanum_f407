@@ -149,8 +149,10 @@ void Chassis_board_CMD_Update(chassis_board_cmd* obj) {
 
     // 板间通信
     obj->send_data.shoot_referee_data.bullet_speed_max = obj->referee->rx_data.game_robot_state.shooter_id1_17mm_speed_limit;
-    obj->send_data.shoot_referee_data.heat_limit_remain = obj->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - obj->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;
+    if(obj->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit == 65535) obj->send_data.shoot_referee_data.heat_limit_remain = 1000;
+    else obj->send_data.shoot_referee_data.heat_limit_remain = obj->referee->rx_data.game_robot_state.shooter_id1_17mm_cooling_limit - obj->referee->rx_data.power_heat.shooter_id1_17mm_cooling_heat;
     obj->send_data.robot_id = obj->referee->rx_data.game_robot_state.robot_id;
+    obj->send_data.shoot_cnt = obj->referee->shoot_cnt;
     CanSend_Send(obj->send, (uint8_t*)&(obj->send_data));
 
     // 更新UI信息

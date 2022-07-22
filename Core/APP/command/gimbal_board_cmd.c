@@ -259,6 +259,7 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;
     }
+    obj->shoot_control.shoot_cnt = obj->recv_data->shoot_cnt;
 }
 
 void mouse_key_mode_update(Gimbal_board_cmd* obj) {
@@ -508,8 +509,13 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             obj->shoot_control.fire_rate = 15;
         } else if (!obj->remote->data.mouse.press_l && obj->remote->data.mouse.press_r) {  // 只按右键 反转防卡弹
             obj->shoot_control.mode = shoot_stuck_handle;
-        } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE && obj->pc->recv->monitor->count > 1) {  //  视觉控制发射(打符)
-            obj->shoot_control.bullet_mode = bullet_single;
+        } else if (obj->pc->pc_recv_data->vitual_mode == VISUAL_FIRE_SINGLE && obj->pc->recv->monitor->count > 1) {  //  视觉控制发射
+            {
+                //自动发弹状态   检测到打符模式单发,否则三发
+                if(obj->autoaim_mode == auto_aim_buff_big || obj->autoaim_mode == auto_aim_buff_small)
+                    obj->shoot_control.bullet_mode = bullet_single;
+                else obj->shoot_control.bullet_mode = bullet_trible;
+            }
         } else if ((obj->remote->data.rc.s1 == 3) || (obj->remote->data.rc.ch4 > CHx_BIAS + 400)) {  // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试时测试弹道用
             obj->shoot_control.bullet_mode = bullet_continuous;
             obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);

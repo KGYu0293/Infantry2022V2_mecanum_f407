@@ -67,6 +67,8 @@ typedef struct Referee_t {
     monitor_item *monitor;
     referee_unpack_tool tool;
     uint8_t robot_status_received; //收到了机器人状态数据
+
+    uint16_t shoot_cnt;  //统计累积发射弹量
 } Referee;
 
 void referee_driver_init(void);
