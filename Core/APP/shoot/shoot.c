@@ -1,12 +1,16 @@
 #include "shoot.h"
 
-// #include "bsp_pwm.h"
 #include "bsp.h"
 #include "bsp_time.h"
 
 void shoot_motor_lost(void *motor) {
     can_motor *now = (can_motor *)motor;
     printf_log("shoot motor can:%d id:%d lost!\n", now->config.bsp_can_index, now->config.motor_set_id);
+}
+
+void shoot_friction_set_param(Shoot *obj, float kp, float kd, float kmax) {
+    SMC_SetConfig(&obj->friction_a->motor_controller->smc_speed_data.config, kp, kd, kmax, ReachingLaw_sqrt, 15000);
+    SMC_SetConfig(&obj->friction_b->motor_controller->smc_speed_data.config, kp, kd, kmax, ReachingLaw_sqrt, 15000);
 }
 
 Shoot *Shoot_Create(void) {
@@ -16,10 +20,6 @@ Shoot *Shoot_Create(void) {
     // 电机初始化
     can_motor_config friction_a_config;
     controller_config friction_a_controller_config;
-    // friction_a_controller_config.control_type = PID_MODEL;
-    // friction_a_controller_config.control_depth = SPEED_CONTROL;
-    // PID_SetConfig_Pos(&friction_a_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    // PID_SetConfig_Comp(&friction_a_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_a_controller_config.control_depth = SPEED_CONTROL;
     friction_a_controller_config.control_type = SMC_MODEL;
     SMC_SetConfig(&friction_a_controller_config.speed_smc_config, 3, 10, 100, ReachingLaw_sqrt, 15000);
@@ -36,10 +36,6 @@ Shoot *Shoot_Create(void) {
 
     can_motor_config friction_b_config;
     controller_config friction_b_controller_config;
-    // friction_b_controller_config.control_type = PID_MODEL;
-    // friction_b_controller_config.control_depth = SPEED_CONTROL;
-    // PID_SetConfig_Pos(&friction_b_controller_config.position_pid_config, 0, 0, 0, 0, 0);
-    // PID_SetConfig_Comp(&friction_b_controller_config.speed_pid_config, 2.5, 1.2, 0.015, 0.6, 1600, 400, 1200, 3000, 2000, 15000);
     friction_b_controller_config.control_depth = SPEED_CONTROL;
     friction_b_controller_config.control_type = SMC_MODEL;
     SMC_SetConfig(&friction_b_controller_config.speed_smc_config, 3, 10, 100, ReachingLaw_sqrt, 15000);
@@ -68,7 +64,6 @@ Shoot *Shoot_Create(void) {
     load_config.speed_fdb_model = MOTOR_FDB;
     load_config.output_model = MOTOR_OUTPUT_NORMAL;
     load_config.lost_callback = shoot_motor_lost;
-
     obj->load = Can_Motor_Create(&load_config);
 
     // 舵机
@@ -79,8 +74,11 @@ Shoot *Shoot_Create(void) {
     magazine_config.initial_angle = 237;
     obj->mag_lid = Servo_Create(&magazine_config);
 
-    // 开启红点激光
+    // 红点激光 1开-0关
     BSP_GPIO_Set(GPIO_5V_OUTPUT, 1);
+
+    // 弹速队列初始化
+    obj->bullet_speed_queue = create_circular_queue(sizeof(float), 10);
 
     obj->shoot_cmd_suber = register_sub("cmd_shoot", 1);
     obj->shoot_upload_puber = register_pub("upload_shoot");
@@ -117,10 +115,13 @@ void Shoot_load_Update(Shoot *obj) {
                 obj->load->motor_controller->config.control_depth = POS_CONTROL;
                 if (obj->cmd_data->fire_rate < 2) {
                     obj->load->motor_controller->ref_position = obj->load->real_position;
-                } else {
+                } else if (obj->cmd_data->fire_rate < 21) {
                     obj->load->motor_controller->ref_position = obj->load->real_position - load_delta_pos;
                     obj->cooldown_start = time_now;
                     obj->cooldown_time = (int)(1000 / obj->cmd_data->fire_rate);
+                } else {
+                    obj->load->motor_controller->config.control_depth = SPEED_CONTROL;
+                    obj->load->motor_controller->ref_speed = -obj->cmd_data->fire_rate * 360 * SHOOT_MOTOR_DECELE_RATIO / SHOOT_NUM_PER_CIRCLE;
                 }
                 break;
             case bullet_single:
@@ -198,6 +199,21 @@ void Shoot_Update(Shoot *obj) {
         obj->cmd_data->mode = shoot_stop;
     }
 
+    // 发弹计数及弹速显示
+    static float last_bullet_speed_fdb;
+    if (obj->cmd_data->bullet_speed_fdb != last_bullet_speed_fdb) {
+        obj->bullet_cnt++;
+        obj->shoot_time = BSP_sys_time_ms();
+        circular_queue_push(obj->bullet_speed_queue, &obj->cmd_data->bullet_speed_fdb);
+        // 弹速显示
+        char c = '.';
+        uint16_t a = (uint16_t)((obj->cmd_data->bullet_speed_fdb) * 100) % 100;
+        uint16_t b = (uint16_t)((obj->cmd_data->bullet_speed_fdb) * 100) / 100;
+        printf_log("%d%c%d\n", b, c, a);
+        //
+        last_bullet_speed_fdb = obj->cmd_data->bullet_speed_fdb;
+    }
+
     // 电机控制
     if (obj->cmd_data->mode == shoot_stop) {
         obj->load->enable = MOTOR_STOP;
@@ -226,19 +242,4 @@ void Shoot_Update(Shoot *obj) {
     shoot_upload.data = (uint8_t *)&(obj->upload_data);
     shoot_upload.len = sizeof(Upload_shoot);
     obj->shoot_upload_puber->publish(obj->shoot_upload_puber, shoot_upload);
-}
-
-//发弹受温度影响控制
-void Shoot_Temp_Control(Shoot *obj)
-{
-    if(obj->start_friction_time< 10e-7)
-    {
-        obj->start_friction_time = BSP_sys_time_ms() / 1000.0f;
-        obj->motor_init_temp = obj->friction_a->temperature;
-        obj->cmd_data->shoot_cnt = 0;
-    }
-    float friction_run_time = BSP_sys_time_ms() / 1000.0f - obj->start_friction_time;//计算出摩擦轮运行时间
-    float temp_change = friction_run_time * 8.33e-3 + obj->cmd_data->shoot_cnt * 0.00365;//计算目前的温度
-    if(temp_change > 7 || obj->motor_init_temp > 38) temp_change = 7;//达到恒定温度
-    obj->shoot_speed_change = 0.175 * temp_change;//预测不限温时的弹速变化
 }

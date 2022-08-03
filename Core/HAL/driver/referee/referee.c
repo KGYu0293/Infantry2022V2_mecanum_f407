@@ -201,7 +201,6 @@ void referee_solve_pack(Referee *obj, referee_rx_pack *rx_pack) {
             break;
         case SHOOT_DATA_CMD_ID:
             memcpy(&obj->rx_data.shoot_data, rx_pack->data, sizeof(obj->rx_data.shoot_data));
-            obj->shoot_cnt++;
             break;
         case BULLET_REMAINING_CMD_ID:
             memcpy(&obj->rx_data.bullet_remaining, rx_pack->data, sizeof(obj->rx_data.bullet_remaining));

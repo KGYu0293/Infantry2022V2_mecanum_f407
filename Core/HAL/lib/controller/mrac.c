@@ -12,6 +12,7 @@
 
 #include "common.h"
 #include "math.h"
+#include "string.h"
 
 float sat(float x, float lower_bound, float upper_bound);
 void MTDFunction(MTD_t *ptd, float aim);

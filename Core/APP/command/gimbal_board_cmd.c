@@ -93,10 +93,13 @@ void Gimbal_board_CMD_Update(Gimbal_board_cmd* obj) {
         obj->pc_send_data.robot_id = 0;
         obj->pc_send_data.bullet_speed = 0;
         obj->gimbal_control.rotate_feedforward = 0;
+        obj->shoot_control.bullet_speed_fdb = 0;
     } else {
         obj->pc_send_data.robot_id = obj->recv_data->robot_id;
         obj->gimbal_control.rotate_feedforward = obj->recv_data->gyro_yaw;
+        obj->shoot_control.bullet_speed_fdb = obj->recv_data->shoot_referee_data.bullet_speed_now;
     }
+
     // 判断云台模块
     publish_data gimbal_data_fdb = obj->gimbal_upload_suber->getdata(obj->gimbal_upload_suber);
     if (gimbal_data_fdb.len == -1) {
@@ -254,12 +257,11 @@ void remote_mode_update(Gimbal_board_cmd* obj) {
             obj->shoot_control.mode = shoot_stuck_handle;
         else {
             obj->shoot_control.bullet_mode = bullet_continuous;
-            obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
+            obj->shoot_control.fire_rate = 0.02f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
         }
         obj->shoot_control.heat_limit_remain = obj->recv_data->shoot_referee_data.heat_limit_remain;
         obj->shoot_control.bullet_speed = obj->recv_data->shoot_referee_data.bullet_speed_max;
     }
-    obj->shoot_control.shoot_cnt = obj->recv_data->shoot_cnt;
 }
 
 void mouse_key_mode_update(Gimbal_board_cmd* obj) {
@@ -518,7 +520,7 @@ void mouse_key_mode_update(Gimbal_board_cmd* obj) {
             }
         } else if ((obj->remote->data.rc.s1 == 3) || (obj->remote->data.rc.ch4 > CHx_BIAS + 400)) {  // DEBUG:键鼠模式下的遥控器自瞄，供视觉调试时测试弹道用
             obj->shoot_control.bullet_mode = bullet_continuous;
-            obj->shoot_control.fire_rate = 0.01f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
+            obj->shoot_control.fire_rate = 0.02f * (float)(obj->remote->data.rc.ch4 - CHx_BIAS);
         } else {
             obj->shoot_control.bullet_mode = bullet_holdon;
         }

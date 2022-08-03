@@ -33,19 +33,25 @@ typedef struct Chassis_Fly_t {
 typedef struct Chassis_t {
     BMI088_imu *imu;
     Super_cap_wuli *super_cap;
-    VL53L0x *vl53l0x;
+    // VL53L0x *vl53l0x;
     can_motor *lf;
     can_motor *rf;
     can_motor *lb;
     can_motor *rb;  // forward back left right
 
-    Chassis_Fly chassis_fly;
+    // Chassis_Fly chassis_fly;
 
-    float offset_x;  // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
+    // 旋转中心距离底盘的距离，云台位于正中心时默认设为0
+    float offset_x;
     float offset_y;
-    float proc_target_vx;  //过程量
-    float proc_target_vy;  //过程量
-    float proc_v_base;     //过程量
+    // 功率控制相关设定
+    float output_limit;   // 轮组最大输出总和限制
+    float acc_limit;      // 加速度限制
+    float linear_v_base;  // 线速度设定
+    float rotate_speed;   // 小陀螺转速设定
+    // 过程量
+    float proc_target_vx;
+    float proc_target_vy;
 
     // sub_pub
     Subscriber *chassis_cmd_suber;

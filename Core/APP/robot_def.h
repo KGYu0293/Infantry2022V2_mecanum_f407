@@ -3,8 +3,8 @@
 
 // 定义主控类型 方便统一板间can通信写法
 // 按照要烧录的主控类型 **必须**定义且仅定义一个 另一个注释
-//#define GIMBAL_BOARD
-#define CHASSIS_BOARD
+#define GIMBAL_BOARD
+// #define CHASSIS_BOARD
 
 #include "stdint.h"
 #include "stdlib.h"
@@ -120,10 +120,9 @@ typedef struct Cmd_shoot_t {
     Bullet_mode bullet_mode;    // 发射模式
     Magazine_mode mag_mode;     // 弹仓盖
     uint16_t bullet_speed;      // 弹速
-    uint16_t bullet_speed_fdb;  // 实际弹速
     float fire_rate;            // 射频（发/秒）
     int16_t heat_limit_remain;  // 剩余热量，cooling_limit-cooling_heat
-    uint16_t shoot_cnt;         // 发弹量
+    float bullet_speed_fdb;     // 实时弹速
 } Cmd_shoot;
 
 // 对云台的控制量
@@ -177,10 +176,10 @@ typedef struct Chassis_board_send_t {
     struct {
         uint16_t bullet_speed_max;  // 弹速
         int16_t heat_limit_remain;  // 剩余热量
+        float bullet_speed_now;     // 实时弹速
     } shoot_referee_data;
     uint8_t robot_id;
     uint8_t chassis_supercap_percent;
-    uint16_t shoot_cnt;
 } Chassis_board_send_data;
 
 #pragma pack()
