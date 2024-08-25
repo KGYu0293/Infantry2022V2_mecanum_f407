@@ -24,13 +24,17 @@
 
 ## 开源链接
 C版本：[RM论坛](https://bbs.robomaster.com/article/19321)/[github](https://github.com/KGYu0293/Infantry2022V2_mecanum_f407)/[gitee](https://gitee.com/KGYu/Infantry2022V2_mecanum_f407)
+
 C++版本：
 [github](https://github.com/cxnaive/Framework_F407_cpp)
 
 ## 部分协作者列表
 首席架构顾问：[imuncle](https://github.com/imuncle)
+
 首席软件顾问：[cxnaive](https://github.com/cxnaive)
+
 框架负责人：[KGYu0293](https://github.com/KGYu0293)
+
 框架参与开发：南工骁鹰2022赛季电控相关成员
 
 ## 背景
